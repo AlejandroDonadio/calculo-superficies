@@ -43,7 +43,7 @@ header h1{
   letter-spacing:.06em; text-transform:uppercase;
 }
 header .sub{color:var(--ink-soft); font-size:.85rem; margin-top:2px;}
-.header-actions{display:flex; gap:8px; align-items:center;}
+.header-actions{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
 button{
   font-family:inherit; font-size:.82rem; cursor:pointer;
   text-transform:uppercase; letter-spacing:.05em; font-weight:600;
@@ -209,7 +209,8 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
   header .sub{font-size:.72rem;}
   #logo-cpa{height:44px !important;}
   .header-actions{width:100%;}
-  .header-actions button{flex:1 1 30%; padding:10px 6px; font-size:.8rem;}
+  .header-actions button{flex:1 1 30%; min-width:0; padding:10px 4px; font-size:.72rem; letter-spacing:.02em;}
+  .solo-pc{display:none;}  /* en celular "Modo oscuro" queda "Oscuro" */
   nav{margin:10px 8px 0;}
   nav .tab{padding:10px 12px; font-size:.85rem; flex:1 1 auto; text-align:center;}
   main{padding:14px 10px; margin:0 8px;}
@@ -2783,7 +2784,7 @@ function setBtn(id, ico, txt){ var b = document.getElementById(id); b.innerHTML 
 setBtn("btn-sonido", "sonido", "Sonido");
 setBtn("btn-modulos", "engra", "Módulos");
 setBtn("btn-imprimir", "impr", "Imprimir");
-setBtn("btn-tema", "luna", "Modo oscuro");
+setBtn("btn-tema", "luna", "<span class='solo-pc'>Modo </span>oscuro");
 setBtn("btn-listado", "lista", "Listado");
 ICO.save = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
 ICO.open = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" style="vertical-align:-2px"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>';
@@ -2794,7 +2795,7 @@ var temaOscuro = false;
 document.getElementById("btn-tema").addEventListener("click", function(){
   temaOscuro = !temaOscuro;
   document.documentElement.setAttribute("data-theme", temaOscuro ? "dark" : "");
-  setBtn("btn-tema", temaOscuro ? "sol" : "luna", temaOscuro ? "Modo claro" : "Modo oscuro");
+  setBtn("btn-tema", temaOscuro ? "sol" : "luna", temaOscuro ? "<span class='solo-pc'>Modo </span>claro" : "<span class='solo-pc'>Modo </span>oscuro");
   sConfirm();
 });
 
@@ -3094,7 +3095,7 @@ function aplicarEstado(st){
       if(st.mods.length > 3) $("mod-tri").checked = !!st.mods[3];
     }
     if(st.activo) activo = st.activo;
-    if(st.tema){ temaOscuro = true; document.documentElement.setAttribute("data-theme", "dark"); setBtn("btn-tema", "sol", "Modo claro"); }
+    if(st.tema){ temaOscuro = true; document.documentElement.setAttribute("data-theme", "dark"); setBtn("btn-tema", "sol", "<span class='solo-pc'>Modo </span>claro"); }
     if(st.mudo){ muted = true; setBtn("btn-sonido", "mudo", "Silencio"); }
 
     if(st.pln >= 3){ $("pl-n").value = st.pln; plGenerar(); }
