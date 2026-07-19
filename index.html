@@ -230,6 +230,10 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
   html, body{max-width:100%; overflow-x:hidden;}
   .panel, .card, .row{max-width:100%; box-sizing:border-box;}
   .row{flex-wrap:wrap;}
+  /* iOS Safari: sin min-width:0 un hijo flex con contenido ancho (selects con
+     opciones largas) fuerza el layout más ancho que la pantalla y encoge todo */
+  .row > div, .row > label, .header-actions > button{min-width:0;}
+  .row > div{max-width:100%;}
   select{max-width:100%; width:100%; box-sizing:border-box; white-space:normal;}
   #cu-caso, #tri-caso, #pl-mensura, #pl-mensura-res{max-width:100%; width:100%;}
   .plano-box{max-width:100%; overflow-x:auto;}
@@ -271,7 +275,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
     
     <button id="btn-listado" title="Ver el listado BASIC original del Spectrum"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px"><line x1="9" y1="6" x2="21" y2="6"></line><line x1="9" y1="12" x2="21" y2="12"></line><line x1="9" y1="18" x2="21" y2="18"></line><rect x="3" y="4.5" width="3" height="3" fill="currentColor" stroke="none"></rect><rect x="3" y="10.5" width="3" height="3" fill="currentColor" stroke="none"></rect><rect x="3" y="16.5" width="3" height="3" fill="currentColor" stroke="none"></rect></svg> Listado</button>
     <button id="btn-guardar" title="Guardar o imprimir esta pantalla como PDF"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line><line x1="9" y1="11" x2="12" y2="11"></line></svg> Guardar PDF</button>
-    
+    <button id="btn-imprimir" title="Imprimir la pantalla actual"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" style="vertical-align:-2px"><path d="M6 9V3h12v6"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="7"></rect></svg> Imprimir</button>
   </div>
 </header>
 
@@ -496,7 +500,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 1.3 · Última actualización: 19/07/2026 03:12 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 1.4 · Última actualización: 19/07/2026 04:45 hs</span></footer>
 
 
 <aside id="listado-drawer" aria-label="Listado BASIC original">
@@ -2800,8 +2804,10 @@ $("cu-calcular").addEventListener("click", function(){
   var Cn3, Ce3, Dn3, De3;
   if(R.D_n !== undefined){ Cn3 = R.C_n; Ce3 = R.C_e; Dn3 = R.D_n; De3 = R.D_e; }
   else { Cn3 = R.a * sind(R.B); Ce3 = R.a * cosd(R.B); Dn3 = R.c * sind(R.A); De3 = R.d - R.c * cosd(R.A); }
-  hh += dibujaPlano([0, Cn3, Dn3, 0], [0, Ce3, De3, R.d], [R.a, R.b, R.c, R.d], R.S, ["B", "C", "D", "A"]);
-  hh += "<p style='font-size:.8rem; color:var(--ink-soft); margin-top:4px;'>Croquis: letras de los vértices en sentido horario (B, C, D, A), con el ángulo interior anotado en cada uno.</p>";
+  /* rotado 90°: la base d queda vertical a la izquierda y las letras leen
+     A (abajo-izq) → B (arriba-izq) → C (arriba-der) → D (abajo-der): desde la izquierda y en sentido horario */
+  hh += dibujaPlano([0, -Ce3, -De3, -R.d], [0, Cn3, Dn3, 0], [R.a, R.b, R.c, R.d], R.S, ["B", "C", "D", "A"]);
+  hh += "<p style='font-size:.8rem; color:var(--ink-soft); margin-top:4px;'>Croquis: letras de los vértices desde la izquierda y en sentido horario (A, B, C, D), con el ángulo interior anotado en cada uno.</p>";
 
   out.innerHTML = hh;
   sMelodia();
@@ -2845,7 +2851,9 @@ setBtn("btn-tema", "luna", "<span class='solo-pc'>Modo </span>oscuro");
 setBtn("btn-listado", "lista", "Listado");
 ICO.save = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
 ICO.open = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" style="vertical-align:-2px"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>';
-setBtn("btn-guardar", "save", "Guardar");
+ICO.pdf = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="12" y2="11"/></svg>';
+setBtn("btn-guardar", "pdf", "Guardar PDF");
+setBtn("btn-imprimir", "impr", "Imprimir");
 
 /* ---------- Modo claro / oscuro ---------- */
 var temaOscuro = false;
@@ -2923,22 +2931,24 @@ var TRI_ESQ = {
 };
 function triEsquema(){
   var v = TRI_ESQ[$("tri-caso").value];
-  /* A(210,38) arriba, B(55,205) abajo-izq, C(365,205) abajo-der */
+  /* Letras desde la izquierda y en sentido horario:
+     A(55,205) abajo-izq, B(210,38) arriba, C(365,205) abajo-der
+     Lados (cada uno opuesto al vértice de su letra): a=BC (der), b=AC (abajo), c=AB (izq) */
   var s = '<svg viewBox="0 0 420 240" xmlns="http://www.w3.org/2000/svg">';
   s += '<polygon points="210,38 55,205 365,205" fill="rgba(226,6,19,0.06)" stroke="none"/>';
-  s += esqLinea(55, 205, 365, 205, v.a);   /* a = BC */
-  s += esqLinea(210, 38, 365, 205, v.b);   /* b = AC */
-  s += esqLinea(210, 38, 55, 205, v.c);    /* c = AB */
-  s += esqArco("M 187 63 A 34 34 0 0 1 234 64", v.A);
-  s += esqArco("M 88 205 A 34 34 0 0 0 78 180", v.B);
+  s += esqLinea(55, 205, 365, 205, v.b);   /* b = AC (abajo) */
+  s += esqLinea(210, 38, 365, 205, v.a);   /* a = BC (derecha) */
+  s += esqLinea(210, 38, 55, 205, v.c);    /* c = AB (izquierda) */
+  s += esqArco("M 187 63 A 34 34 0 0 1 234 64", v.B);
+  s += esqArco("M 88 205 A 34 34 0 0 0 78 180", v.A);
   s += esqArco("M 332 205 A 34 34 0 0 1 340 178", v.C);
   s += esqVert(210,38) + esqVert(55,205) + esqVert(365,205);
-  s += esqLetra(210, 26, "A") + esqLetra(44, 222, "B") + esqLetra(376, 222, "C");
-  s += esqTexto(210, 226, "a" + esqTag(v.a), v.a, 'text-anchor="middle"', 14);
-  s += esqTexto(307, 108, "b" + esqTag(v.b), v.b, 'text-anchor="middle" transform="rotate(47 307 108)"', 14);
+  s += esqLetra(210, 26, "B") + esqLetra(44, 222, "A") + esqLetra(376, 222, "C");
+  s += esqTexto(210, 226, "b" + esqTag(v.b), v.b, 'text-anchor="middle"', 14);
+  s += esqTexto(307, 108, "a" + esqTag(v.a), v.a, 'text-anchor="middle" transform="rotate(47 307 108)"', 14);
   s += esqTexto(114, 108, "c" + esqTag(v.c), v.c, 'text-anchor="middle" transform="rotate(-47 114 108)"', 14);
-  s += esqTexto(210, 90, "áng. A" + esqTag(v.A), v.A, 'text-anchor="middle"');
-  s += esqTexto(97, 183, "áng. B" + esqTag(v.B), v.B, "");
+  s += esqTexto(210, 90, "áng. B" + esqTag(v.B), v.B, 'text-anchor="middle"');
+  s += esqTexto(97, 183, "áng. A" + esqTag(v.A), v.A, "");
   s += esqTexto(325, 183, "áng. C" + esqTag(v.C), v.C, 'text-anchor="end"');
   $("tri-esquema").innerHTML = s + "</svg>";
 }
@@ -2951,31 +2961,33 @@ var CU_ESQ = {
 };
 function cuEsquema(){
   var v = CU_ESQ[$("cu-caso").value];
-  /* B(70,215), A(370,215), C(115,45), D(315,60) */
+  /* Letras desde la izquierda y en sentido horario:
+     A(70,215) abajo-izq, B(115,45) arriba-izq, C(315,60) arriba-der, D(370,215) abajo-der
+     Lados: d=A–B (izq), a=B–C (arriba), b=C–D (der), c=D–A (abajo); diagonal B–D */
   var s = '<svg viewBox="0 0 440 260" xmlns="http://www.w3.org/2000/svg">';
   s += '<polygon points="70,215 370,215 315,60 115,45" fill="rgba(226,6,19,0.06)" stroke="none"/>';
-  s += esqLinea(70, 215, 370, 215, v.d);   /* d = B–A */
-  s += esqLinea(70, 215, 115, 45, v.a);    /* a = B–C */
-  s += esqLinea(370, 215, 315, 60, v.c);   /* c = A–D */
-  s += esqLinea(115, 45, 315, 60, v.b);    /* b = C–D */
+  s += esqLinea(370, 215, 70, 215, v.c);   /* c = D–A (abajo) */
+  s += esqLinea(70, 215, 115, 45, v.d);    /* d = A–B (izquierda) */
+  s += esqLinea(370, 215, 315, 60, v.b);   /* b = C–D (derecha) */
+  s += esqLinea(115, 45, 315, 60, v.a);    /* a = B–C (arriba) */
   if(v.e !== null){
-    s += esqLinea(70, 215, 315, 60, v.e, true);   /* diagonal B–D */
-    s += esqTexto(224, 148, "diag. B–D" + esqTag(v.e), v.e, 'text-anchor="middle" transform="rotate(-32 224 148)"');
+    s += esqLinea(115, 45, 370, 215, v.e, true);   /* diagonal B–D */
+    s += esqTexto(242, 122, "diag. B–D" + esqTag(v.e), v.e, 'text-anchor="middle" transform="rotate(34 242 122)"');
   }
-  s += esqArco("M 98 215 A 28 28 0 0 0 77 189", v.B);
-  s += esqArco("M 342 215 A 28 28 0 0 1 360 187", v.A);
-  s += esqArco("M 108.3 70.1 A 26 26 0 0 0 140.9 46.9", v.C);
-  s += esqArco("M 289.1 58.1 A 26 26 0 0 0 323.7 84.5", v.D);
+  s += esqArco("M 98 215 A 28 28 0 0 0 77 189", v.A);
+  s += esqArco("M 342 215 A 28 28 0 0 1 360 187", v.D);
+  s += esqArco("M 108.3 70.1 A 26 26 0 0 0 140.9 46.9", v.B);
+  s += esqArco("M 289.1 58.1 A 26 26 0 0 0 323.7 84.5", v.C);
   s += esqVert(70,215) + esqVert(370,215) + esqVert(115,45) + esqVert(315,60);
-  s += esqLetra(56, 234, "B") + esqLetra(384, 234, "A") + esqLetra(100, 32, "C") + esqLetra(330, 48, "D");
-  s += esqTexto(220, 238, "d (base)" + esqTag(v.d), v.d, 'text-anchor="middle"', 14);
-  s += esqTexto(58, 130, "a" + esqTag(v.a), v.a, 'text-anchor="middle" transform="rotate(-75 58 130)"', 14);
-  s += esqTexto(378, 132, "c" + esqTag(v.c), v.c, 'text-anchor="middle" transform="rotate(70 378 132)"', 14);
-  s += esqTexto(215, 38, "b" + esqTag(v.b), v.b, 'text-anchor="middle"', 14);
-  s += esqTexto(103, 196, "áng. B" + esqTag(v.B), v.B, "");
-  s += esqTexto(338, 196, "áng. A" + esqTag(v.A), v.A, 'text-anchor="end"');
-  s += esqTexto(138, 82, "áng. C" + esqTag(v.C), v.C, "");
-  s += esqTexto(285, 104, "áng. D" + esqTag(v.D), v.D, 'text-anchor="middle"');
+  s += esqLetra(56, 234, "A") + esqLetra(384, 234, "D") + esqLetra(100, 32, "B") + esqLetra(330, 48, "C");
+  s += esqTexto(220, 238, "c" + esqTag(v.c), v.c, 'text-anchor="middle"', 14);
+  s += esqTexto(58, 130, "d (base)" + esqTag(v.d), v.d, 'text-anchor="middle" transform="rotate(-75 58 130)"', 14);
+  s += esqTexto(378, 132, "b" + esqTag(v.b), v.b, 'text-anchor="middle" transform="rotate(70 378 132)"', 14);
+  s += esqTexto(215, 38, "a" + esqTag(v.a), v.a, 'text-anchor="middle"', 14);
+  s += esqTexto(103, 196, "áng. A" + esqTag(v.A), v.A, "");
+  s += esqTexto(338, 196, "áng. D" + esqTag(v.D), v.D, 'text-anchor="end"');
+  s += esqTexto(138, 82, "áng. B" + esqTag(v.B), v.B, "");
+  s += esqTexto(285, 104, "áng. C" + esqTag(v.C), v.C, 'text-anchor="middle"');
   $("cu-esquema").innerHTML = s + "</svg>";
 }
 
@@ -3081,11 +3093,12 @@ $("tri-calcular").addEventListener("click", function(){
       "<tr class='total'><td class='lbl'>Perímetro</td><td>" + fmt(per, 2) + " m</td><td class='lbl'>Σ (cta.: 180°0'0\")</td><td>" + gmsStr(S.A + S.B + S.C) + "</td></tr>" +
       "</tbody></table>";
     hh += "<div class='big-result'>SUPERFICIE= " + fmt(w, 2) + "m² <small>= " + haStr(w) + "</small></div>";
-    /* croquis: B en el origen, C sobre el este a distancia a, A por el ángulo B y el lado c */
-    var Ae = S.c * cosd(S.B), An = S.c * sind(S.B);
-    var Xs = [An, 0, 0], Ys = [Ae, S.a, 0];
+    /* croquis: A en el origen (abajo-izq), C al este a distancia b, B arriba por el ángulo A y el lado c
+       → letras A (abajo-izq), B (arriba), C (abajo-der): desde la izquierda y en sentido horario */
+    var Bn = S.c * sind(S.A), Be = S.c * cosd(S.A);
+    var Xs = [0, 0, Bn], Ys = [0, S.b, Be];
     hh += dibujaPlano(Xs, Ys, [S.b, S.a, S.c], w, ["A", "C", "B"]);
-    hh += "<p style='font-size:.8rem; color:var(--ink-soft); margin-top:4px;'>Croquis: letras de los vértices en sentido horario, con el ángulo interior anotado en cada uno.</p>";
+    hh += "<p style='font-size:.8rem; color:var(--ink-soft); margin-top:4px;'>Croquis: letras de los vértices desde la izquierda y en sentido horario, con el ángulo interior anotado en cada uno.</p>";
   });
   out.innerHTML = hh;
   sMelodia();
@@ -3185,11 +3198,15 @@ function restaurarEstado(){
   if(st) aplicarEstado(st);
 }
 
-/* ---------- Guardar / Abrir el trabajo en archivo (el SAVE/LOAD de siempre) ---------- */
+/* ---------- Guardar PDF / Imprimir (ambos abren el diálogo del sistema) ---------- */
 $("btn-guardar").addEventListener("click", function(){
   sConfirm();
-  window.print();   /* abre el diálogo del sistema: elegí destino "Guardar como PDF" */
-})
+  window.print();   /* en el diálogo: elegir destino "Guardar como PDF" */
+});
+$("btn-imprimir").addEventListener("click", function(){
+  sConfirm();
+  window.print();   /* en el diálogo: elegir la impresora */
+});
 
 /* ============ arranque ============ */
 triCampos();
