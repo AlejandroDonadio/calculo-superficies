@@ -1,8 +1,8 @@
 /* Service worker: la app funciona sin conexión después de la primera visita.
    Estrategia red-primero: si hay internet se sirve la última versión publicada
    y se actualiza la copia local; sin internet se usa la copia guardada. */
-var CACHE = 'calc-superficies-v1';
-var ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-180.png', './logo.svg'];
+var CACHE = 'calc-superficies-v2';
+var ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-180.png', './logo.svg', './jspdf.umd.min.js', './html2canvas.min.js'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(ASSETS); }));
