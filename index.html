@@ -516,7 +516,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 2.1 · Última actualización: 24/07/2026 10:28 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 2.2 · Última actualización: 24/07/2026 16:17 hs</span></footer>
 
 
 <aside id="listado-drawer" aria-label="Listado BASIC original">
@@ -2160,7 +2160,7 @@ function plVerificar(){
     "<tr><td class='lbl'>Σ Lados</td><td>" + fmt(lt, 2) + " m</td>" +
     "<td class='lbl'>Σ Ángulos</td><td>" + gmsStr(suma) + "</td>" +
     "<td class='lbl'>Condición teórica</td><td>" + cta + "°0'0\"</td>" +
-    "<td class='lbl'>Tolerancia angular</td><td>T = " + kv + "″·√" + PL.n + " = " + gmsStr(Tang / 3600) + "</td></tr></tbody></table>";
+    "<td class='lbl'>Tolerancia angular</td><td>T = " + kv + "·√" + PL.n + " = " + gmsStr(Tang / 3600) + "</td></tr></tbody></table>";
   if(Math.abs(difSeg) < 0.05){
     h += "<div class='msg good'>✔ Cierre angular exacto. Podés continuar con el azimut inicial.</div>";
     sSuccess();
