@@ -379,7 +379,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
           <option value="4">4 · Mensuras rurales difíciles</option>
           <option value="5">5 · Mensuras PH — frentes de manzana</option>
           <option value="6">6 · Mensuras PH — interior de manzana</option>
-        </select></div></div><div class="no-print" id="pl-metodo-box"><div class="ayuda-comp"><div class="tit">¿Qué método de compensación conviene?</div><div class="sub">Según qué medición merece más confianza:</div><ul><li><b>1 · Crandall</b> — supone los <b>ángulos más precisos que las distancias</b>: el error de cierre se descarga sobre los lados y los ángulos quedan como se midieron. Caso clásico: teodolito y cinta.</li><li><b>2 · Proporcional a los lados</b> — supone <b>ángulos y distancias de precisión pareja</b>: cada lado absorbe una parte del error proporcional a su longitud. Es la regla de uso general, habitual con estación total.</li><li><b>3 · Con pesos por lado</b> — cuando <b>algunos lados se midieron en peores condiciones</b> que otros (vegetación, tramos quebrados, medición indirecta). A mayor peso, menos corrección recibe ese lado.</li></ul></div><div class="row"><div><label>Método de compensación lineal — teclas <b>1</b> / <b>2</b> / <b>3</b></label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-met" id="pl-met1" style="accent-color:var(--green);"> 1 · Crandall (mínimos cuadrados)</label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-met" id="pl-met2" style="accent-color:var(--green);"> 2 · Proporcional a los lados (regla de la brújula)</label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-met" id="pl-met3" style="accent-color:var(--green);"> 3 · Proporcional con pesos por lado</label></div></div><div class="row"><div><label>Alcance de la compensación</label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-alc" id="pl-alc-t" checked="" style="accent-color:var(--green);"> Total (todos los lados)</label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-alc" id="pl-alc-p" style="accent-color:var(--green);"> Parcial (elegir los lados a compensar)</label></div><button class="primary" id="pl-compensar">Compensar</button><button class="ghost" id="pl-modif">Modificar lados manualmente…</button></div><div id="pl-lados-box"></div></div><div class="msg good">Error despreciable.</div><div class="big-result">SUPERFICIE= 3444.93m² <small>= 0Ha 34A 44.93Ca</small></div><div class="row no-print"><button class="ghost" id="pl-a-coords">¿Quiere verificar estas coordenadas en el módulo Coordenadas?</button></div><div class="plano-box"><svg viewBox="0 0 640 400" xmlns="http://www.w3.org/2000/svg"><polygon points="140.8,253.3 348.2,46.0 364.9,46.0 498.6,180.5 499.2,197.9 409.9,300.8 339.2,233.2 294.3,288.4 296.4,290.2 241.5,354.0" fill="rgba(226,6,19,0.07)" stroke="#555555" stroke-width="2"></polygon><circle cx="140.8" cy="253.3" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="348.2" cy="46.0" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="364.9" cy="46.0" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="498.6" cy="180.5" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="499.2" cy="197.9" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="409.9" cy="300.8" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="339.2" cy="233.2" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="294.3" cy="288.4" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="296.4" cy="290.2" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="241.5" cy="354.0" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><text x="126.8" y="257.3" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">1</text><text x="342.8" y="37.1" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">2</text><text x="370.3" y="37.1" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">3</text><text x="511.4" y="179.0" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">4</text><text x="512.3" y="206.5" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">5</text><text x="410.5" y="318.8" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">6</text><text x="326.7" y="231.0" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">7</text><text x="305.8" y="300.4" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">8</text><text x="284.7" y="276.8" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">9</text><text x="242.0" y="372.0" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">10</text><text x="235.3" y="140.5" transform="rotate(-45.0 235.3 140.5)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">74.45</text><line x1="356.5" y1="46.0" x2="356.6" y2="12.0" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="356.6" y="12.0" transform="rotate(0.1 356.6 12.0)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">4.24</text><text x="440.9" y="104.1" transform="rotate(45.2 440.9 104.1)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">48.16</text><line x1="498.9" y1="189.2" x2="535.8" y2="188.0" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="535.8" y="188.0" transform="rotate(88.1 535.8 188.0)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">4.40</text><text x="464.3" y="257.8" transform="rotate(-49.1 464.3 257.8)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">34.60</text><line x1="374.5" y1="267.0" x2="347.3" y2="346.1" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="347.3" y="346.1" transform="rotate(43.7 347.3 346.1)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">24.82</text><line x1="316.8" y1="260.8" x2="409.3" y2="338.8" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="409.3" y="338.8" transform="rotate(-50.8 409.3 338.8)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">18.06</text><line x1="295.4" y1="289.3" x2="342.4" y2="293.3" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="342.4" y="293.3" transform="rotate(41.2 342.4 293.3)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">0.72</text><text x="281.1" y="332.6" transform="rotate(-49.3 281.1 332.6)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">21.37</text><text x="182.0" y="312.9" transform="rotate(45.0 182.0 312.9)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">36.15</text><text x="327.3" y="196.3" font-family="Consolas,monospace" font-size="14" font-weight="bold" fill="#1A1A1A" text-anchor="middle">SUP = 3444.93m²</text><line x1="267.3" y1="200.3" x2="387.3" y2="200.3" stroke="#1A1A1A" stroke-width="1.3"></line><text x="184.8" y="257.3" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">90°0'3"</text><text x="350.2" y="96.8" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">134°54'44"</text><line x1="364.9" y1="46.0" x2="351.9" y2="111.6" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="351.9" y="122.6" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">134°54'44"</text><text x="451.8" y="187.3" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">137°6'54"</text><line x1="499.2" y1="197.9" x2="415.3" y2="212.1" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="415.3" y="223.1" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">137°6'54"</text><line x1="409.9" y1="300.8" x2="403.3" y2="165.9" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="403.3" y="162.9" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">87°12'51"</text><line x1="339.2" y1="233.2" x2="318.8" y2="169.3" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="318.8" y="166.3" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">274°34'27"</text><text x="260.4" y="247.1" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">267°57'47"</text><line x1="296.4" y1="290.2" x2="237.5" y2="285.4" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="237.5" y="282.4" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">90°27'20"</text><line x1="241.5" y1="354.0" x2="170.6" y2="175.5" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="170.6" y="172.5" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">85°44'16"</text><g stroke="#1A1A1A" fill="#1A1A1A"><line x1="610" y1="52" x2="610" y2="20" stroke-width="1.5"></line><polygon points="610,14 605,26 615,26"></polygon><text x="610" y="66" font-size="12" text-anchor="middle" font-family="Segoe UI">N</text></g></svg></div></div>
+        </select></div></div><div class="no-print" id="pl-metodo-box"><div class="ayuda-comp"><div class="tit">¿Qué método de compensación conviene?</div><div class="sub">Según qué medición merece más confianza:</div><ul><li><b>1 · Crandall</b> — supone los <b>ángulos más precisos que las distancias</b>: el error de cierre se descarga sobre los lados y los ángulos quedan como se midieron. Caso clásico: teodolito y cinta.</li><li><b>2 · Proporcional a los lados</b> — supone <b>ángulos y distancias de precisión pareja</b>: cada lado absorbe una parte del error proporcional a su longitud. Es la regla de uso general, habitual con estación total.</li><li><b>3 · Con pesos por lado</b> — cuando <b>algunos lados se midieron en peores condiciones</b> que otros (vegetación, tramos quebrados, medición indirecta). A mayor peso, menos corrección recibe ese lado.</li></ul></div><div class="row"><div><label>Método de compensación lineal — teclas <b>1</b> / <b>2</b> / <b>3</b></label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-met" id="pl-met1" style="accent-color:var(--green);"> 1 · Crandall (mínimos cuadrados)</label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-met" id="pl-met2" style="accent-color:var(--green);"> 2 · Proporcional a los lados (regla de la brújula)</label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-met" id="pl-met3" style="accent-color:var(--green);"> 3 · Proporcional con pesos por lado</label></div></div><div class="row"><div><label>Alcance de la compensación</label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-alc" id="pl-alc-t" checked="" style="accent-color:var(--green);"> Total (todos los lados)</label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-alc" id="pl-alc-p" style="accent-color:var(--green);"> Parcial (elegir los lados a compensar)</label></div><button class="primary" id="pl-compensar">Compensar</button><button class="ghost" id="pl-modif">Modificar lados manualmente…</button></div><div id="pl-lados-box"></div></div><div class="msg good">Error despreciable.</div><div class="big-result">SUPERFICIE= 3444.93m² <small>= 0Ha 34A 44.93Ca</small></div><div class="row no-print"><button class="primary" id="pl-otro-metodo">¿Este polígono quiere calcularlo por el método de Coordenadas?</button></div><div class="plano-box"><svg viewBox="0 0 640 400" xmlns="http://www.w3.org/2000/svg"><polygon points="140.8,253.3 348.2,46.0 364.9,46.0 498.6,180.5 499.2,197.9 409.9,300.8 339.2,233.2 294.3,288.4 296.4,290.2 241.5,354.0" fill="rgba(226,6,19,0.07)" stroke="#555555" stroke-width="2"></polygon><circle cx="140.8" cy="253.3" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="348.2" cy="46.0" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="364.9" cy="46.0" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="498.6" cy="180.5" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="499.2" cy="197.9" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="409.9" cy="300.8" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="339.2" cy="233.2" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="294.3" cy="288.4" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="296.4" cy="290.2" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="241.5" cy="354.0" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><text x="126.8" y="257.3" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">1</text><text x="342.8" y="37.1" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">2</text><text x="370.3" y="37.1" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">3</text><text x="511.4" y="179.0" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">4</text><text x="512.3" y="206.5" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">5</text><text x="410.5" y="318.8" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">6</text><text x="326.7" y="231.0" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">7</text><text x="305.8" y="300.4" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">8</text><text x="284.7" y="276.8" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">9</text><text x="242.0" y="372.0" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">10</text><text x="235.3" y="140.5" transform="rotate(-45.0 235.3 140.5)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">74.45</text><line x1="356.5" y1="46.0" x2="356.6" y2="12.0" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="356.6" y="12.0" transform="rotate(0.1 356.6 12.0)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">4.24</text><text x="440.9" y="104.1" transform="rotate(45.2 440.9 104.1)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">48.16</text><line x1="498.9" y1="189.2" x2="535.8" y2="188.0" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="535.8" y="188.0" transform="rotate(88.1 535.8 188.0)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">4.40</text><text x="464.3" y="257.8" transform="rotate(-49.1 464.3 257.8)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">34.60</text><line x1="374.5" y1="267.0" x2="347.3" y2="346.1" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="347.3" y="346.1" transform="rotate(43.7 347.3 346.1)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">24.82</text><line x1="316.8" y1="260.8" x2="409.3" y2="338.8" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="409.3" y="338.8" transform="rotate(-50.8 409.3 338.8)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">18.06</text><line x1="295.4" y1="289.3" x2="342.4" y2="293.3" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="342.4" y="293.3" transform="rotate(41.2 342.4 293.3)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">0.72</text><text x="281.1" y="332.6" transform="rotate(-49.3 281.1 332.6)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">21.37</text><text x="182.0" y="312.9" transform="rotate(45.0 182.0 312.9)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">36.15</text><text x="327.3" y="196.3" font-family="Consolas,monospace" font-size="14" font-weight="bold" fill="#1A1A1A" text-anchor="middle">SUP = 3444.93m²</text><line x1="267.3" y1="200.3" x2="387.3" y2="200.3" stroke="#1A1A1A" stroke-width="1.3"></line><text x="184.8" y="257.3" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">90°0'3"</text><text x="350.2" y="96.8" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">134°54'44"</text><line x1="364.9" y1="46.0" x2="351.9" y2="111.6" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="351.9" y="122.6" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">134°54'44"</text><text x="451.8" y="187.3" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">137°6'54"</text><line x1="499.2" y1="197.9" x2="415.3" y2="212.1" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="415.3" y="223.1" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">137°6'54"</text><line x1="409.9" y1="300.8" x2="403.3" y2="165.9" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="403.3" y="162.9" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">87°12'51"</text><line x1="339.2" y1="233.2" x2="318.8" y2="169.3" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="318.8" y="166.3" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">274°34'27"</text><text x="260.4" y="247.1" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">267°57'47"</text><line x1="296.4" y1="290.2" x2="237.5" y2="285.4" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="237.5" y="282.4" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">90°27'20"</text><line x1="241.5" y1="354.0" x2="170.6" y2="175.5" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="170.6" y="172.5" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">85°44'16"</text><g stroke="#1A1A1A" fill="#1A1A1A"><line x1="610" y1="52" x2="610" y2="20" stroke-width="1.5"></line><polygon points="610,14 605,26 615,26"></polygon><text x="610" y="66" font-size="12" text-anchor="middle" font-family="Segoe UI">N</text></g></svg></div></div>
   </div>
 </section>
 
@@ -516,7 +516,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 1.9 · Última actualización: 24/07/2026 08:45 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 2.0 · Última actualización: 24/07/2026 10:15 hs</span></footer>
 
 
 <aside id="listado-drawer" aria-label="Listado BASIC original">
@@ -2333,68 +2333,77 @@ function plMostrar(){
   /* --- presentación según el Método de Cálculo elegido (menú del programa original) --- */
   if(D.mcalc === undefined) D.mcalc = 1;
   if($("pl-metcalc1")){ $(D.mcalc === 2 ? "pl-metcalc2" : "pl-metcalc1").checked = true; }
-  /* Se resuelven SIEMPRE los dos métodos: el elegido queda como definitivo y el otro
-     sirve de control. Al final se muestran ambos con la diferencia entre ellos. */
+  /* Se calculan los dos métodos, pero solo se muestra el elegido. El otro se agrega
+     debajo recién si el usuario acepta la pregunta (D.verOtro). */
   var wCoord = w;   /* por coordenadas (Gauss) — ya calculado arriba con shoelace */
-  {
-    /* MÉTODO 1: planilla de cálculo (dobles superficies) */
-    h += "<p style='font-size:.85rem; color:var(--ink-soft); margin:12px 0 4px; text-transform:uppercase; letter-spacing:.04em;'><b>Planilla de cálculo de superficie (dobles superficies)</b></p>";
-    h += "<table><thead><tr><th>Lado</th><th>Δx</th><th>Δy</th><th>Yi+Yi+1</th><th>Xi+Xi+1</th><th>Δx·(Yi+Yi+1)</th><th>Δy·(Xi+Xi+1)</th></tr></thead><tbody>";
-    var t1 = 0, t2 = 0;
-    for(i = 0; i < n; i++){
-      var jj = (i + 1) % n;
-      var sy2 = Y[i] + Y[jj], sx2 = X[i] + X[jj];
-      var dd1 = D.x[i] * sy2, ee1 = D.y[i] * sx2;
-      t1 += dd1; t2 += ee1;
-      h += "<tr><td class='lbl'>" + (i+1) + "–" + (i+2 > n ? 1 : i+2) + "</td>" +
-           "<td>" + fmt(D.x[i], 3) + "</td><td>" + fmt(D.y[i], 3) + "</td>" +
-           "<td>" + fmt(sy2, 3) + "</td><td>" + fmt(sx2, 3) + "</td>" +
-           "<td>" + fmt(dd1, 2) + "</td><td>" + fmt(ee1, 2) + "</td></tr>";
-    }
-    h += "<tr class='total'><td class='lbl'>Σ</td><td></td><td></td><td></td><td></td>" +
-         "<td>" + fmt(t1, 2) + "</td><td>" + fmt(t2, 2) + "</td></tr></tbody></table>";
-    var wPlan = (Math.abs(t1) + Math.abs(t2)) / 4;   /* la superficie sale de ESTA planilla */
-    h += "<p style='font-size:.85rem; color:var(--ink-soft); margin:4px 0 8px;'>Superficie = (|Σ₁| + |Σ₂|) / 4 = (" +
-         fmt(Math.abs(t1), 2) + " + " + fmt(Math.abs(t2), 2) + ") / 4 = <b>" + fmt(wPlan, 2) + "m²</b></p>";
+
+  /* --- MÉTODO 1: planilla de cálculo (dobles superficies) --- */
+  var hPlan = "";
+  hPlan += "<p style='font-size:.85rem; color:var(--ink-soft); margin:12px 0 4px; text-transform:uppercase; letter-spacing:.04em;'><b>Planilla de cálculo de superficie (dobles superficies)</b></p>";
+  hPlan += "<table><thead><tr><th>Lado</th><th>Δx</th><th>Δy</th><th>Yi+Yi+1</th><th>Xi+Xi+1</th><th>Δx·(Yi+Yi+1)</th><th>Δy·(Xi+Xi+1)</th></tr></thead><tbody>";
+  var t1 = 0, t2 = 0;
+  for(i = 0; i < n; i++){
+    var jj = (i + 1) % n;
+    var sy2 = Y[i] + Y[jj], sx2 = X[i] + X[jj];
+    var dd1 = D.x[i] * sy2, ee1 = D.y[i] * sx2;
+    t1 += dd1; t2 += ee1;
+    hPlan += "<tr><td class='lbl'>" + (i+1) + "–" + (i+2 > n ? 1 : i+2) + "</td>" +
+         "<td>" + fmt(D.x[i], 3) + "</td><td>" + fmt(D.y[i], 3) + "</td>" +
+         "<td>" + fmt(sy2, 3) + "</td><td>" + fmt(sx2, 3) + "</td>" +
+         "<td>" + fmt(dd1, 2) + "</td><td>" + fmt(ee1, 2) + "</td></tr>";
   }
-  {
-  /* MÉTODO 2: por coordenadas totales, con punto de arranque real */
+  hPlan += "<tr class='total'><td class='lbl'>Σ</td><td></td><td></td><td></td><td></td>" +
+       "<td>" + fmt(t1, 2) + "</td><td>" + fmt(t2, 2) + "</td></tr></tbody></table>";
+  var wPlan = (Math.abs(t1) + Math.abs(t2)) / 4;   /* la superficie sale de ESTA planilla */
+  hPlan += "<p style='font-size:.85rem; color:var(--ink-soft); margin:4px 0 8px;'>Superficie = (|Σ₁| + |Σ₂|) / 4 = (" +
+       fmt(Math.abs(t1), 2) + " + " + fmt(Math.abs(t2), 2) + ") / 4 = <b>" + fmt(wPlan, 2) + "m²</b></p>";
+
+  /* --- MÉTODO 2: por coordenadas totales, con punto de arranque real --- */
   if(D.bx === undefined || !isFinite(D.bx)){ D.bx = 0; }
   if(D.by === undefined || !isFinite(D.by)){ D.by = 0; }
-  h += "<p style='font-size:.85rem; color:var(--ink-soft); margin:12px 0 4px; text-transform:uppercase; letter-spacing:.04em;'><b>Cálculo por coordenadas — coordenadas totales de los vértices</b></p>";
-  h += "<div class='row no-print'>" +
+  var hCoord = "";
+  hCoord += "<p style='font-size:.85rem; color:var(--ink-soft); margin:12px 0 4px; text-transform:uppercase; letter-spacing:.04em;'><b>Cálculo por coordenadas — coordenadas totales de los vértices</b></p>";
+  hCoord += "<div class='row no-print'>" +
        "<div><label>X del vértice 1 (Norte) — ej. Gauss-Krüger</label><input type='text' inputmode='decimal' id='pl-x0' value='" + D.bx + "' style='width:160px;'></div>" +
        "<div><label>Y del vértice 1 (Este)</label><input type='text' inputmode='decimal' id='pl-y0' value='" + D.by + "' style='width:160px;'></div>" +
        "<div style='align-self:center; font-size:.8rem; color:var(--ink-soft);'>Cargá las coordenadas reales del punto de partida y la tabla se actualiza (Enter o clic afuera).</div>" +
        "</div>";
-  h += "<table><thead><tr><th>Vértice</th><th>X (Norte)</th><th>Y (Este)</th></tr></thead><tbody>";
+  hCoord += "<table><thead><tr><th>Vértice</th><th>X (Norte)</th><th>Y (Este)</th></tr></thead><tbody>";
   for(i = 0; i < n; i++){
-    h += "<tr><td class='lbl'>" + (i+1) + "</td><td>" + fmt(D.bx + X[i], 3) + "</td><td>" + fmt(D.by + Y[i], 3) + "</td></tr>";
+    hCoord += "<tr><td class='lbl'>" + (i+1) + "</td><td>" + fmt(D.bx + X[i], 3) + "</td><td>" + fmt(D.by + Y[i], 3) + "</td></tr>";
   }
-  h += "</tbody></table>";
-  h += "<p style='font-size:.85rem; color:var(--ink-soft); margin:4px 0 8px;'>Superficie por coordenadas (Gauss) = <b>" +
+  hCoord += "</tbody></table>";
+  hCoord += "<p style='font-size:.85rem; color:var(--ink-soft); margin:4px 0 8px;'>Superficie por coordenadas (Gauss) = <b>" +
        fmt(wCoord, 2) + "m²</b></p>";
-  }
 
-  /* --- control: los dos métodos, uno al lado del otro --- */
-  var elegido = (D.mcalc === 2) ? "coord" : "plan";
-  var difMet = Math.abs(wPlan - wCoord);
-  h += "<p style='font-size:.85rem; color:var(--ink-soft); margin:14px 0 4px; text-transform:uppercase; letter-spacing:.04em;'><b>Control entre los dos métodos</b></p>";
-  h += "<table><tbody>" +
-       "<tr><td class='lbl'>Por planilla de cálculo (dobles superficies)" +
-       (elegido === "plan" ? " — <b>elegido</b>" : "") + "</td><td>" + fmt(wPlan, 2) + " m²</td></tr>" +
-       "<tr><td class='lbl'>Por coordenadas (Gauss)" +
-       (elegido === "coord" ? " — <b>elegido</b>" : "") + "</td><td>" + fmt(wCoord, 2) + " m²</td></tr>" +
-       "<tr class='total'><td class='lbl'>Diferencia</td><td>" + fmt(difMet, 2) + " m²</td></tr>" +
-       "</tbody></table>";
-  if(difMet < 0.005){
-    h += "<div class='msg good'>Los dos métodos dan el mismo resultado: el cálculo está controlado.</div>";
+  /* primero el método elegido; el otro va debajo solo si se aceptó la pregunta */
+  var porCoord = (D.mcalc === 2);
+  h += porCoord ? hCoord : hPlan;
+
+  if(D.verOtro){
+    h += porCoord ? hPlan : hCoord;
+    var difMet = Math.abs(wPlan - wCoord);
+    h += "<p style='font-size:.85rem; color:var(--ink-soft); margin:14px 0 4px; text-transform:uppercase; letter-spacing:.04em;'><b>Los dos métodos</b></p>";
+    h += "<table><tbody>" +
+         "<tr><td class='lbl'>Por planilla de cálculo (dobles superficies)" +
+         (porCoord ? "" : " — <b>elegido</b>") + "</td><td>" + fmt(wPlan, 2) + " m²</td></tr>" +
+         "<tr><td class='lbl'>Por coordenadas (Gauss)" +
+         (porCoord ? " — <b>elegido</b>" : "") + "</td><td>" + fmt(wCoord, 2) + " m²</td></tr>" +
+         "<tr class='total'><td class='lbl'>Diferencia</td><td>" + fmt(difMet, 2) + " m²</td></tr>" +
+         "</tbody></table>";
+    if(difMet < 0.005){
+      h += "<div class='msg good'>Los dos métodos dan el mismo resultado: el cálculo está controlado.</div>";
+    } else {
+      h += "<p style='font-size:.85rem; color:var(--ink-soft); margin:2px 0 8px;'>Mientras el polígono no esté compensado " +
+           "los dos métodos reparten el error de cierre de distinta manera, así que una diferencia es esperable. " +
+           "Una vez compensado tienen que coincidir.</p>";
+    }
   } else {
-    h += "<p style='font-size:.85rem; color:var(--ink-soft); margin:2px 0 8px;'>Mientras el polígono no esté compensado " +
-         "los dos métodos reparten el error de cierre de distinta manera, así que una diferencia es esperable. " +
-         "Una vez compensado tienen que coincidir.</p>";
+    h += "<div class='row no-print'><button class='primary' id='pl-otro-metodo'>¿Este polígono " +
+         (D.comp ? "compensado " : "") + "quiere calcularlo por el método de " +
+         (porCoord ? "Planilla de cálculo" : "Coordenadas") + "?</button></div>";
   }
-  w = (D.mcalc === 2) ? wCoord : wPlan;   /* la superficie definitiva es la del método elegido */
+  w = porCoord ? wCoord : wPlan;   /* la superficie definitiva es la del método elegido */
 
   /* tipo de mensura cambiable acá mismo: al elegir otro, la tolerancia y el
      veredicto DENTRO/EXCEDE se actualizan al instante, sin recargar nada */
@@ -2449,8 +2458,6 @@ function plMostrar(){
        (D.comp ? "<b>" + D.metodo + "</b>." : "<b>SIN COMPENSAR</b> — la superficie incluye el error de cierre.") + "</p>";
 
   h += "<div class='big-result'>SUPERFICIE= " + fmt(w, 2) + "m² <small>= " + haStr(w) + "</small></div>";
-  h += "<div class='row no-print'><button class='ghost' id='pl-a-coords'>" +
-       "¿Quiere verificar estas coordenadas en el módulo Coordenadas?</button></div>";
   h += dibujaPlano(X, Y, D.L, w);
   $("pl-resultados").style.display = "block";
   $("pl-res-body").innerHTML = h;
@@ -2466,18 +2473,12 @@ function plMostrar(){
     });
   });
 
-  var bpc = $("pl-a-coords");
-  if(bpc) bpc.addEventListener("click", function(){
-    $("mod-coords").checked = true;          /* habilita el módulo si estaba apagado */
-    $("co-n").value = n;
-    coGenerar();
-    for(var k = 0; k < n; k++){
-      $("co-x" + (k+1)).value = fmt(D.bx + X[k], 3);
-      $("co-y" + (k+1)).value = fmt(D.by + Y[k], 3);
-    }
-    activo = "coords";
-    renderTabs();
-    $("co-calcular").click();
+  /* agrega debajo el cálculo por el otro método, sin perder nada de lo ya hecho */
+  var bom = $("pl-otro-metodo");
+  if(bom) bom.addEventListener("click", function(){
+    D.verOtro = true;
+    sConfirm();
+    plMostrar();
   });
 
   var selR = $("pl-mensura-res");
