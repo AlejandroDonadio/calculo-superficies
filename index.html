@@ -516,7 +516,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 2.0 · Última actualización: 24/07/2026 10:15 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 2.1 · Última actualización: 24/07/2026 10:28 hs</span></footer>
 
 
 <aside id="listado-drawer" aria-label="Listado BASIC original">
@@ -2398,7 +2398,10 @@ function plMostrar(){
            "los dos métodos reparten el error de cierre de distinta manera, así que una diferencia es esperable. " +
            "Una vez compensado tienen que coincidir.</p>";
     }
-  } else {
+  } else if(D.comp || D.error < 0.01){
+    /* la consulta recién aparece con el resultado final: compensado, o con el error
+       de cierre despreciable (no hay nada que compensar). Así el segundo método se
+       calcula siempre sobre los datos definitivos. */
     h += "<div class='row no-print'><button class='primary' id='pl-otro-metodo'>¿Este polígono " +
          (D.comp ? "compensado " : "") + "quiere calcularlo por el método de " +
          (porCoord ? "Planilla de cálculo" : "Coordenadas") + "?</button></div>";
