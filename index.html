@@ -246,6 +246,10 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 .trab-item .tn small{color:var(--ink-soft); font-size:.78rem;}
 .trab-item button{padding:6px 12px; font-size:.82rem;}
 .trab-vacio{color:var(--ink-soft); font-size:.9rem; line-height:1.5; padding:12px 2px;}
+#trab-drawer .td-pie{border-top:1px solid var(--line); padding:10px 14px;}
+#trab-drawer .td-pie .fila{display:flex; gap:8px; flex-wrap:wrap;}
+#trab-drawer .td-pie button{font-size:.82rem; padding:7px 12px;}
+#trab-drawer .td-pie p{font-size:.78rem; color:var(--ink-soft); line-height:1.45; margin-top:7px;}
 @media print{ #trab-drawer{display:none !important;} }
 
 
@@ -550,7 +554,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 3.0 · Última actualización: 26/07/2026 15:34 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 3.1 · Última actualización: 26/07/2026 16:02 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -561,6 +565,14 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
     <button class="ghost" id="trab-cerrar">Cerrar  X</button>
   </div>
   <div id="trab-lista"></div>
+  <div class="td-pie">
+    <div class="fila">
+      <button id="trab-exportar">Guardar en archivo</button>
+      <button id="trab-importar">Abrir archivo…</button>
+      <input type="file" id="trab-file" accept=".json,application/json" style="display:none">
+    </div>
+    <p>El archivo se puede pasar de la computadora al celular, mandar por mail o guardar de respaldo. Al abrirlo, el trabajo también queda en esta lista.</p>
+  </div>
 </aside>
 
 <aside id="listado-drawer" aria-label="Listado BASIC original">
@@ -2475,6 +2487,10 @@ function plMostrar(){
       "<li><b>3 · Con pesos por lado</b> — cuando <b>algunos lados se midieron en peores condiciones</b> " +
       "que otros (vegetación, tramos quebrados, medición indirecta). A mayor peso, menos corrección " +
       "recibe ese lado.</li>" +
+      "<li><b>Mediciones con GNSS/GPS</b> — no corresponde ninguno de los tres: no hay error de cierre " +
+      "que repartir, porque cada vértice se determina de forma independiente. Usar el módulo " +
+      "<b>Coordenadas</b>. Si la poligonal es <b>mixta</b> (algunos vértices por GNSS y otros con " +
+      "estación total o cinta), método <b>3</b>, dando mayor peso a los lados medidos por GNSS.</li>" +
       "</ul></div>" +
       "<div class='row'>" +
       "<div><label>Método de compensación lineal — teclas <b>1</b> / <b>2</b> / <b>3</b></label>" +
@@ -3418,6 +3434,82 @@ $("trab-lista").addEventListener("click", function(e){
   guardarEstado();
   trabCerrarPanel();
   sConfirm();
+});
+
+/* ---------- Guardar / abrir por archivo ----------
+   Sirve para pasar un trabajo de un equipo a otro (la lista de arriba vive solo en
+   este navegador) y para tener un respaldo fuera del programa. */
+function trabNombreArchivo(n){
+  var base = String(n)
+    .replace(/[áä]/gi, "a").replace(/[éë]/gi, "e").replace(/[íï]/gi, "i")
+    .replace(/[óö]/gi, "o").replace(/[úü]/gi, "u").replace(/ñ/gi, "n")
+    .replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return "Calculo-superficies_" + (base || "trabajo") + ".json";
+}
+function trabDescargar(nombreArchivo, obj){
+  try{
+    var blob = new Blob([JSON.stringify(obj, null, 1)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = nombreArchivo;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    return true;
+  }catch(e){ return false; }
+}
+
+$("trab-exportar").addEventListener("click", function(){
+  var st = recogerEstado();
+  if(!st){ sError(); alert("No se pudo leer el trabajo actual."); return; }
+  var nom = prompt("Nombre del trabajo para el archivo:", "");
+  if(nom === null) return;
+  nom = nom.replace(/\s+/g, " ").replace(/^\s|\s$/g, "");
+  if(!nom){ sError(); alert("Poné un nombre para el archivo."); return; }
+  var obj = { app: "calculo-superficies", v: 1, n: nom, f: trabFecha(), e: st };
+  if(trabDescargar(trabNombreArchivo(nom), obj)) sConfirm();
+  else { sError(); alert("Este navegador no pudo generar el archivo."); }
+});
+
+$("trab-importar").addEventListener("click", function(){ $("trab-file").click(); });
+
+$("trab-file").addEventListener("change", function(){
+  var f = this.files && this.files[0];
+  this.value = "";                     /* así se puede volver a elegir el mismo archivo */
+  if(!f) return;
+  var lector = new FileReader();
+  lector.onload = function(){
+    var obj = null;
+    try{ obj = JSON.parse(lector.result); }catch(e){}
+    if(!obj || obj.app !== "calculo-superficies" || !obj.e){
+      sError();
+      alert("Ese archivo no es un trabajo de Cálculo de Superficies.");
+      return;
+    }
+    var nom = String(obj.n || "Trabajo importado");
+    if(!confirm("Abrir «" + nom + "».\nLo que tengas cargado ahora se reemplaza. ¿Seguimos?")) return;
+    aplicarEstado(obj.e);
+    guardarEstado();
+
+    /* además queda en la lista, para que el trabajo importado no se pierda */
+    var arr = trabLeer(), i = -1, k;
+    for(k = 0; k < arr.length; k++){
+      if(String(arr[k].n).toLowerCase() === nom.toLowerCase()){ i = k; break; }
+    }
+    var poner = true;
+    if(i >= 0) poner = confirm("Ya tenías un trabajo llamado «" + arr[i].n + "».\n¿Querés reemplazarlo con el del archivo?");
+    if(poner){
+      var reg = { n: nom, f: obj.f || trabFecha(), e: obj.e };
+      if(i >= 0) arr[i] = reg; else arr.unshift(reg);
+      trabEscribir(arr);
+    }
+    trabRender();
+    trabCerrarPanel();
+    sConfirm();
+  };
+  lector.onerror = function(){ sError(); alert("No se pudo leer el archivo."); };
+  lector.readAsText(f);
 });
 
 /* ---------- Guardar PDF / Imprimir ----------
