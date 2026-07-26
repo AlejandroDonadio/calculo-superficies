@@ -11,9 +11,81 @@
 <meta name="theme-color" content="#E20613">
 <link rel="apple-touch-icon" href="icon-180.png">
 <script>
+/* ====== Versión de la app ======
+   IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
+   contenido de version.txt. De esa comparación depende la actualización automática. */
+var APP_VER = "3.2";
+
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
-  addEventListener('load', function(){ navigator.serviceWorker.register('./sw.js'); });
+  addEventListener('load', function(){
+    /* updateViaCache:'none' evita que el navegador sirva un sw.js viejo desde su caché */
+    try{
+      navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+        .then(function(reg){ if(reg && reg.update) reg.update(); })
+        .catch(function(){});
+    }catch(e){
+      navigator.serviceWorker.register('./sw.js');
+    }
+  });
 }
+
+/* ====== Actualización automática ======
+   Al abrir con internet se compara la versión que está corriendo con la publicada.
+   Si hay una nueva, se borra la copia guardada y se recarga una sola vez, para que la
+   app quede al día sin que el usuario tenga que hacer nada. Si se descubre mientras se
+   está trabajando, no se interrumpe: aparece un aviso para actualizar cuando se quiera. */
+(function(){
+  if(location.protocol.indexOf('http') !== 0) return;   /* abierto como archivo local */
+
+  function limpiarYRecargar(){
+    var recargar = function(){ location.reload(); };
+    if(window.caches && caches.keys){
+      caches.keys().then(function(ks){
+        return Promise.all(ks.map(function(k){ return caches.delete(k); }));
+      }).then(recargar, recargar);
+    } else recargar();
+  }
+
+  function avisarNueva(){
+    if(document.getElementById("aviso-version")) return;
+    var d = document.createElement("div");
+    d.id = "aviso-version";
+    d.className = "no-print";
+    d.innerHTML = "<span>Hay una versión nueva del programa.</span>" +
+                  "<button id='aviso-actualizar'>Actualizar</button>" +
+                  "<button id='aviso-cerrar' class='ghost'>Ahora no</button>";
+    document.body.appendChild(d);
+    document.getElementById("aviso-actualizar").addEventListener("click", limpiarYRecargar);
+    document.getElementById("aviso-cerrar").addEventListener("click", function(){ d.parentNode.removeChild(d); });
+  }
+
+  function revisar(alAbrir){
+    if(!window.fetch) return;
+    fetch("./version.txt", { cache: "no-store" })
+      .then(function(r){ return r.ok ? r.text() : null; })
+      .then(function(t){
+        if(t === null) return;                       /* sin conexión o sin el archivo */
+        var pub = String(t).replace(/[^0-9.]/g, "");
+        if(!pub || pub === APP_VER) return;
+        if(alAbrir){
+          /* una sola vez por sesión, para no entrar en un ciclo de recargas */
+          try{
+            if(sessionStorage.getItem("calcsup_actualizando")) { avisarNueva(); return; }
+            sessionStorage.setItem("calcsup_actualizando", "1");
+          }catch(e){}
+          limpiarYRecargar();
+        } else {
+          avisarNueva();
+        }
+      })
+      .catch(function(){});
+  }
+
+  addEventListener("load", function(){
+    setTimeout(function(){ revisar(true); }, 800);
+    setInterval(function(){ revisar(false); }, 30 * 60 * 1000);   /* cada media hora */
+  });
+})();
 </script>
 <style>
 /* ============ Paleta y tipografía (fuentes de sistema Windows 7) ============ */
@@ -251,6 +323,19 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 #trab-drawer .td-pie button{font-size:.82rem; padding:7px 12px;}
 #trab-drawer .td-pie p{font-size:.78rem; color:var(--ink-soft); line-height:1.45; margin-top:7px;}
 @media print{ #trab-drawer{display:none !important;} }
+
+/* aviso de versión nueva encontrada mientras se está trabajando */
+#aviso-version{
+  position:fixed; left:0; right:0; bottom:0; z-index:70;
+  background:var(--ink); color:#fff;
+  display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;
+  padding:10px 14px; font-size:.9rem;
+  box-shadow:0 -4px 14px rgba(0,0,0,.25);
+}
+#aviso-version button{padding:6px 14px; font-size:.85rem; background:var(--green); border-color:var(--green); color:#fff;}
+#aviso-version button.ghost{background:transparent; border-color:#777777; color:#EAEAEA;}
+#aviso-version button.ghost:hover{background:#333333;}
+@media print{ #aviso-version{display:none !important;} }
 
 
 /* ============ Adaptación para celulares (iPhone y Android) ============ */
@@ -554,7 +639,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 3.1 · Última actualización: 26/07/2026 16:02 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 3.2 · Última actualización: 26/07/2026 16:35 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
