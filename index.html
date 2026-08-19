@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "3.2";
+var APP_VER = "3.3";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -479,7 +479,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
     </div>
     <div class="row">
       <div>
-        <label for="pl-mensura" style="font-weight:700; color:var(--ink);">Tolerancia Lineal Según Tipo de Mensura a Realizar:</label>
+        <label for="pl-mensura" style="font-weight:700; color:var(--ink);">Tolerancia Lineal Según Tipo de Mensura a Realizar: <span style="font-weight:400; color:var(--ink-soft);">Art. 40 — Instrucciones Generales para Agrimensores (Dirección de Geodesia y Catastro, Prov. de Buenos Aires).</span></label>
         <select id="pl-mensura" style="font-family:inherit; font-size:.95rem; padding:7px; border:1px solid var(--line); border-radius:12px;">
           <option value="1">1 · Mensuras urbanas</option>
           <option value="2">2 · Mensuras suburbanas (quintas y chacras)</option>
@@ -495,7 +495,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 
   <div class="card" id="pl-resultados" style="display: block;">
     <h2>3 · Resultados</h2>
-    <div id="pl-res-body"><table><thead><tr><th>Lado</th><th>Long. (m)</th><th>Azimut</th><th>Rumbo</th><th>Δx</th><th>Δy</th></tr></thead><tbody><tr><td class="lbl">1–2</td><td>74.45</td><td>45°0'0"</td><td>45°0'0" NE</td><td>52.644</td><td>52.644</td></tr><tr><td class="lbl">2–3</td><td>4.24</td><td>90°5'16"</td><td>89°54'44" SE</td><td>-0.006</td><td>4.240</td></tr><tr><td class="lbl">3–4</td><td>48.16</td><td>135°10'32"</td><td>44°49'28" SE</td><td>-34.158</td><td>33.950</td></tr><tr><td class="lbl">4–5</td><td>4.40</td><td>178°3'38"</td><td>1°56'22" SE</td><td>-4.397</td><td>0.149</td></tr><tr><td class="lbl">5–6</td><td>34.60</td><td>220°56'44"</td><td>40°56'44" SO</td><td>-26.135</td><td>-22.675</td></tr><tr><td class="lbl">6–7</td><td>24.82</td><td>313°43'53"</td><td>46°16'7" NO</td><td>17.158</td><td>-17.935</td></tr><tr><td class="lbl">7–8</td><td>18.06</td><td>219°9'26"</td><td>39°9'26" SO</td><td>-14.004</td><td>-11.404</td></tr><tr><td class="lbl">8–9</td><td>0.72</td><td>131°11'39"</td><td>48°48'21" SE</td><td>-0.474</td><td>0.542</td></tr><tr><td class="lbl">9–10</td><td>21.37</td><td>220°44'19"</td><td>40°44'19" SO</td><td>-16.192</td><td>-13.946</td></tr><tr><td class="lbl">10–1</td><td>36.15</td><td>315°0'0"</td><td>45°0'0" NO</td><td>25.562</td><td>-25.562</td></tr><tr class="total"><td class="lbl">Σ</td><td>266.97</td><td></td><td></td><td>-0.0035</td><td>0.0029</td></tr></tbody></table><table><tbody><tr><td class="lbl">ex</td><td>-0.0035 m</td><td class="lbl">ey</td><td>0.0029 m</td><td class="lbl">Error de cierre lineal</td><td><span class="resalta ok">0.00 m</span></td><td class="lbl">Tolerancia lineal</td><td>0.16 m &nbsp;<span class="badge ok">DENTRO</span></td></tr></tbody></table><p style="font-size:.85rem; color:var(--ink-soft); margin:12px 0 4px; text-transform:uppercase; letter-spacing:.04em;"><b>Coordenadas totales de los vértices</b></p><div class="row no-print"><div><label>X del vértice 1 (Norte) — ej. Gauss-Krüger</label><input type="text" inputmode="decimal" id="pl-x0" value="0" style="width:160px;"></div><div><label>Y del vértice 1 (Este)</label><input type="text" inputmode="decimal" id="pl-y0" value="0" style="width:160px;"></div><div style="align-self:center; font-size:.8rem; color:var(--ink-soft);">Cargá las coordenadas reales del punto de partida y la tabla se actualiza (Enter o clic afuera).</div></div><table><thead><tr><th>Vértice</th><th>X (Norte)</th><th>Y (Este)</th></tr></thead><tbody><tr><td class="lbl">1</td><td>0.000</td><td>0.000</td></tr><tr><td class="lbl">2</td><td>52.644</td><td>52.644</td></tr><tr><td class="lbl">3</td><td>52.638</td><td>56.884</td></tr><tr><td class="lbl">4</td><td>18.479</td><td>90.834</td></tr><tr><td class="lbl">5</td><td>14.082</td><td>90.983</td></tr><tr><td class="lbl">6</td><td>-12.053</td><td>68.308</td></tr><tr><td class="lbl">7</td><td>5.105</td><td>50.373</td></tr><tr><td class="lbl">8</td><td>-8.899</td><td>38.969</td></tr><tr><td class="lbl">9</td><td>-9.374</td><td>39.511</td></tr><tr><td class="lbl">10</td><td>-25.565</td><td>25.565</td></tr></tbody></table><div class="row no-print"><div><label>Tipo de mensura — podés cambiarlo acá y la Tolerancia se Actualiza</label><select id="pl-mensura-res" style="font-family:inherit; font-size:.95rem; padding:7px; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink);">
+    <div id="pl-res-body"><table><thead><tr><th>Lado</th><th>Long. (m)</th><th>Azimut</th><th>Rumbo</th><th>Δx</th><th>Δy</th></tr></thead><tbody><tr><td class="lbl">1–2</td><td>74.45</td><td>45°0'0"</td><td>45°0'0" NE</td><td>52.644</td><td>52.644</td></tr><tr><td class="lbl">2–3</td><td>4.24</td><td>90°5'16"</td><td>89°54'44" SE</td><td>-0.006</td><td>4.240</td></tr><tr><td class="lbl">3–4</td><td>48.16</td><td>135°10'32"</td><td>44°49'28" SE</td><td>-34.158</td><td>33.950</td></tr><tr><td class="lbl">4–5</td><td>4.40</td><td>178°3'38"</td><td>1°56'22" SE</td><td>-4.397</td><td>0.149</td></tr><tr><td class="lbl">5–6</td><td>34.60</td><td>220°56'44"</td><td>40°56'44" SO</td><td>-26.135</td><td>-22.675</td></tr><tr><td class="lbl">6–7</td><td>24.82</td><td>313°43'53"</td><td>46°16'7" NO</td><td>17.158</td><td>-17.935</td></tr><tr><td class="lbl">7–8</td><td>18.06</td><td>219°9'26"</td><td>39°9'26" SO</td><td>-14.004</td><td>-11.404</td></tr><tr><td class="lbl">8–9</td><td>0.72</td><td>131°11'39"</td><td>48°48'21" SE</td><td>-0.474</td><td>0.542</td></tr><tr><td class="lbl">9–10</td><td>21.37</td><td>220°44'19"</td><td>40°44'19" SO</td><td>-16.192</td><td>-13.946</td></tr><tr><td class="lbl">10–1</td><td>36.15</td><td>315°0'0"</td><td>45°0'0" NO</td><td>25.562</td><td>-25.562</td></tr><tr class="total"><td class="lbl">Σ</td><td>266.97</td><td></td><td></td><td>-0.0035</td><td>0.0029</td></tr></tbody></table><table><tbody><tr><td class="lbl">ex</td><td>-0.0035 m</td><td class="lbl">ey</td><td>0.0029 m</td><td class="lbl">Error de cierre lineal</td><td><span class="resalta ok">0.00 m</span></td><td class="lbl">Tolerancia lineal</td><td>0.16 m &nbsp;<span class="badge ok">DENTRO</span></td></tr></tbody></table><p style="font-size:.85rem; color:var(--ink-soft); margin:12px 0 4px; text-transform:uppercase; letter-spacing:.04em;"><b>Coordenadas totales de los vértices</b></p><div class="row no-print"><div><label>X del vértice 1 (Norte) — ej. Gauss-Krüger</label><input type="text" inputmode="decimal" id="pl-x0" value="0" style="width:160px;"></div><div><label>Y del vértice 1 (Este)</label><input type="text" inputmode="decimal" id="pl-y0" value="0" style="width:160px;"></div><div style="align-self:center; font-size:.8rem; color:var(--ink-soft);">Cargá las coordenadas reales del punto de partida y la tabla se actualiza (Enter o clic afuera).</div></div><table><thead><tr><th>Vértice</th><th>X (Norte)</th><th>Y (Este)</th></tr></thead><tbody><tr><td class="lbl">1</td><td>0.000</td><td>0.000</td></tr><tr><td class="lbl">2</td><td>52.644</td><td>52.644</td></tr><tr><td class="lbl">3</td><td>52.638</td><td>56.884</td></tr><tr><td class="lbl">4</td><td>18.479</td><td>90.834</td></tr><tr><td class="lbl">5</td><td>14.082</td><td>90.983</td></tr><tr><td class="lbl">6</td><td>-12.053</td><td>68.308</td></tr><tr><td class="lbl">7</td><td>5.105</td><td>50.373</td></tr><tr><td class="lbl">8</td><td>-8.899</td><td>38.969</td></tr><tr><td class="lbl">9</td><td>-9.374</td><td>39.511</td></tr><tr><td class="lbl">10</td><td>-25.565</td><td>25.565</td></tr></tbody></table><div class="row no-print"><div><label>Tipo de mensura — podés cambiarlo acá y la Tolerancia lineal se Actualiza</label><select id="pl-mensura-res" style="font-family:inherit; font-size:.95rem; padding:7px; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink);">
           <option value="1">1 · Mensuras urbanas</option>
           <option value="2">2 · Mensuras suburbanas (quintas y chacras)</option>
           <option value="3">3 · Mensuras rurales normales</option>
@@ -639,7 +639,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 3.2 · Última actualización: 26/07/2026 16:35 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 3.3 · Última actualización: 19/08/2026 20:37 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2433,7 +2433,7 @@ $("pl-calcular").addEventListener("click", function(){
   var lt = d.L.reduce(function(a, b){ return a + b; }, 0);
   var error = Math.sqrt(ex*ex + ey*ey);
   var tol = TOL[$("pl-mensura").value](lt);
-  var dentro = Math.round(error * 100) <= Math.round(tol * 100);
+  var dentro = error < tol;   /* Art. 42: E debe ser MENOR que T, sin redondear */
 
   PL.datos = { L:d.L, Z:Z, x:x, y:y, ex:ex, ey:ey, error:error, tol:tol, lt:lt, comp:false, mcalc: ($("pl-metcalc2") && $("pl-metcalc2").checked) ? 2 : 1 };
   plMostrar();
@@ -2446,9 +2446,10 @@ function plMostrar(){
   var X = [0], Y = [0];
   for(i = 1; i < n; i++){ X.push(X[i-1] + D.x[i-1]); Y.push(Y[i-1] + D.y[i-1]); }
   var w = shoelace(X, Y);
-  var errR = Math.round(D.error * 100) / 100;   /* error de cierre al centímetro */
-  var tolR = Math.round(D.tol * 100) / 100;     /* tolerancia al centímetro      */
-  var dentro = errR <= tolR;
+  /* Art. 42: "E debe ser menor que la tolerancia T respectiva". El veredicto se decide
+     con los valores exactos; el redondeo es solo de presentación. */
+  var errR = D.error, tolR = D.tol;
+  var dentro = errR < tolR;
 
   var h = "";
   h += "<table><thead><tr><th>Lado</th><th>Long. (m)</th><th>Azimut</th><th>Rumbo</th><th>Δx</th><th>Δy</th></tr></thead><tbody>";
@@ -2466,8 +2467,8 @@ function plMostrar(){
        "<td class='lbl'>ex</td><td>" + fmt(D.ex, 4) + " m</td>" +
        "<td class='lbl'>ey</td><td>" + fmt(D.ey, 4) + " m</td>" +
        "<td class='lbl'>Error de cierre lineal</td><td><span class='resalta " + (dentro ? "ok" : "no") + "'>" +
-       fmt(errR, 2) + " m</span></td>" +
-       "<td class='lbl'>Tolerancia lineal</td><td>" + fmt(tolR, 2) + " m &nbsp;" +
+       fmt(errR, 3) + " m</span></td>" +
+       "<td class='lbl'>Tolerancia lineal</td><td>" + fmt(tolR, 3) + " m &nbsp;" +
        (dentro ? "<span class='badge ok'>DENTRO</span>" : "<span class='badge no'>EXCEDE</span>") +
        "</td></tr></tbody></table>";
 
@@ -2552,7 +2553,7 @@ function plMostrar(){
 
   /* tipo de mensura cambiable acá mismo: al elegir otro, la tolerancia y el
      veredicto DENTRO/EXCEDE se actualizan al instante, sin recargar nada */
-  h += "<div class='row no-print'><div><label>Tipo de mensura — podés cambiarlo acá y la Tolerancia se Actualiza</label>" +
+  h += "<div class='row no-print'><div><label>Tipo de mensura — podés cambiarlo acá y la Tolerancia lineal se Actualiza</label>" +
        "<select id='pl-mensura-res' style='font-family:inherit; font-size:.95rem; padding:7px; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink);'>" +
        $("pl-mensura").innerHTML + "</select></div></div>";
 
