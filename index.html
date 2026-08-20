@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "3.3";
+var APP_VER = "3.4";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -91,7 +91,7 @@ if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
 /* ============ Paleta y tipografía (fuentes de sistema Windows 7) ============ */
 :root{
   --paper:#F7F7F7; --card:#FFFFFF; --ink:#1A1A1A; --ink-soft:#5C5C5C;
-  --line:#E3E3E3; --green:#E20613; --green-soft:#FCE7E9; --brass:#1A1A1A;
+  --line:#E3E3E3; --marca:#E20613; --marca-suave:#FCE7E9; --brass:#1A1A1A;
   --error:#BE3B2B; --error-soft:#FBEDEA; --ok:#1E6B52; --ok-soft:#E7F0EB; --plan:#555555;
   --warn:#B45309; --warn-soft:#FEF3C7;
 }
@@ -124,18 +124,18 @@ button{
   box-shadow:0 1px 3px rgba(0,0,0,.18), inset 0 -2px 0 rgba(0,0,0,.07);
   transition:background .15s, color .15s, border-color .15s, box-shadow .15s;
 }
-button:hover{background:var(--green); border-color:var(--green); color:#fff;}
+button:hover{background:var(--marca); border-color:var(--marca); color:#fff;}
 button:active{box-shadow:inset 0 2px 4px rgba(0,0,0,.3); transform:translateY(1px);}
-button:focus{outline:2px solid var(--green); outline-offset:1px;}
-button.primary{background:var(--green); border-color:var(--green); color:#fff; font-weight:600;}
+button:focus{outline:2px solid var(--marca); outline-offset:1px;}
+button.primary{background:var(--marca); border-color:var(--marca); color:#fff; font-weight:600;}
 button.primary:hover{background:#B10510;}
 button.ghost{border-color:var(--line); color:var(--ink-soft);}
-button.ghost:hover{background:var(--green); border-color:var(--green); color:#fff;}
+button.ghost:hover{background:var(--marca); border-color:var(--marca); color:#fff;}
 .header-actions button{border-radius:0;}
 #btn-guardar, #btn-imprimir{background:#E9E9E9; border-color:#E9E9E9;}
-#btn-guardar:hover, #btn-imprimir:hover{background:var(--green); border-color:var(--green); color:#fff;}
+#btn-guardar:hover, #btn-imprimir:hover{background:var(--marca); border-color:var(--marca); color:#fff;}
 [data-theme="dark"] #btn-guardar, [data-theme="dark"] #btn-imprimir{background:#333333; border-color:#333333;}
-[data-theme="dark"] #btn-guardar:hover, [data-theme="dark"] #btn-imprimir:hover{background:var(--green); border-color:var(--green);}
+[data-theme="dark"] #btn-guardar:hover, [data-theme="dark"] #btn-imprimir:hover{background:var(--marca); border-color:var(--marca);}
 
 /* ============ Pestañas de módulos ============ */
 nav{max-width:960px; margin:18px auto 0; display:flex; gap:6px; flex-wrap:wrap;}
@@ -143,8 +143,8 @@ nav .tab{
   border:1px solid var(--line); border-bottom:none; background:#F1F1F1;
   padding:10px 18px; border-radius:0; box-shadow:none; color:var(--ink-soft); font-weight:600;
 }
-nav .tab:hover{background:var(--green); border-color:var(--green); color:#fff;}
-nav .tab.active, [data-theme="dark"] nav .tab.active{background:var(--green); color:#fff; border-color:var(--green);}
+nav .tab:hover{background:var(--marca); border-color:var(--marca); color:#fff;}
+nav .tab.active, [data-theme="dark"] nav .tab.active{background:var(--marca); color:#fff; border-color:var(--marca);}
 
 main{max-width:960px; margin:0 auto; background:var(--card); border:1px solid var(--ink); border-radius:0 0 20px 20px; padding:24px 26px;}
 .panel{display:none;}
@@ -154,7 +154,7 @@ main{max-width:960px; margin:0 auto; background:var(--card); border:1px solid va
 .card{border:1px dashed #C6C6C6; border-radius:16px; padding:16px 18px; margin-bottom:18px; background:#FEFEFE;}
 .card h2{
   font-family:'Poppins', 'Segoe UI', sans-serif; font-size:1.05rem; letter-spacing:.04em;
-  text-transform:uppercase; color:var(--green); border-bottom:1px solid var(--line);
+  text-transform:uppercase; color:var(--marca); border-bottom:1px solid var(--line);
   padding-bottom:6px; margin-bottom:12px;
 }
 .row{display:flex; gap:14px; align-items:flex-end; flex-wrap:wrap; margin-bottom:10px;}
@@ -164,7 +164,7 @@ input[type=text]{
   border:1px solid var(--line); border-radius:12px; padding:7px 10px; width:110px;
   background:#F2F2F2; color:var(--ink);
 }
-input[type=text]:focus{outline:2px solid var(--green); outline-offset:0; border-color:var(--green);}
+input[type=text]:focus{outline:2px solid var(--marca); outline-offset:0; border-color:var(--marca);}
 input.gms{width:64px; text-align:right;}
 input.err{border-color:var(--error); background:var(--error-soft);}
 table{border-collapse:collapse; width:100%; margin:8px 0;}
@@ -180,10 +180,10 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
 .msg.good{background:var(--ok-soft); border:1px solid var(--ok); color:var(--ok);}
 .msg.info{background:var(--warn-soft); border:1px solid var(--warn); color:var(--warn);}
 /* ayuda breve para elegir el método de compensación (no se imprime) */
-.ayuda-comp{border:1px solid var(--line); border-left:3px solid var(--green); border-radius:0;
+.ayuda-comp{border:1px solid var(--line); border-left:3px solid var(--marca); border-radius:0;
   padding:10px 14px; margin:2px 0 12px; background:var(--card);}
 .ayuda-comp .tit{font-family:'Poppins', 'Segoe UI', sans-serif; font-weight:600;
-  font-size:.9rem; color:var(--green); margin-bottom:2px;}
+  font-size:.9rem; color:var(--marca); margin-bottom:2px;}
 .ayuda-comp .sub{font-size:.82rem; color:var(--ink-soft); margin-bottom:6px;}
 .ayuda-comp ul{list-style:none; margin:0; padding:0;}
 .ayuda-comp li{font-size:.85rem; color:var(--ink); line-height:1.45; padding:3px 0;}
@@ -216,7 +216,7 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
 #modulos-panel.open{display:block;}
 #modulos-panel label{display:inline-flex; align-items:center; gap:8px; margin:4px 22px 4px 0;
   font-size:.95rem; color:var(--ink); cursor:pointer;}
-#modulos-panel input{width:18px; height:18px; accent-color:var(--green);}
+#modulos-panel input{width:18px; height:18px; accent-color:var(--marca);}
 
 .hint-bar{
   max-width:960px; margin:10px auto 0; font-size:.8rem; color:var(--ink-soft);
@@ -236,12 +236,12 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
   min-width:200px; padding:22px 18px; font-size:1rem; font-weight:600;
   border:1px dashed #C6C6C6; border-radius:0; background:var(--card); color:var(--ink);
 }
-.metodo-btn:hover{background:var(--green); border:1px solid var(--green); color:#fff;}
-.metodo-btn:hover .num{background:#fff; color:var(--green);}
+.metodo-btn:hover{background:var(--marca); border:1px solid var(--marca); color:#fff;}
+.metodo-btn:hover .num{background:#fff; color:var(--marca);}
 .metodo-btn:hover small{color:rgba(255,255,255,.85);}
 .metodo-btn .num{
   font-family:Consolas, monospace; font-size:1.5rem; font-weight:700;
-  color:#fff; background:var(--green); border-radius:50%;
+  color:#fff; background:var(--marca); border-radius:50%;
   width:40px; height:40px; line-height:40px; text-align:center;
 }
 .metodo-btn small{font-weight:400; color:var(--ink-soft); font-size:.8rem;}
@@ -249,7 +249,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 /* ============ Modo oscuro ============ */
 [data-theme="dark"]{
   --paper:#161616; --card:#202020; --ink:#F1F1F1; --ink-soft:#A8A8A8;
-  --line:#3C3C3C; --green:#FF5A61; --green-soft:#3A1518; --brass:#F2F2F2;
+  --line:#3C3C3C; --marca:#FF5A61; --marca-suave:#3A1518; --brass:#F2F2F2;
   --error:#E0705C; --error-soft:#3A241F; --ok:#57B893; --ok-soft:#1E3A31; --plan:#BBBBBB;
   --warn:#F0B429; --warn-soft:#3A2C12;
 }
@@ -263,7 +263,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 /* ============ Ventana lateral: Listado BASIC ============ */
 #listado-drawer{
   position:fixed; top:0; right:0; width:520px; max-width:92vw; height:100%;
-  background:#141414; color:#EAEAEA; border-left:3px solid var(--green);
+  background:#141414; color:#EAEAEA; border-left:3px solid var(--marca);
   z-index:60; display:flex; flex-direction:column;
   box-shadow:-8px 0 22px rgba(0,0,0,.4);
   transform:translateX(105%); transition:transform .22s ease;
@@ -292,7 +292,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 /* ============ Trabajos guardados (lista con nombre) ============ */
 #trab-drawer{
   position:fixed; top:0; right:0; width:460px; max-width:92vw; height:100%;
-  background:var(--card); color:var(--ink); border-left:3px solid var(--green);
+  background:var(--card); color:var(--ink); border-left:3px solid var(--marca);
   z-index:60; display:flex; flex-direction:column;
   box-shadow:-8px 0 22px rgba(0,0,0,.28);
   transform:translateX(105%); transition:transform .22s ease;
@@ -305,7 +305,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 }
 #trab-drawer .td-head h3{
   font-family:'Poppins', 'Segoe UI', sans-serif; font-size:1rem;
-  color:var(--green); font-weight:700;
+  color:var(--marca); font-weight:700;
 }
 #trab-drawer .td-head small{display:block; color:var(--ink-soft); font-size:.78rem; font-weight:400; margin-top:2px;}
 #trab-lista{overflow:auto; flex:1; padding:12px 14px;}
@@ -332,7 +332,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
   padding:10px 14px; font-size:.9rem;
   box-shadow:0 -4px 14px rgba(0,0,0,.25);
 }
-#aviso-version button{padding:6px 14px; font-size:.85rem; background:var(--green); border-color:var(--green); color:#fff;}
+#aviso-version button{padding:6px 14px; font-size:.85rem; background:var(--marca); border-color:var(--marca); color:#fff;}
 #aviso-version button.ghost{background:transparent; border-color:#777777; color:#EAEAEA;}
 #aviso-version button.ghost:hover{background:#333333;}
 @media print{ #aviso-version{display:none !important;} }
@@ -473,8 +473,8 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
     <p style="font-size:.8rem; color:var(--ink-soft); margin-top:2px;">En una mensura real, el azimut de la línea 1–2 debe ser el verdadero (georreferenciado o de rumbo conocido): de él dependen las coordenadas de los vértices. Para un cálculo libre se puede designar cualquiera (solo rota el polígono), y el recomendado es <b>0° 0' 0"</b>, que deja el primer lado apuntando al Norte y facilita la verificación. La superficie y el error total de cierre lineal no cambian con el azimut elegido, y la compensación elimina el mismo error cualquiera sea el arranque.</p>
     <div class="row">
       <div><label style="font-weight:700; color:var(--ink);">Método de Cálculo de la Superficie</label>
-        <label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-metcalc" id="pl-metcalc1" checked style="accent-color:var(--green);"> 1 · Por planilla de cálculo</label>
-        <label style="display:inline-flex; align-items:center; gap:6px; margin-top:2px; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-metcalc" id="pl-metcalc2" style="accent-color:var(--green);"> 2 · Por coordenadas</label>
+        <label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-metcalc" id="pl-metcalc1" checked style="accent-color:var(--marca);"> 1 · Por planilla de cálculo</label>
+        <label style="display:inline-flex; align-items:center; gap:6px; margin-top:2px; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-metcalc" id="pl-metcalc2" style="accent-color:var(--marca);"> 2 · Por coordenadas</label>
       </div>
     </div>
     <div class="row">
@@ -495,14 +495,14 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 
   <div class="card" id="pl-resultados" style="display: block;">
     <h2>3 · Resultados</h2>
-    <div id="pl-res-body"><table><thead><tr><th>Lado</th><th>Long. (m)</th><th>Azimut</th><th>Rumbo</th><th>Δx</th><th>Δy</th></tr></thead><tbody><tr><td class="lbl">1–2</td><td>74.45</td><td>45°0'0"</td><td>45°0'0" NE</td><td>52.644</td><td>52.644</td></tr><tr><td class="lbl">2–3</td><td>4.24</td><td>90°5'16"</td><td>89°54'44" SE</td><td>-0.006</td><td>4.240</td></tr><tr><td class="lbl">3–4</td><td>48.16</td><td>135°10'32"</td><td>44°49'28" SE</td><td>-34.158</td><td>33.950</td></tr><tr><td class="lbl">4–5</td><td>4.40</td><td>178°3'38"</td><td>1°56'22" SE</td><td>-4.397</td><td>0.149</td></tr><tr><td class="lbl">5–6</td><td>34.60</td><td>220°56'44"</td><td>40°56'44" SO</td><td>-26.135</td><td>-22.675</td></tr><tr><td class="lbl">6–7</td><td>24.82</td><td>313°43'53"</td><td>46°16'7" NO</td><td>17.158</td><td>-17.935</td></tr><tr><td class="lbl">7–8</td><td>18.06</td><td>219°9'26"</td><td>39°9'26" SO</td><td>-14.004</td><td>-11.404</td></tr><tr><td class="lbl">8–9</td><td>0.72</td><td>131°11'39"</td><td>48°48'21" SE</td><td>-0.474</td><td>0.542</td></tr><tr><td class="lbl">9–10</td><td>21.37</td><td>220°44'19"</td><td>40°44'19" SO</td><td>-16.192</td><td>-13.946</td></tr><tr><td class="lbl">10–1</td><td>36.15</td><td>315°0'0"</td><td>45°0'0" NO</td><td>25.562</td><td>-25.562</td></tr><tr class="total"><td class="lbl">Σ</td><td>266.97</td><td></td><td></td><td>-0.0035</td><td>0.0029</td></tr></tbody></table><table><tbody><tr><td class="lbl">ex</td><td>-0.0035 m</td><td class="lbl">ey</td><td>0.0029 m</td><td class="lbl">Error de cierre lineal</td><td><span class="resalta ok">0.00 m</span></td><td class="lbl">Tolerancia lineal</td><td>0.16 m &nbsp;<span class="badge ok">DENTRO</span></td></tr></tbody></table><p style="font-size:.85rem; color:var(--ink-soft); margin:12px 0 4px; text-transform:uppercase; letter-spacing:.04em;"><b>Coordenadas totales de los vértices</b></p><div class="row no-print"><div><label>X del vértice 1 (Norte) — ej. Gauss-Krüger</label><input type="text" inputmode="decimal" id="pl-x0" value="0" style="width:160px;"></div><div><label>Y del vértice 1 (Este)</label><input type="text" inputmode="decimal" id="pl-y0" value="0" style="width:160px;"></div><div style="align-self:center; font-size:.8rem; color:var(--ink-soft);">Cargá las coordenadas reales del punto de partida y la tabla se actualiza (Enter o clic afuera).</div></div><table><thead><tr><th>Vértice</th><th>X (Norte)</th><th>Y (Este)</th></tr></thead><tbody><tr><td class="lbl">1</td><td>0.000</td><td>0.000</td></tr><tr><td class="lbl">2</td><td>52.644</td><td>52.644</td></tr><tr><td class="lbl">3</td><td>52.638</td><td>56.884</td></tr><tr><td class="lbl">4</td><td>18.479</td><td>90.834</td></tr><tr><td class="lbl">5</td><td>14.082</td><td>90.983</td></tr><tr><td class="lbl">6</td><td>-12.053</td><td>68.308</td></tr><tr><td class="lbl">7</td><td>5.105</td><td>50.373</td></tr><tr><td class="lbl">8</td><td>-8.899</td><td>38.969</td></tr><tr><td class="lbl">9</td><td>-9.374</td><td>39.511</td></tr><tr><td class="lbl">10</td><td>-25.565</td><td>25.565</td></tr></tbody></table><div class="row no-print"><div><label>Tipo de mensura — podés cambiarlo acá y la Tolerancia lineal se Actualiza</label><select id="pl-mensura-res" style="font-family:inherit; font-size:.95rem; padding:7px; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink);">
+    <div id="pl-res-body"><table><thead><tr><th>Lado</th><th>Long. (m)</th><th>" + ((D.comp && D.Zaj) ? "Azimut ajustado" : "Azimut") + "</th><th>Rumbo</th><th>Δx</th><th>Δy</th></tr></thead><tbody><tr><td class="lbl">1–2</td><td>74.45</td><td>45°0'0"</td><td>45°0'0" NE</td><td>52.644</td><td>52.644</td></tr><tr><td class="lbl">2–3</td><td>4.24</td><td>90°5'16"</td><td>89°54'44" SE</td><td>-0.006</td><td>4.240</td></tr><tr><td class="lbl">3–4</td><td>48.16</td><td>135°10'32"</td><td>44°49'28" SE</td><td>-34.158</td><td>33.950</td></tr><tr><td class="lbl">4–5</td><td>4.40</td><td>178°3'38"</td><td>1°56'22" SE</td><td>-4.397</td><td>0.149</td></tr><tr><td class="lbl">5–6</td><td>34.60</td><td>220°56'44"</td><td>40°56'44" SO</td><td>-26.135</td><td>-22.675</td></tr><tr><td class="lbl">6–7</td><td>24.82</td><td>313°43'53"</td><td>46°16'7" NO</td><td>17.158</td><td>-17.935</td></tr><tr><td class="lbl">7–8</td><td>18.06</td><td>219°9'26"</td><td>39°9'26" SO</td><td>-14.004</td><td>-11.404</td></tr><tr><td class="lbl">8–9</td><td>0.72</td><td>131°11'39"</td><td>48°48'21" SE</td><td>-0.474</td><td>0.542</td></tr><tr><td class="lbl">9–10</td><td>21.37</td><td>220°44'19"</td><td>40°44'19" SO</td><td>-16.192</td><td>-13.946</td></tr><tr><td class="lbl">10–1</td><td>36.15</td><td>315°0'0"</td><td>45°0'0" NO</td><td>25.562</td><td>-25.562</td></tr><tr class="total"><td class="lbl">Σ</td><td>266.97</td><td></td><td></td><td>-0.0035</td><td>0.0029</td></tr></tbody></table><table><tbody><tr><td class="lbl">ex</td><td>-0.0035 m</td><td class="lbl">ey</td><td>0.0029 m</td><td class="lbl">Error de cierre lineal</td><td><span class="resalta ok">0.00 m</span></td><td class="lbl">Tolerancia lineal</td><td>0.16 m &nbsp;<span class="badge ok">DENTRO</span></td></tr></tbody></table><p style="font-size:.85rem; color:var(--ink-soft); margin:12px 0 4px; text-transform:uppercase; letter-spacing:.04em;"><b>Coordenadas totales de los vértices</b></p><div class="row no-print"><div><label>X del vértice 1 (Norte) — ej. Gauss-Krüger</label><input type="text" inputmode="decimal" id="pl-x0" value="0" style="width:160px;"></div><div><label>Y del vértice 1 (Este)</label><input type="text" inputmode="decimal" id="pl-y0" value="0" style="width:160px;"></div><div style="align-self:center; font-size:.8rem; color:var(--ink-soft);">Cargá las coordenadas reales del punto de partida y la tabla se actualiza (Enter o clic afuera).</div></div><table><thead><tr><th>Vértice</th><th>X (Norte)</th><th>Y (Este)</th></tr></thead><tbody><tr><td class="lbl">1</td><td>0.000</td><td>0.000</td></tr><tr><td class="lbl">2</td><td>52.644</td><td>52.644</td></tr><tr><td class="lbl">3</td><td>52.638</td><td>56.884</td></tr><tr><td class="lbl">4</td><td>18.479</td><td>90.834</td></tr><tr><td class="lbl">5</td><td>14.082</td><td>90.983</td></tr><tr><td class="lbl">6</td><td>-12.053</td><td>68.308</td></tr><tr><td class="lbl">7</td><td>5.105</td><td>50.373</td></tr><tr><td class="lbl">8</td><td>-8.899</td><td>38.969</td></tr><tr><td class="lbl">9</td><td>-9.374</td><td>39.511</td></tr><tr><td class="lbl">10</td><td>-25.565</td><td>25.565</td></tr></tbody></table><div class="row no-print"><div><label>Tipo de mensura — podés cambiarlo acá y la Tolerancia lineal se Actualiza</label><select id="pl-mensura-res" style="font-family:inherit; font-size:.95rem; padding:7px; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink);">
           <option value="1">1 · Mensuras urbanas</option>
           <option value="2">2 · Mensuras suburbanas (quintas y chacras)</option>
           <option value="3">3 · Mensuras rurales normales</option>
           <option value="4">4 · Mensuras rurales difíciles</option>
           <option value="5">5 · Mensuras PH — frentes de manzana</option>
           <option value="6">6 · Mensuras PH — interior de manzana</option>
-        </select></div></div><div class="no-print" id="pl-metodo-box"><div class="ayuda-comp"><div class="tit">¿Qué método de compensación conviene?</div><div class="sub">Según qué medición merece más confianza:</div><ul><li><b>1 · Crandall</b> — supone los <b>ángulos más precisos que las distancias</b>: el error de cierre se descarga sobre los lados y los ángulos quedan como se midieron. Caso clásico: teodolito y cinta.</li><li><b>2 · Proporcional a los lados</b> — supone <b>ángulos y distancias de precisión pareja</b>: cada lado absorbe una parte del error proporcional a su longitud. Es la regla de uso general, habitual con estación total.</li><li><b>3 · Con pesos por lado</b> — cuando <b>algunos lados se midieron en peores condiciones</b> que otros (vegetación, tramos quebrados, medición indirecta). A mayor peso, menos corrección recibe ese lado.</li></ul></div><div class="row"><div><label>Método de compensación lineal — teclas <b>1</b> / <b>2</b> / <b>3</b></label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-met" id="pl-met1" style="accent-color:var(--green);"> 1 · Crandall (mínimos cuadrados)</label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-met" id="pl-met2" style="accent-color:var(--green);"> 2 · Proporcional a los lados (regla de la brújula)</label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-met" id="pl-met3" style="accent-color:var(--green);"> 3 · Proporcional con pesos por lado</label></div></div><div class="row"><div><label>Alcance de la compensación</label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-alc" id="pl-alc-t" checked="" style="accent-color:var(--green);"> Total (todos los lados)</label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-alc" id="pl-alc-p" style="accent-color:var(--green);"> Parcial (elegir los lados a compensar)</label></div><button class="primary" id="pl-compensar">Compensar</button><button class="ghost" id="pl-modif">Modificar lados manualmente…</button></div><div id="pl-lados-box"></div></div><div class="msg good">Error despreciable.</div><div class="big-result">SUPERFICIE= 3444.93m² <small>= 0Ha 34A 44.93Ca</small></div><div class="row no-print"><button class="primary" id="pl-otro-metodo">¿Este polígono quiere calcularlo por el método de Coordenadas?</button></div><div class="plano-box"><svg viewBox="0 0 640 400" xmlns="http://www.w3.org/2000/svg"><polygon points="140.8,253.3 348.2,46.0 364.9,46.0 498.6,180.5 499.2,197.9 409.9,300.8 339.2,233.2 294.3,288.4 296.4,290.2 241.5,354.0" fill="rgba(226,6,19,0.07)" stroke="#555555" stroke-width="2"></polygon><circle cx="140.8" cy="253.3" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="348.2" cy="46.0" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="364.9" cy="46.0" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="498.6" cy="180.5" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="499.2" cy="197.9" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="409.9" cy="300.8" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="339.2" cy="233.2" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="294.3" cy="288.4" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="296.4" cy="290.2" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="241.5" cy="354.0" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><text x="126.8" y="257.3" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">1</text><text x="342.8" y="37.1" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">2</text><text x="370.3" y="37.1" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">3</text><text x="511.4" y="179.0" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">4</text><text x="512.3" y="206.5" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">5</text><text x="410.5" y="318.8" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">6</text><text x="326.7" y="231.0" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">7</text><text x="305.8" y="300.4" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">8</text><text x="284.7" y="276.8" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">9</text><text x="242.0" y="372.0" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">10</text><text x="235.3" y="140.5" transform="rotate(-45.0 235.3 140.5)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">74.45</text><line x1="356.5" y1="46.0" x2="356.6" y2="12.0" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="356.6" y="12.0" transform="rotate(0.1 356.6 12.0)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">4.24</text><text x="440.9" y="104.1" transform="rotate(45.2 440.9 104.1)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">48.16</text><line x1="498.9" y1="189.2" x2="535.8" y2="188.0" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="535.8" y="188.0" transform="rotate(88.1 535.8 188.0)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">4.40</text><text x="464.3" y="257.8" transform="rotate(-49.1 464.3 257.8)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">34.60</text><line x1="374.5" y1="267.0" x2="347.3" y2="346.1" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="347.3" y="346.1" transform="rotate(43.7 347.3 346.1)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">24.82</text><line x1="316.8" y1="260.8" x2="409.3" y2="338.8" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="409.3" y="338.8" transform="rotate(-50.8 409.3 338.8)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">18.06</text><line x1="295.4" y1="289.3" x2="342.4" y2="293.3" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="342.4" y="293.3" transform="rotate(41.2 342.4 293.3)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">0.72</text><text x="281.1" y="332.6" transform="rotate(-49.3 281.1 332.6)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">21.37</text><text x="182.0" y="312.9" transform="rotate(45.0 182.0 312.9)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">36.15</text><text x="327.3" y="196.3" font-family="Consolas,monospace" font-size="14" font-weight="bold" fill="#1A1A1A" text-anchor="middle">SUP = 3444.93m²</text><line x1="267.3" y1="200.3" x2="387.3" y2="200.3" stroke="#1A1A1A" stroke-width="1.3"></line><text x="184.8" y="257.3" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">90°0'3"</text><text x="350.2" y="96.8" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">134°54'44"</text><line x1="364.9" y1="46.0" x2="351.9" y2="111.6" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="351.9" y="122.6" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">134°54'44"</text><text x="451.8" y="187.3" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">137°6'54"</text><line x1="499.2" y1="197.9" x2="415.3" y2="212.1" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="415.3" y="223.1" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">137°6'54"</text><line x1="409.9" y1="300.8" x2="403.3" y2="165.9" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="403.3" y="162.9" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">87°12'51"</text><line x1="339.2" y1="233.2" x2="318.8" y2="169.3" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="318.8" y="166.3" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">274°34'27"</text><text x="260.4" y="247.1" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">267°57'47"</text><line x1="296.4" y1="290.2" x2="237.5" y2="285.4" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="237.5" y="282.4" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">90°27'20"</text><line x1="241.5" y1="354.0" x2="170.6" y2="175.5" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="170.6" y="172.5" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">85°44'16"</text><g stroke="#1A1A1A" fill="#1A1A1A"><line x1="610" y1="52" x2="610" y2="20" stroke-width="1.5"></line><polygon points="610,14 605,26 615,26"></polygon><text x="610" y="66" font-size="12" text-anchor="middle" font-family="Segoe UI">N</text></g></svg></div></div>
+        </select></div></div><div class="no-print" id="pl-metodo-box"><div class="ayuda-comp"><div class="tit">¿Qué método de compensación conviene?</div><div class="sub">Según qué medición merece más confianza:</div><ul><li><b>1 · Crandall</b> — supone los <b>ángulos más precisos que las distancias</b>: el error de cierre se descarga sobre los lados y los ángulos quedan como se midieron. Caso clásico: teodolito y cinta.</li><li><b>2 · Proporcional a los lados</b> — supone <b>ángulos y distancias de precisión pareja</b>: cada lado absorbe una parte del error proporcional a su longitud. Es la regla de uso general, habitual con estación total.</li><li><b>3 · Con pesos por lado</b> — cuando <b>algunos lados se midieron en peores condiciones</b> que otros (vegetación, tramos quebrados, medición indirecta). A mayor peso, menos corrección recibe ese lado.</li></ul></div><div class="row"><div><label>Método de compensación lineal — teclas <b>1</b> / <b>2</b> / <b>3</b></label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-met" id="pl-met1" style="accent-color:var(--marca);"> 1 · Crandall (mínimos cuadrados)</label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-met" id="pl-met2" style="accent-color:var(--marca);"> 2 · Proporcional a los lados (regla de la brújula)</label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-met" id="pl-met3" style="accent-color:var(--marca);"> 3 · Proporcional con pesos por lado</label></div></div><div class="row"><div><label>Alcance de la compensación</label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-alc" id="pl-alc-t" checked="" style="accent-color:var(--marca);"> Total (todos los lados)</label><label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-alc" id="pl-alc-p" style="accent-color:var(--marca);"> Parcial (elegir los lados a compensar)</label></div><button class="primary" id="pl-compensar">Compensar</button><button class="ghost" id="pl-modif">Modificar lados manualmente…</button></div><div id="pl-lados-box"></div></div><div class="msg good">Error despreciable.</div><div class="big-result">SUPERFICIE= 3444.93m² <small>= 0Ha 34A 44.93Ca</small></div><div class="row no-print"><button class="primary" id="pl-otro-metodo">¿Este polígono quiere calcularlo por el método de Coordenadas?</button></div><div class="plano-box"><svg viewBox="0 0 640 400" xmlns="http://www.w3.org/2000/svg"><polygon points="140.8,253.3 348.2,46.0 364.9,46.0 498.6,180.5 499.2,197.9 409.9,300.8 339.2,233.2 294.3,288.4 296.4,290.2 241.5,354.0" fill="rgba(226,6,19,0.07)" stroke="#555555" stroke-width="2"></polygon><circle cx="140.8" cy="253.3" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="348.2" cy="46.0" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="364.9" cy="46.0" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="498.6" cy="180.5" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="499.2" cy="197.9" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="409.9" cy="300.8" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="339.2" cy="233.2" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="294.3" cy="288.4" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="296.4" cy="290.2" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="241.5" cy="354.0" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><text x="126.8" y="257.3" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">1</text><text x="342.8" y="37.1" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">2</text><text x="370.3" y="37.1" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">3</text><text x="511.4" y="179.0" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">4</text><text x="512.3" y="206.5" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">5</text><text x="410.5" y="318.8" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">6</text><text x="326.7" y="231.0" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">7</text><text x="305.8" y="300.4" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">8</text><text x="284.7" y="276.8" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">9</text><text x="242.0" y="372.0" font-family="Consolas,monospace" font-size="13" font-weight="bold" fill="#E20613" text-anchor="middle">10</text><text x="235.3" y="140.5" transform="rotate(-45.0 235.3 140.5)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">74.45</text><line x1="356.5" y1="46.0" x2="356.6" y2="12.0" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="356.6" y="12.0" transform="rotate(0.1 356.6 12.0)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">4.24</text><text x="440.9" y="104.1" transform="rotate(45.2 440.9 104.1)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">48.16</text><line x1="498.9" y1="189.2" x2="535.8" y2="188.0" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="535.8" y="188.0" transform="rotate(88.1 535.8 188.0)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">4.40</text><text x="464.3" y="257.8" transform="rotate(-49.1 464.3 257.8)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">34.60</text><line x1="374.5" y1="267.0" x2="347.3" y2="346.1" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="347.3" y="346.1" transform="rotate(43.7 347.3 346.1)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">24.82</text><line x1="316.8" y1="260.8" x2="409.3" y2="338.8" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="409.3" y="338.8" transform="rotate(-50.8 409.3 338.8)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">18.06</text><line x1="295.4" y1="289.3" x2="342.4" y2="293.3" stroke="#1A1A1A" stroke-width="0.8" opacity="0.45" stroke-dasharray="3,3"></line><text x="342.4" y="293.3" transform="rotate(41.2 342.4 293.3)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">0.72</text><text x="281.1" y="332.6" transform="rotate(-49.3 281.1 332.6)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">21.37</text><text x="182.0" y="312.9" transform="rotate(45.0 182.0 312.9)" font-family="Consolas,monospace" font-size="12" fill="#1A1A1A" text-anchor="middle" dy="0.35em">36.15</text><text x="327.3" y="196.3" font-family="Consolas,monospace" font-size="14" font-weight="bold" fill="#1A1A1A" text-anchor="middle">SUP = 3444.93m²</text><line x1="267.3" y1="200.3" x2="387.3" y2="200.3" stroke="#1A1A1A" stroke-width="1.3"></line><text x="184.8" y="257.3" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">90°0'3"</text><text x="350.2" y="96.8" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">134°54'44"</text><line x1="364.9" y1="46.0" x2="351.9" y2="111.6" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="351.9" y="122.6" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">134°54'44"</text><text x="451.8" y="187.3" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">137°6'54"</text><line x1="499.2" y1="197.9" x2="415.3" y2="212.1" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="415.3" y="223.1" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">137°6'54"</text><line x1="409.9" y1="300.8" x2="403.3" y2="165.9" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="403.3" y="162.9" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">87°12'51"</text><line x1="339.2" y1="233.2" x2="318.8" y2="169.3" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="318.8" y="166.3" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">274°34'27"</text><text x="260.4" y="247.1" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">267°57'47"</text><line x1="296.4" y1="290.2" x2="237.5" y2="285.4" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="237.5" y="282.4" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">90°27'20"</text><line x1="241.5" y1="354.0" x2="170.6" y2="175.5" stroke="#1A1A1A" stroke-width="0.8" opacity="0.55" stroke-dasharray="3,3"></line><text x="170.6" y="172.5" font-family="Consolas,monospace" font-size="11" fill="#1A1A1A" text-anchor="middle">85°44'16"</text><g stroke="#1A1A1A" fill="#1A1A1A"><line x1="610" y1="52" x2="610" y2="20" stroke-width="1.5"></line><polygon points="610,14 605,26 615,26"></polygon><text x="610" y="66" font-size="12" text-anchor="middle" font-family="Segoe UI">N</text></g></svg></div></div>
   </div>
 </section>
 
@@ -530,7 +530,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
   <div class="card">
     <h2>1 · Datos del cuadrilátero</h2>
     <p style="font-size:.85rem; color:var(--ink-soft); margin-bottom:8px;">
-      Esquema de referencia del <b>caso elegido</b>: en <b style="color:var(--green);">rojo</b> los datos que cargás,
+      Esquema de referencia del <b>caso elegido</b>: en <b style="color:var(--marca);">rojo</b> los datos que cargás,
       en negro punteado las incógnitas que calcula el programa. Al cambiar de caso, el dibujo se actualiza.
     </p>
     <div class="plano-box" style="max-width:460px; margin-bottom:14px;" id="cu-esquema"><svg viewBox="0 0 440 260" xmlns="http://www.w3.org/2000/svg"><polygon points="70,215 370,215 315,60 115,45" fill="rgba(226,6,19,0.06)" stroke="none"></polygon><line x1="70" y1="215" x2="370" y2="215" stroke="#E20613" stroke-width="2.5"></line><line x1="70" y1="215" x2="115" y2="45" stroke="#E20613" stroke-width="2.5"></line><line x1="370" y1="215" x2="315" y2="60" stroke="#E20613" stroke-width="2.5"></line><line x1="115" y1="45" x2="315" y2="60" stroke="#E20613" stroke-width="2.5"></line><line x1="70" y1="215" x2="315" y2="60" stroke="#1A1A1A" stroke-width="1.6" stroke-dasharray="6,4"></line><text x="224" y="148" font-family="Consolas,monospace" font-size="13" fill="#1A1A1A" text-anchor="middle" transform="rotate(-32 224 148)">diag. B–D (calc.)</text><path d="M 98 215 A 28 28 0 0 0 77 189" fill="none" stroke="#1A1A1A" stroke-width="1.5" stroke-dasharray="4,3"></path><path d="M 342 215 A 28 28 0 0 1 360 187" fill="none" stroke="#E20613" stroke-width="1.6"></path><path d="M 108.3 70.1 A 26 26 0 0 0 140.9 46.9" fill="none" stroke="#1A1A1A" stroke-width="1.5" stroke-dasharray="4,3"></path><path d="M 289.1 58.1 A 26 26 0 0 0 323.7 84.5" fill="none" stroke="#1A1A1A" stroke-width="1.5" stroke-dasharray="4,3"></path><circle cx="70" cy="215" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="370" cy="215" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="115" cy="45" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="315" cy="60" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><text x="56" y="234" font-family="Consolas,monospace" font-size="16" font-weight="bold" fill="#1A1A1A" text-anchor="middle">B</text><text x="384" y="234" font-family="Consolas,monospace" font-size="16" font-weight="bold" fill="#1A1A1A" text-anchor="middle">A</text><text x="100" y="32" font-family="Consolas,monospace" font-size="16" font-weight="bold" fill="#1A1A1A" text-anchor="middle">C</text><text x="330" y="48" font-family="Consolas,monospace" font-size="16" font-weight="bold" fill="#1A1A1A" text-anchor="middle">D</text><text x="220" y="238" font-family="Consolas,monospace" font-size="14" fill="#E20613" text-anchor="middle">d (base) (dato)</text><text x="58" y="130" font-family="Consolas,monospace" font-size="14" fill="#E20613" text-anchor="middle" transform="rotate(-75 58 130)">a (dato)</text><text x="378" y="132" font-family="Consolas,monospace" font-size="14" fill="#E20613" text-anchor="middle" transform="rotate(70 378 132)">c (dato)</text><text x="215" y="38" font-family="Consolas,monospace" font-size="14" fill="#E20613" text-anchor="middle">b (dato)</text><text x="103" y="196" font-family="Consolas,monospace" font-size="13" fill="#1A1A1A">áng. B (calc.)</text><text x="338" y="196" font-family="Consolas,monospace" font-size="13" fill="#E20613" text-anchor="end">áng. A (dato)</text><text x="138" y="82" font-family="Consolas,monospace" font-size="13" fill="#1A1A1A">áng. C (calc.)</text><text x="285" y="104" font-family="Consolas,monospace" font-size="13" fill="#1A1A1A" text-anchor="middle">áng. D (calc.)</text></svg></div>
@@ -587,7 +587,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
     <h2>1 · Datos del triángulo</h2>
     <p style="font-size:.85rem; color:var(--ink-soft); margin-bottom:8px;">
       Convención: cada lado lleva la letra minúscula del vértice <b>opuesto</b> (el lado <b>a</b> se opone al ángulo <b>A</b>).
-      El esquema muestra el <b>caso elegido</b>: en <b style="color:var(--green);">rojo</b> los datos, en negro punteado las incógnitas.
+      El esquema muestra el <b>caso elegido</b>: en <b style="color:var(--marca);">rojo</b> los datos, en negro punteado las incógnitas.
     </p>
     <div class="plano-box" style="max-width:420px; margin-bottom:12px;" id="tri-esquema"><svg viewBox="0 0 420 240" xmlns="http://www.w3.org/2000/svg"><polygon points="210,38 55,205 365,205" fill="rgba(226,6,19,0.06)" stroke="none"></polygon><line x1="55" y1="205" x2="365" y2="205" stroke="#1A1A1A" stroke-width="2" stroke-dasharray="6,4"></line><line x1="210" y1="38" x2="365" y2="205" stroke="#1A1A1A" stroke-width="2" stroke-dasharray="6,4"></line><line x1="210" y1="38" x2="55" y2="205" stroke="#E20613" stroke-width="2.5"></line><path d="M 187 63 A 34 34 0 0 1 234 64" fill="none" stroke="#E20613" stroke-width="1.6"></path><path d="M 88 205 A 34 34 0 0 0 78 180" fill="none" stroke="#E20613" stroke-width="1.6"></path><path d="M 332 205 A 34 34 0 0 1 340 178" fill="none" stroke="#1A1A1A" stroke-width="1.5" stroke-dasharray="4,3"></path><circle cx="210" cy="38" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="55" cy="205" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><circle cx="365" cy="205" r="4" fill="#fff" stroke="#1A1A1A" stroke-width="1.5"></circle><text x="210" y="26" font-family="Consolas,monospace" font-size="16" font-weight="bold" fill="#1A1A1A" text-anchor="middle">A</text><text x="44" y="222" font-family="Consolas,monospace" font-size="16" font-weight="bold" fill="#1A1A1A" text-anchor="middle">B</text><text x="376" y="222" font-family="Consolas,monospace" font-size="16" font-weight="bold" fill="#1A1A1A" text-anchor="middle">C</text><text x="210" y="226" font-family="Consolas,monospace" font-size="14" fill="#1A1A1A" text-anchor="middle">a (calc.)</text><text x="307" y="108" font-family="Consolas,monospace" font-size="14" fill="#1A1A1A" text-anchor="middle" transform="rotate(47 307 108)">b (calc.)</text><text x="114" y="108" font-family="Consolas,monospace" font-size="14" fill="#E20613" text-anchor="middle" transform="rotate(-47 114 108)">c (dato)</text><text x="210" y="90" font-family="Consolas,monospace" font-size="13" fill="#E20613" text-anchor="middle">áng. A (dato)</text><text x="97" y="183" font-family="Consolas,monospace" font-size="13" fill="#E20613">áng. B (dato)</text><text x="325" y="183" font-family="Consolas,monospace" font-size="13" fill="#1A1A1A" text-anchor="end">áng. C (calc.)</text></svg></div>
     <div class="row">
@@ -639,7 +639,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 3.3 · Última actualización: 19/08/2026 20:37 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 3.4 · Última actualización: 19/08/2026 21:26 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -1764,6 +1764,34 @@ function haStr(w){
   return he + "Ha " + ar + "A " + fmt(ce, 2) + "Ca";
 }
 function validGms(g, m, s){ return isFinite(g) && isFinite(m) && isFinite(s) && g >= 0 && g <= 360 && m >= 0 && m < 60 && s >= 0 && s < 60; }
+
+/* ---------- ¿el polígono es simple? (ningún par de lados no contiguos se cruza) ----------
+   Un polígono con lados cruzados no encierra una superficie única: la fórmula de Gauss
+   devuelve la suma algebraica de las dos hojas, que no es la superficie de la parcela.
+   Suele pasar cuando los vértices se cargan fuera de orden. */
+function segsCruzan(ax, ay, bx, by, cx, cy, dx, dy){
+  function orient(px, py, qx, qy, rx, ry){
+    var v = (qy - py) * (rx - qx) - (qx - px) * (ry - qy);
+    if(Math.abs(v) < 1e-12) return 0;
+    return v > 0 ? 1 : 2;
+  }
+  var o1 = orient(ax,ay,bx,by,cx,cy), o2 = orient(ax,ay,bx,by,dx,dy);
+  var o3 = orient(cx,cy,dx,dy,ax,ay), o4 = orient(cx,cy,dx,dy,bx,by);
+  return (o1 !== o2 && o3 !== o4 && o1 !== 0 && o2 !== 0 && o3 !== 0 && o4 !== 0);
+}
+function poligonoSimple(X, Y){
+  var n = X.length, i, j;
+  if(n < 4) return true;
+  for(i = 0; i < n; i++){
+    for(j = i + 1; j < n; j++){
+      if(j === i + 1) continue;                 /* lados contiguos */
+      if(i === 0 && j === n - 1) continue;      /* el último cierra contra el primero */
+      if(segsCruzan(X[i], Y[i], X[(i+1)%n], Y[(i+1)%n],
+                    X[j], Y[j], X[(j+1)%n], Y[(j+1)%n])) return false;
+    }
+  }
+  return true;
+}
 function shoelace(X, Y){
   var n = X.length, w = 0, i;
   for(i = 0; i < n - 1; i++) w += (X[i] - X[i+1]) * (Y[i] + Y[i+1]);
@@ -2373,7 +2401,7 @@ function plVerificar(){
     var box = $("pl-elegir-box"), c = "<div class='msg info' style='margin-bottom:6px;'>Marcá los vértices cuyos ángulos querés corregir; la diferencia de " + segStr(difSeg) + " se reparte en partes iguales entre ellos.</div><div style='margin:6px 0;'>";
     for(var i = 1; i <= PL.n; i++){
       c += "<label style='display:inline-flex; align-items:center; gap:5px; margin:3px 14px 3px 0; font-size:.92rem; color:var(--ink); cursor:pointer;'>" +
-           "<input type='checkbox' class='pl-chk' value='" + i + "' style='width:16px;height:16px;accent-color:var(--green);'> Vértice " + i + "</label>";
+           "<input type='checkbox' class='pl-chk' value='" + i + "' style='width:16px;height:16px;accent-color:var(--marca);'> Vértice " + i + "</label>";
     }
     c += "</div><div class='row no-print'><button class='primary' id='pl-aplicar-sel'>Aplicar a los seleccionados</button></div>";
     box.innerHTML = c;
@@ -2451,12 +2479,16 @@ function plMostrar(){
   var errR = D.error, tolR = D.tol;
   var dentro = errR < tolR;
 
+  /* compensada la poligonal, se muestran los azimuts ajustados: son los que corresponden
+     a las proyecciones y longitudes de la misma fila */
+  var Zver = (D.comp && D.Zaj) ? D.Zaj : D.Z;
   var h = "";
-  h += "<table><thead><tr><th>Lado</th><th>Long. (m)</th><th>Azimut</th><th>Rumbo</th><th>Δx</th><th>Δy</th></tr></thead><tbody>";
+  if(!poligonoSimple(X, Y)) h += "<div class='msg info'><b>Atención:</b> con estos datos los lados del polígono se cruzan. Revisá los ángulos y las longitudes: la superficie no corresponde a una parcela cerrada simple.</div>";
+  h += "<table><thead><tr><th>Lado</th><th>Long. (m)</th><th>" + ((D.comp && D.Zaj) ? "Azimut ajustado" : "Azimut") + "</th><th>Rumbo</th><th>Δx</th><th>Δy</th></tr></thead><tbody>";
   for(i = 0; i < n; i++){
-    var r = rumbo(D.Z[i]);
+    var r = rumbo(Zver[i]);
     h += "<tr><td class='lbl'>" + (i+1) + "–" + (i+2 > n ? 1 : i+2) + "</td>" +
-         "<td>" + fmt(D.L[i], 2) + "</td><td>" + gmsStr(D.Z[i]) + "</td>" +
+         "<td>" + fmt(D.L[i], 2) + "</td><td>" + gmsStr(Zver[i]) + "</td>" +
          "<td>" + gmsStr(r.r) + " " + r.c + "</td>" +
          "<td>" + fmt(D.x[i], 3) + "</td><td>" + fmt(D.y[i], 3) + "</td></tr>";
   }
@@ -2581,17 +2613,17 @@ function plMostrar(){
       "<div class='row'>" +
       "<div><label>Método de compensación lineal — teclas <b>1</b> / <b>2</b> / <b>3</b></label>" +
       "<label style='" + estRad + "'>" +
-      "<input type='radio' name='pl-met' id='pl-met1' style='accent-color:var(--green);'> 1 · Crandall (mínimos cuadrados)</label>" +
+      "<input type='radio' name='pl-met' id='pl-met1' style='accent-color:var(--marca);'> 1 · Crandall (mínimos cuadrados)</label>" +
       "<label style='" + estRad + "'>" +
-      "<input type='radio' name='pl-met' id='pl-met2' style='accent-color:var(--green);'> 2 · Proporcional a los lados (regla de la brújula)</label>" +
+      "<input type='radio' name='pl-met' id='pl-met2' style='accent-color:var(--marca);'> 2 · Proporcional a los lados (regla de la brújula)</label>" +
       "<label style='" + estRad + "'>" +
-      "<input type='radio' name='pl-met' id='pl-met3' style='accent-color:var(--green);'> 3 · Proporcional con pesos por lado</label></div>" +
+      "<input type='radio' name='pl-met' id='pl-met3' style='accent-color:var(--marca);'> 3 · Proporcional con pesos por lado</label></div>" +
       "</div><div class='row'>" +
       "<div><label>Alcance de la compensación</label>" +
       "<label style='" + estRad + "'>" +
-      "<input type='radio' name='pl-alc' id='pl-alc-t' checked style='accent-color:var(--green);'> Total (todos los lados)</label>" +
+      "<input type='radio' name='pl-alc' id='pl-alc-t' checked style='accent-color:var(--marca);'> Total (todos los lados)</label>" +
       "<label style='" + estRad + "'>" +
-      "<input type='radio' name='pl-alc' id='pl-alc-p' style='accent-color:var(--green);'> Parcial (elegir los lados a compensar)</label></div>" +
+      "<input type='radio' name='pl-alc' id='pl-alc-p' style='accent-color:var(--marca);'> Parcial (elegir los lados a compensar)</label></div>" +
       "<button class='primary' id='pl-compensar'>Compensar</button>" +
       "<button class='ghost' id='pl-modif'>Modificar lados manualmente…</button>" +
       "</div><div id='pl-lados-box'></div></div>";
@@ -2668,7 +2700,7 @@ function plMostrar(){
       c += "<tr>";
       if(parcial){
         c += "<td><input type='checkbox' class='pl-lado-chk' value='" + i + "'" +
-             (prevC[String(i)] ? " checked" : "") + " style='width:16px;height:16px;accent-color:var(--green);'></td>";
+             (prevC[String(i)] ? " checked" : "") + " style='width:16px;height:16px;accent-color:var(--marca);'></td>";
       }
       c += "<td class='lbl'>" + (i+1) + "–" + (i+2 > n ? 1 : i+2) + "</td><td>" + fmt(D.L[i], 2) + "</td>";
       if(conPesos){
@@ -2807,6 +2839,12 @@ function plMostrar(){
     }
     /* lados compensados a partir de las proyecciones */
     for(i = 0; i < n; i++) D.L[i] = Math.sqrt(D.x[i]*D.x[i] + D.y[i]*D.y[i]);
+    /* azimuts ajustados: la regla de la brújula y el método con pesos corrigen Δx y Δy por
+       separado, así que la dirección de cada lado cambia y el azimut observado deja de
+       corresponder a las proyecciones compensadas. Crandall conserva la dirección y
+       devuelve el mismo valor. El azimut observado se conserva en D.Z. */
+    D.Zaj = [];
+    for(i = 0; i < n; i++) D.Zaj.push(norm360(Math.atan2(D.y[i], D.x[i]) * 180 / Math.PI));
     D.lt = D.L.reduce(function(a, b){ return a + b; }, 0);
     D.ex = 0; D.ey = 0;
     for(i = 0; i < n; i++){ D.ex += D.x[i]; D.ey += D.y[i]; }
@@ -2870,7 +2908,9 @@ $("co-calcular").addEventListener("click", function(){
     var l = Math.sqrt(Math.pow(X[j]-X[i],2) + Math.pow(Y[j]-Y[i],2));
     L.push(l); lt += l;
   }
-  var h = "<table><thead><tr><th>Lado</th><th>Longitud (m)</th></tr></thead><tbody>";
+  var h = "";
+  if(!poligonoSimple(X, Y)) h += "<div class='msg info'><b>Atención:</b> hay lados del polígono que se cruzan. La superficie que sigue es la suma algebraica de las dos hojas y no representa una parcela. Revisá el orden de los vértices.</div>";
+  h += "<table><thead><tr><th>Lado</th><th>Longitud (m)</th></tr></thead><tbody>";
   for(i = 0; i < CO.n; i++){
     h += "<tr><td class='lbl'>" + (i+1) + "–" + ((i+2) > CO.n ? 1 : i+2) + "</td><td>" + fmt(L[i], 2) + "</td></tr>";
   }
@@ -2938,6 +2978,7 @@ $("cu-calcular").addEventListener("click", function(){
   if(caso === "1"){
     if(!(a > 0 && c > 0 && d > 0)) return fallo("Cargá los lados a, c y d con valores mayores que cero.");
     if(A === null || B === null) return fallo("Los ángulos A y B no corresponden: g ≤ 360, m y s menores que 60.");
+    if(A <= 0 || A >= 180 || B <= 0 || B >= 180) return fallo("Los ángulos A y B deben estar entre 0° y 180°: el cálculo supone el cuadrilátero convexo.");
     esDato = { a:1, c:1, d:1, A:1, B:1 };
     var A1 = rad(A), A2 = rad(B);
     /* --- superficie y lado b: fórmulas del programa original (exactas) --- */
@@ -2952,6 +2993,8 @@ $("cu-calcular").addEventListener("click", function(){
     var v2x = De1 - Ce1, v2y = Dn1 - Cn1;           /* C→D */
     var Cc = acosd((v1x*v2x + v1y*v2y) / (a * b1));
     R = { a:a, b:b1, c:c, d:d, A:A, B:B, C:Cc, D:360 - (A + B + Cc), S:S1 };
+    /* control de existencia: con datos incompatibles el ángulo D sale negativo o llano */
+    if(!(R.D > 0 && R.D < 180)) return fallo("Con esos datos el ángulo D queda en " + gmsStr(R.D) + ", que no forma un cuadrilátero convexo. Revisá los lados y los ángulos A y B.");
   }
   else if(caso === "2" || caso === "3"){
     if(!(a > 0 && b > 0 && c > 0 && d > 0)) return fallo("Cargá los cuatro lados con valores mayores que cero.");
@@ -2979,7 +3022,8 @@ $("cu-calcular").addEventListener("click", function(){
   }
   else { /* caso 4: a, d + A, B, C */
     if(!(a > 0 && d > 0)) return fallo("Cargá los lados a y d con valores mayores que cero.");
-    if(A === null || B === null || C === null || A <= 0 || B <= 0 || C <= 0) return fallo("Cargá los ángulos A, B y C (g ≤ 360, m y s menores que 60).");
+    if(A === null || B === null || C === null) return fallo("Cargá los ángulos A, B y C (g ≤ 360, m y s menores que 60).");
+    if(A <= 0 || A >= 180 || B <= 0 || B >= 180 || C <= 0 || C >= 180) return fallo("Los ángulos A, B y C deben estar entre 0° y 180°: el cálculo supone el cuadrilátero convexo.");
     var Dq = 360 - A - B - C;
     if(Dq <= 0) return fallo("A + B + C = " + gmsStr(A + B + C) + " no deja lugar para el ángulo D (la suma debe ser menor que 360°).");
     esDato = { a:1, d:1, A:1, B:1, C:1 };
@@ -3302,7 +3346,7 @@ $("tri-calcular").addEventListener("click", function(){
     var per = S.a + S.b + S.c;
     var w = 0.5 * S.a * S.b * sind(S.C);
     if(sols.length === 2){
-      hh += "<h3 style='font-family:Poppins,sans-serif; color:var(--green); margin:14px 0 6px;'>Solución " + (k+1) + (k === 0 ? " (ángulo B agudo)" : " (ángulo B obtuso)") + "</h3>";
+      hh += "<h3 style='font-family:Poppins,sans-serif; color:var(--marca); margin:14px 0 6px;'>Solución " + (k+1) + (k === 0 ? " (ángulo B agudo)" : " (ángulo B obtuso)") + "</h3>";
     }
     hh += "<table><thead><tr><th>Lados</th><th></th><th>Ángulos</th><th></th></tr></thead><tbody>" +
       "<tr><td class='lbl'>lado a</td><td>" + fmt(S.a, 2) + "</td><td class='lbl'>áng. A</td><td>" + gmsStr(S.A) + "</td></tr>" +
