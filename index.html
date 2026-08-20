@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "3.4";
+var APP_VER = "3.5";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -337,6 +337,12 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 #aviso-version button.ghost:hover{background:#333333;}
 @media print{ #aviso-version{display:none !important;} }
 
+/* panel de pruebas automáticas (solo con ?pruebas=1) */
+.pruebas-caja{border:2px solid var(--marca); padding:16px 18px; margin-bottom:18px;}
+.pruebas-caja table{margin-top:6px;}
+.pruebas-caja td{font-size:.85rem;}
+.pruebas-caja tr.total td{font-weight:700; color:var(--marca); font-family:"Poppins","Segoe UI",sans-serif;}
+
 
 /* ============ Adaptación para celulares (iPhone y Android) ============ */
 @media (max-width: 700px){
@@ -459,7 +465,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
       <button class="ghost" id="pl-ejemplo">Cargar ejemplo</button>
       <button class="ghost" id="pl-nuevo">Nuevo cálculo (limpiar)</button>
     </div>
-    <div id="pl-tabla-box"><table><thead><tr><th>#</th><th>Lado (m)</th><th>Ángulo g</th><th>m</th><th>s</th></tr></thead><tbody><tr><td class="lbl">1</td><td><input type="text" inputmode="decimal" id="pl-l1"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g1"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m1"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s1"></td></tr><tr><td class="lbl">2</td><td><input type="text" inputmode="decimal" id="pl-l2"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g2"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m2"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s2"></td></tr><tr><td class="lbl">3</td><td><input type="text" inputmode="decimal" id="pl-l3"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g3"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m3"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s3"></td></tr><tr><td class="lbl">4</td><td><input type="text" inputmode="decimal" id="pl-l4"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g4"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m4"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s4"></td></tr><tr><td class="lbl">5</td><td><input type="text" inputmode="decimal" id="pl-l5"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g5"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m5"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s5"></td></tr><tr><td class="lbl">6</td><td><input type="text" inputmode="decimal" id="pl-l6"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g6"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m6"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s6"></td></tr><tr><td class="lbl">7</td><td><input type="text" inputmode="decimal" id="pl-l7"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g7"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m7"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s7"></td></tr><tr><td class="lbl">8</td><td><input type="text" inputmode="decimal" id="pl-l8"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g8"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m8"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s8"></td></tr><tr><td class="lbl">9</td><td><input type="text" inputmode="decimal" id="pl-l9"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g9"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m9"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s9"></td></tr><tr><td class="lbl">10</td><td><input type="text" inputmode="decimal" id="pl-l10"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g10"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m10"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s10"></td></tr></tbody></table><div class="row"><div><label style="font-weight:700; color:var(--ink);">k — Tolerancia Angular T = k·√n (en segundos)</label><input type="text" class="gms" id="pl-k" inputmode="decimal" value="20&#8243;" title="Valores habituales: 1&quot; a 10&quot; Trabajos o Redes Geodésicos (Alta Precisión) · 10&quot; a 20&quot; Mensuras Urbanas y Rurales · 30&quot; a 60&quot; Relevamientos Expeditivos"></div><button id="pl-verificar">Verificar cierre angular</button></div><p style="font-size:.78rem; color:var(--ink-soft); margin-top:2px;">k habituales: 1″ a 10″ Trabajos o Redes Geodésicos (Alta Precisión) · 10″ a 20″ Mensuras Urbanas y Rurales · 30″ a 60″ Relevamientos Expeditivos.</p></div>
+    <div id="pl-tabla-box"><table><thead><tr><th>#</th><th>Lado (m)</th><th>Ángulo g</th><th>m</th><th>s</th></tr></thead><tbody><tr><td class="lbl">1</td><td><input type="text" inputmode="decimal" id="pl-l1"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g1"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m1"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s1"></td></tr><tr><td class="lbl">2</td><td><input type="text" inputmode="decimal" id="pl-l2"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g2"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m2"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s2"></td></tr><tr><td class="lbl">3</td><td><input type="text" inputmode="decimal" id="pl-l3"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g3"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m3"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s3"></td></tr><tr><td class="lbl">4</td><td><input type="text" inputmode="decimal" id="pl-l4"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g4"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m4"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s4"></td></tr><tr><td class="lbl">5</td><td><input type="text" inputmode="decimal" id="pl-l5"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g5"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m5"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s5"></td></tr><tr><td class="lbl">6</td><td><input type="text" inputmode="decimal" id="pl-l6"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g6"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m6"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s6"></td></tr><tr><td class="lbl">7</td><td><input type="text" inputmode="decimal" id="pl-l7"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g7"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m7"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s7"></td></tr><tr><td class="lbl">8</td><td><input type="text" inputmode="decimal" id="pl-l8"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g8"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m8"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s8"></td></tr><tr><td class="lbl">9</td><td><input type="text" inputmode="decimal" id="pl-l9"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g9"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m9"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s9"></td></tr><tr><td class="lbl">10</td><td><input type="text" inputmode="decimal" id="pl-l10"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-g10"></td><td><input type="text" class="gms" inputmode="numeric" id="pl-m10"></td><td><input type="text" class="gms" inputmode="decimal" id="pl-s10"></td></tr></tbody></table><div class="row"><div><label style="font-weight:700; color:var(--ink);">k — Tolerancia Angular T = k·√n (en segundos)</label><input type="text" class="gms" id="pl-k" inputmode="decimal" value="20&#8243;" title="Art. 41: 30&quot; poligonaciones principales o de rodeo · 60&quot; secundarias internas · 1&quot; a 10&quot; trabajos o redes geodésicos"></div><button id="pl-verificar">Verificar cierre angular</button></div><p style="font-size:.78rem; color:var(--ink-soft); margin-top:2px;">k según el Art. 41 de las Instrucciones Generales para Agrimensores: 30″ para poligonaciones principales o de rodeo · 60″ para poligonaciones secundarias internas. Para trabajos o redes geodésicos de alta precisión se usan valores de 1″ a 10″. El programa arranca en 20″, más exigente que la norma.</p></div>
     <div id="pl-cierre-ang"></div>
   </div>
 
@@ -639,7 +645,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 3.4 · Última actualización: 19/08/2026 21:26 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 3.5 · Última actualización: 19/08/2026 21:58 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2278,9 +2284,9 @@ function plGenerar(){
   h += "</tbody></table>";
   h += "<div class='row'><div><label style='font-weight:700; color:var(--ink);'>k — Tolerancia Angular T = k·√n (en segundos)</label>" +
        "<input type='text' class='gms' id='pl-k' inputmode='decimal' value='20&#8243;' " +
-       "title='Valores habituales: 1&quot; a 10&quot; Trabajos o Redes Geodésicos (Alta Precisión) · 10&quot; a 20&quot; Mensuras Urbanas y Rurales · 30&quot; a 60&quot; Relevamientos Expeditivos'></div>" +
+       "title='Art. 41: 30&quot; poligonaciones principales o de rodeo · 60&quot; secundarias internas · 1&quot; a 10&quot; trabajos o redes geodésicos'></div>" +
        "<button id='pl-verificar'>Verificar cierre angular</button></div>" +
-       "<p style='font-size:.78rem; color:var(--ink-soft); margin-top:2px;'>k habituales: 1″ a 10″ Trabajos o Redes Geodésicos (Alta Precisión) · 10″ a 20″ Mensuras Urbanas y Rurales · 30″ a 60″ Relevamientos Expeditivos.</p>";
+       "<p style='font-size:.78rem; color:var(--ink-soft); margin-top:2px;'>k según el Art. 41 de las Instrucciones Generales para Agrimensores: 30″ para poligonaciones principales o de rodeo · 60″ para poligonaciones secundarias internas. Para trabajos o redes geodésicos de alta precisión se usan valores de 1″ a 10″. El programa arranca en 20″, más exigente que la norma.</p>";
   $("pl-tabla-box").innerHTML = h;
   $("pl-cierre-ang").innerHTML = "";
   $("pl-paso2").style.display = "none";
@@ -3682,6 +3688,258 @@ $("btn-imprimir").addEventListener("click", function(){
   sConfirm();
   window.print();   /* en el diálogo: elegir la impresora */
 });
+
+
+/* =====================================================================
+   PRUEBAS AUTOMÁTICAS — se abren agregando  ?pruebas=1  a la dirección
+   Verifican el núcleo de cálculo contra resultados conocidos de antemano.
+   El trabajo que esté cargado se guarda antes de empezar y se restaura al
+   terminar, así correr las pruebas nunca hace perder datos.
+===================================================================== */
+function correrPruebas(){
+  var casos = [];
+  function ver(grupo, nombre, obtenido, esperado, tol){
+    var t = (tol === undefined) ? 0 : tol, pasa;
+    if(typeof esperado === "number" && typeof obtenido === "number"){
+      pasa = isFinite(obtenido) && Math.abs(obtenido - esperado) <= t;
+    } else {
+      pasa = (String(obtenido) === String(esperado));
+    }
+    casos.push({ g:grupo, n:nombre, obt:obtenido, esp:esperado, ok:pasa });
+  }
+  function gms(d){ var g=Math.floor(d), m0=(d-g)*60, m=Math.floor(m0), s=(m0-m)*60; return [g,m,s]; }
+  function tab(re){
+    var b = [].slice.call(document.querySelectorAll("#tabs .tab"))
+             .filter(function(x){ return re.test(x.textContent); })[0];
+    if(b) b.click();
+  }
+  function sup(id){
+    var e = document.querySelector("#" + id + " .big-result");
+    if(!e) return null;
+    var m = e.textContent.match(/SUPERFICIE=\s*([\d.]+)m/);
+    return m ? parseFloat(m[1]) : null;
+  }
+
+  /* ---------- A · funciones de cálculo ---------- */
+  var A = "A · Funciones de cálculo";
+  ver(A, "shoelace: cuadrado de 100 m", shoelace([0,100,100,0],[0,0,100,100]), 10000, 1e-9);
+  ver(A, "shoelace: rectángulo 100 × 50", shoelace([0,100,100,0],[0,0,50,50]), 5000, 1e-9);
+  ver(A, "shoelace: no depende del sentido", shoelace([0,0,100,100],[0,50,50,0]), 5000, 1e-9);
+  ver(A, "heron3: triángulo 3-4-5", heron3(3,4,5), 6, 1e-9);
+  ver(A, "heron3: protege la raíz negativa", heron3(1,1,10), 0, 1e-9);
+  ver(A, "triOK: 3-4-5 forma triángulo", triOK(3,4,5), true);
+  ver(A, "triOK: 1-1-10 no forma triángulo", triOK(1,1,10), false);
+  ver(A, "norm360(-90)", norm360(-90), 270, 1e-9);
+  ver(A, "norm360(450)", norm360(450), 90, 1e-9);
+  ver(A, "gmsToDec(45° 30' 0\")", gmsToDec(45,30,0), 45.5, 1e-9);
+  ver(A, "validGms rechaza m = 60", validGms(10,60,0), false);
+  ver(A, "validGms rechaza s = 60", validGms(10,0,60), false);
+  ver(A, "haStr(9631.58)", haStr(9631.58), "0Ha 96A 31.58Ca");
+  ver(A, "haStr(1000000) = 100 Ha", haStr(1000000), "100Ha 0A 0.00Ca");
+  ver(A, "poligonoSimple: cuadrado", poligonoSimple([0,10,10,0],[0,0,10,10]), true);
+  ver(A, "poligonoSimple: lados cruzados", poligonoSimple([0,10,10,0],[0,10,0,10]), false);
+
+  /* ---------- B · tolerancias lineales del Art. 40 ---------- */
+  var B = "B · Tolerancias del Art. 40";
+  var norma = {
+    1: function(L){ return 0.015 * Math.sqrt(0.3*L + 0.0005*L*L); },
+    2: function(L){ return 0.020 * Math.sqrt(0.3*L + 0.0005*L*L); },
+    3: function(L){ return 0.010 * Math.sqrt(1.5*L + 0.003*L*L);  },
+    4: function(L){ return 0.015 * Math.sqrt(1.5*L + 0.003*L*L);  },
+    5: function(L){ return 0.010 * Math.sqrt(0.3*L + 0.0005*L*L); },
+    6: function(L){ return 0.030 * Math.sqrt(0.3*L + 0.0005*L*L); }
+  };
+  var nombresTol = ["", "principal o de rodeo urbana", "quintas y chacras / interna urbana",
+                    "rural condiciones normales", "rural condiciones difíciles",
+                    "frentes de manzana", "interior de manzana"];
+  [100, 500, 2000].forEach(function(L){
+    for(var k = 1; k <= 6; k++){
+      ver(B, nombresTol[k] + " (L = " + L + " m)", TOL[k](L), norma[k](L), 1e-12);
+    }
+  });
+
+  /* ---------- C · módulos, contra resultados conocidos ---------- */
+  var C = "C · Planilla (lados y ángulos)";
+  function planilla(L, ang, az, mensura){
+    tab(/Planilla/);
+    document.getElementById("pl-nuevo").click();
+    document.getElementById("pl-n").value = String(L.length);
+    document.getElementById("pl-generar").click();
+    for(var i = 0; i < L.length; i++){
+      document.getElementById("pl-l" + (i+1)).value = L[i];
+      var a = gms(ang[i]);
+      document.getElementById("pl-g" + (i+1)).value = a[0];
+      document.getElementById("pl-m" + (i+1)).value = a[1];
+      document.getElementById("pl-s" + (i+1)).value = a[2].toFixed(2);
+    }
+    if(mensura) document.getElementById("pl-mensura").value = String(mensura);
+    var z = gms(az);
+    document.getElementById("pl-az-g").value = z[0];
+    document.getElementById("pl-az-m").value = z[1];
+    document.getElementById("pl-az-s").value = z[2].toFixed(2);
+    document.getElementById("pl-calcular").click();
+    return sup("pl-res-body");
+  }
+  ver(C, "cuadrado de 100 m", planilla([100,100,100,100],[90,90,90,90],0,1), 10000, 0.01);
+  ver(C, "error de cierre nulo", PL.datos ? PL.datos.error : -1, 0, 1e-6);
+  ver(C, "rectángulo 100 × 50", planilla([100,50,100,50],[90,90,90,90],0,1), 5000, 0.01);
+  ver(C, "triángulo equilátero de 100 m", planilla([100,100,100],[60,60,60],0,1), 4330.13, 0.02);
+  var dec = [], angDec = [];
+  for(var q = 0; q < 10; q++){ dec.push(50); angDec.push(144); }
+  ver(C, "decágono regular de 50 m", planilla(dec, angDec, 0, 1), 19235.52, 0.02);
+  /* la superficie no cambia con el azimut de arranque */
+  var s0  = planilla([100,50,100,50],[90,90,90,90],0,1);
+  var s45 = planilla([100,50,100,50],[90,90,90,90],45,1);
+  var s200= planilla([100,50,100,50],[90,90,90,90],200,1);
+  ver(C, "azimut 0° y 45° dan la misma superficie", s45, s0, 0.01);
+  ver(C, "azimut 0° y 200° dan la misma superficie", s200, s0, 0.01);
+
+  /* compensación: los tres métodos deben cerrar el error */
+  var D = "D · Compensación";
+  function compensar(metodo){
+    tab(/Planilla/);
+    document.getElementById("pl-ejemplo").click();
+    document.getElementById("pl-az-g").value = 45;
+    document.getElementById("pl-az-m").value = 0;
+    document.getElementById("pl-az-s").value = 0;
+    document.getElementById("pl-calcular").click();
+    var antes = PL.datos.error;
+    document.getElementById(metodo).click();
+    document.getElementById("pl-compensar").click();
+    return { antes: antes, despues: PL.datos.error, datos: PL.datos };
+  }
+  var c1 = compensar("pl-met1");
+  ver(D, "Crandall: había error para compensar", c1.antes > 0.1, true);
+  ver(D, "Crandall: cierra el error", c1.despues, 0, 1e-6);
+  var c2 = compensar("pl-met2");
+  ver(D, "Regla de la brújula: cierra el error", c2.despues, 0, 1e-6);
+  var c3 = compensar("pl-met3");
+  ver(D, "Con pesos: cierra el error", c3.despues, 0, 1e-6);
+  /* el azimut ajustado tiene que corresponder a las proyecciones compensadas */
+  var maxDesvio = 0, dd = c2.datos;
+  for(var w = 0; w < dd.L.length; w++){
+    var real = norm360(Math.atan2(dd.y[w], dd.x[w]) * 180 / Math.PI);
+    maxDesvio = Math.max(maxDesvio, Math.abs(dd.Zaj[w] - real) * 3600);
+  }
+  ver(D, "azimut ajustado coherente (segundos)", maxDesvio, 0, 0.001);
+
+  /* ---------- E · Coordenadas ---------- */
+  var E = "E · Coordenadas";
+  function coords(X, Y){
+    tab(/Coordenadas/);
+    document.getElementById("co-n").value = String(X.length);
+    document.getElementById("co-generar").click();
+    for(var i = 0; i < X.length; i++){
+      document.getElementById("co-x" + (i+1)).value = X[i];
+      document.getElementById("co-y" + (i+1)).value = Y[i];
+    }
+    document.getElementById("co-calcular").click();
+    return sup("co-res-body");
+  }
+  ver(E, "cuadrado de 100 m", coords([0,100,100,0],[0,0,100,100]), 10000, 0.01);
+  ver(E, "lote urbano 8,66 × 30", coords([0,8.66,8.66,0],[0,0,30,30]), 259.80, 0.01);
+  ver(E, "parcela rural de 100 Ha", coords([0,1000,1000,0],[0,0,1000,1000]), 1000000, 0.01);
+  ver(E, "coordenadas Gauss-Krüger reales",
+      coords([6115234.12,6115284.12,6115284.12,6115234.12],
+             [5432187.45,5432187.45,5432217.45,5432217.45]), 1500, 0.01);
+  coords([0,10,10,0],[0,10,0,10]);
+  ver(E, "avisa si los lados se cruzan",
+      /se cruzan/.test(document.getElementById("co-res-body").textContent), true);
+
+  /* ---------- F · Cuadriláteros ---------- */
+  var F = "F · Cuadriláteros";
+  function cuadri(caso){
+    tab(/Cuadril/);
+    var s = document.getElementById("cu-caso");
+    s.value = caso; s.dispatchEvent(new Event("change"));
+    document.getElementById("cu-ejemplo").click();
+    document.getElementById("cu-calcular").click();
+    return sup("cu-res-body");
+  }
+  ver(F, "caso 1 — 3 lados y 2 ángulos", cuadri("1"), 5574.19, 0.01);
+  ver(F, "caso 2 — 4 lados y 1 ángulo",  cuadri("2"), 5605.63, 0.01);
+  ver(F, "caso 3 — 4 lados y diagonal",  cuadri("3"), 5572.73, 0.01);
+  ver(F, "caso 4 — 2 lados y 3 ángulos", cuadri("4"), 6113.59, 0.01);
+  /* rechazo de ángulos imposibles */
+  tab(/Cuadril/);
+  var sc = document.getElementById("cu-caso");
+  sc.value = "1"; sc.dispatchEvent(new Event("change"));
+  document.getElementById("cu-ejemplo").click();
+  document.getElementById("cu-ag").value = "360";
+  document.getElementById("cu-calcular").click();
+  ver(F, "rechaza un ángulo de 360°",
+      !!document.getElementById("cu-res-body").querySelector(".msg.bad"), true);
+
+  /* ---------- G · Triángulos ---------- */
+  var G = "G · Triángulos";
+  function tri(caso){
+    tab(/Tri/);
+    var s = document.getElementById("tri-caso");
+    s.value = caso; s.dispatchEvent(new Event("change"));
+    document.getElementById("tri-ejemplo").click();
+    document.getElementById("tri-calcular").click();
+    return sup("tri-res-body");
+  }
+  ver(G, "caso 1 — tres lados",            tri("1"), 2400, 0.01);
+  ver(G, "caso 2 — dos lados y el ángulo", tri("2"), 2400, 0.01);
+  ver(G, "caso 3 — un lado y dos ángulos", tri("3"), 2400, 0.01);
+  ver(G, "caso 4 — caso ambiguo",          tri("4"), 2400, 0.01);
+
+  return casos;
+}
+
+/* ---------- presentación de las pruebas ---------- */
+function mostrarPruebas(){
+  var estado = null;
+  try{ estado = recogerEstado(); }catch(e){}
+
+  var casos;
+  try{ casos = correrPruebas(); }
+  catch(e){
+    casos = [{ g:"ERROR", n:"la batería se interrumpió: " + e.message, obt:"-", esp:"-", ok:false }];
+  }
+
+  /* devolver el trabajo que había antes de correr las pruebas */
+  try{ if(estado) aplicarEstado(estado); }catch(e){}
+
+  var bien = 0, mal = 0, i;
+  for(i = 0; i < casos.length; i++){ if(casos[i].ok) bien++; else mal++; }
+
+  var h = "<div class='pruebas-caja'>";
+  h += "<h2 style='border:none;'>Pruebas automáticas</h2>";
+  h += "<p style='font-size:.9rem; color:var(--ink-soft); margin-bottom:10px;'>" +
+       "Verifican el núcleo de cálculo contra resultados conocidos de antemano. " +
+       "El trabajo que estaba cargado se restauró al terminar.</p>";
+  h += "<div class='msg " + (mal === 0 ? "good" : "bad") + "'><b>" + bien + " de " + (bien + mal) +
+       "</b> pruebas pasaron" + (mal === 0 ? ". Todo en orden." : " — <b>" + mal + " fallaron</b>.") + "</div>";
+
+  var grupo = "";
+  h += "<table><thead><tr><th>Prueba</th><th>Obtenido</th><th>Esperado</th><th></th></tr></thead><tbody>";
+  for(i = 0; i < casos.length; i++){
+    var c = casos[i];
+    if(c.g !== grupo){
+      grupo = c.g;
+      h += "<tr class='total'><td colspan='4' style='padding-top:10px;'>" + grupo + "</td></tr>";
+    }
+    var o = (typeof c.obt === "number") ? (Math.round(c.obt * 100000) / 100000) : c.obt;
+    var p = (typeof c.esp === "number") ? (Math.round(c.esp * 100000) / 100000) : c.esp;
+    h += "<tr><td class='lbl'>" + c.n + "</td><td>" + o + "</td><td>" + p + "</td>" +
+         "<td>" + (c.ok ? "<span class='badge ok'>OK</span>" : "<span class='badge no'>FALLA</span>") + "</td></tr>";
+  }
+  h += "</tbody></table>";
+  h += "<p style='font-size:.8rem; color:var(--ink-soft); margin-top:12px;'>" +
+       "Para volver al programa, sacá <b>?pruebas=1</b> de la dirección.</p></div>";
+
+  var cont = document.createElement("div");
+  cont.id = "pruebas-panel";
+  cont.innerHTML = h;
+  document.querySelector("main").insertBefore(cont, document.querySelector("main").firstChild);
+  cont.scrollIntoView();
+}
+
+if(location.search.indexOf("pruebas=1") >= 0){
+  addEventListener("load", function(){ setTimeout(mostrarPruebas, 300); });
+}
 
 /* ============ arranque ============ */
 triCampos();
