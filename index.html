@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "3.12";
+var APP_VER = "3.13";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -639,7 +639,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 3.12 · Última actualización: 21/08/2026 15:20 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 3.13 · Última actualización: 21/08/2026 17:31 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -1733,8 +1733,15 @@ document.getElementById("btn-sonido").addEventListener("click", function(){
 ===================================================================== */
 function $(id){ return document.getElementById(id); }
 function num(v){
-  var s = String(v == null ? "" : v).trim().replace(",", ".");
+  var s = String(v == null ? "" : v).trim();
   if(s === "") return NaN;
+  var comas  = (s.match(/,/g)    || []).length;
+  var puntos = (s.match(/\./g)   || []).length;
+  /* "1.234,56": los puntos son de mil y la coma es el decimal */
+  if(comas === 1 && puntos >= 1) s = s.replace(/\./g, "").replace(",", ".");
+  else if(comas === 1)           s = s.replace(",", ".");
+  /* "1,2,3" o "1.234.567" no se pueden leer sin adivinar: mejor marcarlo mal */
+  else if(comas > 1 || puntos > 1) return NaN;
   return parseFloat(s);
 }
 function fmt(v, d){ if(!isFinite(v)) return "—"; return v.toFixed(d === undefined ? 2 : d); }
@@ -3735,6 +3742,12 @@ function correrPruebas(){
   ver(A, "haStr(1000000) = 100 Ha", haStr(1000000), "100Ha 0A 0.00Ca");
   ver(A, "poligonoSimple: cuadrado", poligonoSimple([0,10,10,0],[0,0,10,10]), true);
   ver(A, "poligonoSimple: lados cruzados", poligonoSimple([0,10,10,0],[0,10,0,10]), false);
+  ver(A, "num: coma decimal", num("12,45"), 12.45, 1e-9);
+  ver(A, "num: punto decimal", num("12.45"), 12.45, 1e-9);
+  ver(A, "num: punto de mil con coma decimal", num("1.234,56"), 1234.56, 1e-9);
+  ver(A, "num: rechaza 1.234.567 por ambiguo", isFinite(num("1.234.567")), false);
+  ver(A, "num: rechaza dos comas", isFinite(num("1,2,3")), false);
+  ver(A, "num: tolera la marca de segundos", num("20″"), 20, 1e-9);
 
   /* ---------- B · tolerancias lineales del Art. 40 ---------- */
   var B = "B · Tolerancias del Art. 40";
