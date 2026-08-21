@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "3.6";
+var APP_VER = "3.7";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -646,7 +646,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 3.6 · Última actualización: 21/08/2026 12:45 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 3.7 · Última actualización: 21/08/2026 13:05 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2685,8 +2685,9 @@ function plMostrar(){
   var alcP = $("pl-alc-p"), alcT = $("pl-alc-t");
   function pintaLados(){
     var box = $("pl-lados-box");
-    var m3 = $("pl-met3");
+    var m3 = $("pl-met3"), m1 = $("pl-met1");
     var conPesos = m3 && m3.checked;
+    var esCrandall = m1 && m1.checked;
     var parcial = alcP.checked;
     /* conservar lo que ya estaba marcado o cargado antes de redibujar */
     var prevP = {}, prevC = {}, i2;
@@ -2699,7 +2700,9 @@ function plMostrar(){
 
     if(!conPesos && !parcial){ box.innerHTML = ""; return; }
     var c = "";
-    if(parcial) c += "<div class='msg info' style='margin:4px 0 6px;'>Compensación parcial: marcá los lados que van a absorber el error (los demás quedan fijos).<br>Sin embargo, si el polígono es perfectamente cerrado (error = 0), la llamada a compensar es innecesaria: seguir un paso adelante.</div>";
+    if(parcial) c += "<div class='msg info' style='margin:4px 0 6px;'>Compensación parcial: marcá los lados que van a absorber el error (los demás quedan fijos)." +
+         (esCrandall ? " Se sugieren <b>dos lados como mínimo</b> para compensar los dos errores (ex y ey): con un solo lado el Método de Crandall no tiene solución y no se garantiza el cierre." : "") +
+         "<br>Sin embargo, si el polígono es perfectamente cerrado (error = 0), la llamada a compensar es innecesaria: seguir un paso adelante.</div>";
     if(conPesos) c += "<div class='msg info' style='margin:4px 0 6px;'>Pesos: 1 = confianza normal. A <b>mayor</b> peso (medición más confiable), <b>menos</b> corrección recibe ese lado; a menor peso, más corrección absorbe.</div>";
     c += "<table><thead><tr>" + (parcial ? "<th>Comp.</th>" : "") +
          "<th>Lado</th><th>Longitud (m)</th>" + (conPesos ? "<th>Peso</th>" : "") + "</tr></thead><tbody>";
