@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "4.5";
+var APP_VER = "4.6";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -486,7 +486,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
     </div>
     <div class="row">
       <div>
-        <label for="pl-mensura" style="font-weight:700; color:var(--ink);">Tolerancia Lineal Según Tipo de Mensura a Realizar: <span style="font-weight:400; color:var(--ink-soft);">Art. 40 — Instrucciones Generales para Agrimensores y Dirección de Geodesia y Catastro, Prov. de Buenos Aires.</span></label>
+        <label for="pl-mensura" style="font-weight:700; color:var(--ink);">Tolerancia Lineal Según Tipo de Mensura a Realizar: <span style="font-weight:400; color:var(--ink-soft);">Art. 40 — Instrucciones Generales para Agrimensores e Instrucciones de la Dirección de Geodesia y Catastro, Prov. de Buenos Aires.</span></label>
         <select id="pl-mensura" style="font-family:inherit; font-size:.95rem; padding:7px; border:1px solid var(--line); border-radius:12px;">
           <option value="1">1 · Mensuras urbanas</option>
           <option value="2">2 · Mensuras suburbanas (quintas y chacras)</option>
@@ -639,7 +639,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 4.5 · Última actualización: 22/08/2026 09:11 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 4.6 · Última actualización: 22/08/2026 09:21 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2287,7 +2287,7 @@ function plGenerar(){
        "<input type='text' class='gms' id='pl-k' inputmode='decimal' value='20&#8243;' " +
        "title='Art. 41: 30&quot; poligonales principales o de rodeo · 60&quot; secundarias internas · 1&quot; a 10&quot; trabajos o redes geodésicos'></div>" +
        "<button id='pl-verificar'>Verificar cierre angular</button></div>" +
-       "<p style='font-size:.78rem; color:var(--ink-soft); margin-top:2px;'>k según el Art. 41 de las Instrucciones Generales para Agrimensores y Dirección de Geodesia y Catastro, Prov. de Buenos Aires: 30″ para poligonales principales o de rodeo · 60″ para poligonales secundarias internas. Para trabajos o redes geodésicos de alta precisión se usan valores de 1″ a 10″. El programa arranca en 20″ (Mensuras Urbanas o Rurales), más exigente que la norma, o se lo puede modificar.</p>";
+       "<p style='font-size:.78rem; color:var(--ink-soft); margin-top:2px;'>k según el Art. 41 de las Instrucciones Generales para Agrimensores e Instrucciones de la Dirección de Geodesia y Catastro, Prov. de Buenos Aires: 30″ para poligonales principales o de rodeo · 60″ para poligonales secundarias internas. Para trabajos o redes geodésicos de alta precisión se usan valores de 1″ a 10″. El programa arranca en 20″ (Mensuras Urbanas o Rurales), más exigente que la norma, o se lo puede modificar.</p>";
   $("pl-tabla-box").innerHTML = h;
   $("pl-cierre-ang").innerHTML = "";
   $("pl-paso2").style.display = "none";
