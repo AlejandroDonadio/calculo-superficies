@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "4.2";
+var APP_VER = "4.3";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -639,7 +639,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 4.2 · Última actualización: 21/08/2026 21:17 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 4.3 · Última actualización: 21/08/2026 21:20 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2352,8 +2352,8 @@ function plVerificar(){
          "<button id='pl-rep-todos'>Repartir entre todos los ángulos</button>" +
          "<button id='pl-rep-elegir'>Elegir ángulos a compensar…</button>" +
          "<button id='pl-rep-corto' style='line-height:1.3; text-align:left;'>" +
-           "<span style='display:block; font-size:.72rem; font-weight:500; opacity:.75;'>Corrección manual asistida</span>" +
-           "<span style='display:block;'>Compensar el lado más corto</span></button>" +
+           "<span style='display:block; font-size:.9rem; font-weight:700;'>Corrección manual asistida</span>" +
+           "<span style='display:block; font-size:.7rem; font-weight:500; opacity:.8;'>Compensar el lado más corto</span></button>" +
          "</div><div id='pl-elegir-box'></div>";
     sError();
   }
