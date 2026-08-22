@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "4.0";
+var APP_VER = "4.1";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -639,7 +639,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 4.0 · Última actualización: 21/08/2026 17:46 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 4.1 · Última actualización: 21/08/2026 21:12 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2345,9 +2345,9 @@ function plVerificar(){
   } else {
     h += "<div class='msg " + (dentroAng ? "info" : "bad") + "'>Error de cierre angular: " + segStr(difSeg) +
          " &nbsp;" + (dentroAng ?
-           "<span class='badge ok'>DENTRO de tolerancia</span> — podés compensarlo con alguna de estas opciones:" :
-           "<span class='badge no'>EXCEDE la tolerancia</span> — supera T = " + gmsStr(Tang / 3600) +
-           ": conviene revisar los ángulos medidos en campo antes de compensar.") + "</div>" +
+           "<span class='badge ok'>DENTRO de tolerancia</span><br><span style='font-size:.82rem;'>podés compensarlo con alguna de estas opciones:</span>" :
+           "<span class='badge no'>EXCEDE la tolerancia</span><br><span style='font-size:.82rem;'>supera T = " + gmsStr(Tang / 3600) +
+           ": conviene revisar los ángulos medidos en campo antes de compensar.</span>") + "</div>" +
          "<div class='row no-print'>" +
          "<button id='pl-rep-todos'>Repartir entre todos los ángulos</button>" +
          "<button id='pl-rep-elegir'>Elegir ángulos a compensar…</button>" +
