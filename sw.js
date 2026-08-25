@@ -1,7 +1,7 @@
 /* Service worker: la app funciona sin conexión después de la primera visita.
    Estrategia red-primero: si hay internet se sirve la última versión publicada
    y se actualiza la copia local; sin internet se usa la copia guardada. */
-var CACHE = 'calc-superficies-v20';
+var CACHE = 'calc-superficies-v21';
 var ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-180.png', './logo.svg'];
 
 self.addEventListener('install', function (e) {
