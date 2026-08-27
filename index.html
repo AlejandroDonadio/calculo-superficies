@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "5.0";
+var APP_VER = "5.1";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -642,7 +642,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 5.0 · Última actualización: 27/08/2026 09:49 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 5.1 · Última actualización: 27/08/2026 10:10 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2630,14 +2630,15 @@ function plMostrar(){
       "<div class='sub'>Según qué medición merece más confianza:</div>" +
       "<ul>" +
       "<li><b>1 · Método de Crandall</b> — supone los <b>ángulos más precisos que las distancias</b>: el error " +
-      "de cierre se descarga sobre los lados y los ángulos quedan como se midieron. " +
-      "Caso clásico: teodolito y cinta.</li>" +
+      "de cierre se descarga sobre los lados. Caso clásico: teodolito y cinta. " +
+      "<b>Corrige solo las longitudes: los ángulos quedan como se midieron.</b></li>" +
       "<li><b>2 · Proporcional a los lados</b> — supone <b>ángulos y distancias de precisión pareja</b>: " +
       "cada lado absorbe una parte del error proporcional a su longitud. " +
-      "Es la regla de uso general, habitual con estación total. Se compensan las longitudes y los ángulos.</li>" +
+      "Es la regla de uso general, habitual con estación total. " +
+      "<b>Corrige las longitudes y también los ángulos.</b></li>" +
       "<li><b>3 · Con pesos por lado</b> — cuando <b>algunos lados se midieron en peores condiciones</b> " +
       "que otros (vegetación, tramos quebrados, medición indirecta). A mayor peso, menos corrección " +
-      "recibe ese lado.</li>" +
+      "recibe ese lado. <b>Corrige las longitudes y también los ángulos.</b></li>" +
       "<li><b>Mediciones con GNSS/GPS</b> — no corresponde ninguno de los tres: no hay error de cierre " +
       "que repartir, porque cada vértice se determina de forma independiente. Usar el módulo " +
       "<b>Coordenadas</b>. Si la poligonal es <b>mixta</b> (algunos vértices por GNSS y otros con " +
