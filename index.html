@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "4.7";
+var APP_VER = "4.8";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -450,7 +450,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
       <button class="metodo-btn" id="ini-planilla"><span class="num">1</span>Por planilla de cálculo<small>lados y ángulos</small></button>
       <button class="metodo-btn" id="ini-coords"><span class="num">2</span>Por coordenadas<small>X e Y de los vértices</small></button>
       <button class="metodo-btn" id="ini-cuadri"><span class="num">3</span>Cuadriláteros<small>dos lados, dos ángulos y la base</small></button>
-      <button class="metodo-btn" id="ini-tri"><span class="num">4</span>Triángulos<small>siete casos según los datos</small></button>
+      <button class="metodo-btn" id="ini-tri"><span class="num">4</span>Triángulos<small>seis casos según los datos</small></button>
     </div>
   </div>
 </section>
@@ -595,11 +595,10 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
         <select id="tri-caso" style="font-family:inherit; font-size:.95rem; padding:7px; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink);">
           <option value="1">1 – Tres lados (a, b, c) según Fórmula de Herón</option>
           <option value="2">2 – Dos lados y el ángulo comprendido (a, b y áng. C)</option>
-          <option value="3">3 – Dos ángulos y el lado comprendido (áng. A, áng. B y lado c)</option>
+          <option value="3">3 – Dos lados y el ángulo opuesto al otro (a, b y áng. B) — caso ambiguo</option>
           <option value="4">4 – Dos lados y el ángulo opuesto a uno (a, b y áng. A) — caso ambiguo</option>
-          <option value="5">5 – Dos lados y el ángulo opuesto al otro (a, b y áng. B) — caso ambiguo</option>
-          <option value="6">6 – Dos ángulos y el lado opuesto a uno (áng. A, áng. B y lado a)</option>
-          <option value="7">7 – Dos ángulos y el lado opuesto al otro (áng. A, áng. B y lado b)</option>
+          <option value="5">5 – Dos ángulos y el lado adyacente a ellos (áng. A, áng. B y lado c)</option>
+          <option value="6">6 – Dos ángulos y el lado opuesto a uno de ellos (áng. A, áng. B y lado b)</option>
         </select>
       </div>
     </div>
@@ -642,7 +641,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 4.7 · Última actualización: 25/08/2026 17:32 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 4.8 · Última actualización: 27/08/2026 09:10 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -1769,8 +1768,11 @@ function segStr(seg){ /* segundos enteros -> g°m's" con signo */
 function haStr(w){
   var he = Math.floor(w / 10000);
   var ar = Math.floor(w / 100) - he * 100;
-  var ce = w - he * 10000 - ar * 100;
-  ce = Math.round(ce * 100) / 100;
+  var ce = Math.round((w - he * 10000 - ar * 100) * 100) / 100;
+  /* Si al redondear las centiáreas llegan a 100, hay que llevarlas: sin esto una
+     superficie de 2399.999 m² se mostraba como "0Ha 23A 100.00Ca". */
+  if(ce >= 100){ ce -= 100; ar += 1; }
+  if(ar >= 100){ ar -= 100; he += 1; }
   return he + "Ha " + ar + "A " + fmt(ce, 2) + "Ca";
 }
 function validGms(g, m, s){ return isFinite(g) && isFinite(m) && isFinite(s) && g >= 0 && g <= 360 && m >= 0 && m < 60 && s >= 0 && s < 60; }
@@ -3203,11 +3205,10 @@ function esqLetra(x, y, t){ return '<text x="' + x + '" y="' + y + '" font-famil
 var TRI_ESQ = {
   "1": { a:1, b:1, c:1, A:0, B:0, C:0 },
   "2": { a:1, b:1, c:0, A:0, B:0, C:1 },
-  "3": { a:0, b:0, c:1, A:1, B:1, C:0 },
+  "3": { a:1, b:1, c:0, A:0, B:1, C:0 },
   "4": { a:1, b:1, c:0, A:1, B:0, C:0 },
-  "5": { a:1, b:1, c:0, A:0, B:1, C:0 },
-  "6": { a:1, b:0, c:0, A:1, B:1, C:0 },
-  "7": { a:0, b:1, c:0, A:1, B:1, C:0 }
+  "5": { a:0, b:0, c:1, A:1, B:1, C:0 },
+  "6": { a:0, b:1, c:0, A:1, B:1, C:0 }
 };
 function triEsquema(){
   var v = TRI_ESQ[$("tri-caso").value];
@@ -3272,7 +3273,7 @@ function cuEsquema(){
 }
 
 /* =====================================================================
-   MÓDULO 4 — TRIÁNGULOS (los siete casos resolubles según los datos disponibles)
+   MÓDULO 4 — TRIÁNGULOS (seis casos según los datos disponibles)
 ===================================================================== */
 function sind(d){ return Math.sin(rad(d)); }
 function cosd(d){ return Math.cos(rad(d)); }
@@ -3283,11 +3284,10 @@ function triCampos(){
   var vis = {
     "1": { a:1, b:1, c:1, A:0, B:0, C:0 },
     "2": { a:1, b:1, c:0, A:0, B:0, C:1 },
-    "3": { a:0, b:0, c:1, A:1, B:1, C:0 },
+    "3": { a:1, b:1, c:0, A:0, B:1, C:0 },
     "4": { a:1, b:1, c:0, A:1, B:0, C:0 },
-    "5": { a:1, b:1, c:0, A:0, B:1, C:0 },
-    "6": { a:1, b:0, c:0, A:1, B:1, C:0 },
-    "7": { a:0, b:1, c:0, A:1, B:1, C:0 }
+    "5": { a:0, b:0, c:1, A:1, B:1, C:0 },
+    "6": { a:0, b:1, c:0, A:1, B:1, C:0 }
   }[$("tri-caso").value];
   ["a","b","c"].forEach(function(k){ $("tri-f-" + k).style.display = vis[k] ? "" : "none"; });
   ["A","B","C"].forEach(function(k){ $("tri-f-" + k).style.display = vis[k] ? "flex" : "none"; });
@@ -3327,7 +3327,7 @@ $("tri-calcular").addEventListener("click", function(){
       var A2 = acosd((b*b + c2*c2 - a*a) / (2*b*c2));
       sols.push({ a:a, b:b, c:c2, A:A2, B:180 - A2 - C, C:C });
     }
-  } else if(caso === "3"){
+  } else if(caso === "5"){ /* áng. A, áng. B y el lado c, adyacente a los dos */
     if(!(c > 0)) err = "Cargá el lado c con un valor mayor que cero.";
     else if(A === null || B === null || A <= 0 || B <= 0) err = "Cargá los ángulos A y B (g ≤ 360, m y s menores que 60).";
     else if(A + B >= 180) err = "A + B debe ser menor que 180° para que exista el triángulo.";
@@ -3353,7 +3353,7 @@ $("tri-calcular").addEventListener("click", function(){
         if(sols.length === 0) err = "Con esos datos el triángulo no cierra (A + B llega a 180° o más).";
       }
     }
-  } else if(caso === "5"){ /* a, b y el ángulo B, opuesto al lado b: el espejo del caso 4 */
+  } else if(caso === "3"){ /* a, b y el ángulo B, opuesto al lado b: el espejo del caso 4 */
     if(!(a > 0 && b > 0)) err = "Cargá los lados a y b con valores mayores que cero.";
     else if(B === null || B <= 0 || B >= 180) err = "El ángulo B debe estar entre 0° y 180° (m y s menores que 60).";
     else {
@@ -3371,21 +3371,13 @@ $("tri-calcular").addEventListener("click", function(){
         if(sols.length === 0) err = "Con esos datos el triángulo no cierra (A + B llega a 180° o más).";
       }
     }
-  } else if(caso === "6"){ /* áng. A, áng. B y el lado a, opuesto a A */
-    if(!(a > 0)) err = "Cargá el lado a con un valor mayor que cero.";
-    else if(A === null || B === null || A <= 0 || B <= 0) err = "Cargá los ángulos A y B (g ≤ 360, m y s menores que 60).";
-    else if(A + B >= 180) err = "A + B debe ser menor que 180° para que exista el triángulo.";
-    else {
-      var C6 = 180 - A - B;
-      sols.push({ a:a, b: a * sind(B) / sind(A), c: a * sind(C6) / sind(A), A:A, B:B, C:C6 });
-    }
-  } else { /* caso 7: áng. A, áng. B y el lado b, opuesto a B */
+  } else { /* caso 6: áng. A, áng. B y el lado b, opuesto a B */
     if(!(b > 0)) err = "Cargá el lado b con un valor mayor que cero.";
     else if(A === null || B === null || A <= 0 || B <= 0) err = "Cargá los ángulos A y B (g ≤ 360, m y s menores que 60).";
     else if(A + B >= 180) err = "A + B debe ser menor que 180° para que exista el triángulo.";
     else {
-      var C7 = 180 - A - B;
-      sols.push({ a: b * sind(A) / sind(B), b:b, c: b * sind(C7) / sind(B), A:A, B:B, C:C7 });
+      var C6 = 180 - A - B;
+      sols.push({ a: b * sind(A) / sind(B), b:b, c: b * sind(C6) / sind(B), A:A, B:B, C:C6 });
     }
   }
 
@@ -3437,10 +3429,9 @@ $("tri-ejemplo").addEventListener("click", function(){
   function ang(k){ $("tri-" + k + "g").value = ej[k][0]; $("tri-" + k + "m").value = ej[k][1]; $("tri-" + k + "s").value = ej[k][2]; }
   if(caso === "1"){ lado("a"); lado("b"); lado("c"); }
   else if(caso === "2"){ lado("a"); lado("b"); ang("C"); }
-  else if(caso === "3"){ ang("A"); ang("B"); lado("c"); }
+  else if(caso === "3"){ lado("a"); lado("b"); ang("B"); }
   else if(caso === "4"){ lado("a"); lado("b"); ang("A"); }
-  else if(caso === "5"){ lado("a"); lado("b"); ang("B"); }
-  else if(caso === "6"){ ang("A"); ang("B"); lado("a"); }
+  else if(caso === "5"){ ang("A"); ang("B"); lado("c"); }
   else            { ang("A"); ang("B"); lado("b"); }
   triCampos();
   sConfirm();
@@ -3461,7 +3452,7 @@ function recogerEstado(){
     var campos = {}, ins = document.querySelectorAll("input[type=text][id]"), i;
     for(i = 0; i < ins.length; i++) campos[ins[i].id] = ins[i].value;
     var st = {
-      v: 1,
+      v: 2,
       activo: activo, tema: temaOscuro, mudo: muted,
       mods: [$("mod-planilla").checked, $("mod-coords").checked, $("mod-cuadri").checked, $("mod-tri").checked],
       mensura: $("pl-mensura").value,
@@ -3523,7 +3514,14 @@ function aplicarEstado(st){
       plNormalizarK();   /* limpia un k guardado con la marca de segundos */
     }
     if(st.mensura) $("pl-mensura").value = st.mensura;
-    if(st.tricaso) $("tri-caso").value = st.tricaso;
+    if(st.tricaso){
+      /* Hasta la v1 del estado, los casos de triángulo estaban numerados de otra
+         manera. Se traducen para que un trabajo viejo abra en el caso correcto. */
+      var trad = { "3":"5", "5":"3", "6":"6", "7":"6" };
+      if((st.v || 1) < 2 && trad[st.tricaso]) st.tricaso = trad[st.tricaso];
+      $("tri-caso").value = st.tricaso;
+    }
+
     triCampos();
     if(st.cucaso) $("cu-caso").value = st.cucaso;
     cuCampos();
@@ -3804,6 +3802,8 @@ function correrPruebas(){
   ver(A, "validGms rechaza s = 60", validGms(10,0,60), false);
   ver(A, "haStr(9631.58)", haStr(9631.58), "0Ha 96A 31.58Ca");
   ver(A, "haStr(1000000) = 100 Ha", haStr(1000000), "100Ha 0A 0.00Ca");
+  ver(A, "haStr lleva las centiáreas que redondean a 100", haStr(2399.999), "0Ha 24A 0.00Ca");
+  ver(A, "haStr lleva también las áreas", haStr(9999.999), "1Ha 0A 0.00Ca");
   ver(A, "poligonoSimple: cuadrado", poligonoSimple([0,10,10,0],[0,0,10,10]), true);
   ver(A, "poligonoSimple: lados cruzados", poligonoSimple([0,10,10,0],[0,10,0,10]), false);
   ver(A, "num: coma decimal", num("12,45"), 12.45, 1e-9);
@@ -3954,14 +3954,13 @@ function correrPruebas(){
     document.getElementById("tri-calcular").click();
     return sup("tri-res-body");
   }
-  /* el mismo triángulo por los siete caminos: los siete tienen que dar 2400 m² */
-  ver(G, "caso 1 — tres lados",                            tri("1"), 2400, 0.01);
-  ver(G, "caso 2 — dos lados y el ángulo comprendido",     tri("2"), 2400, 0.01);
-  ver(G, "caso 3 — dos ángulos y el lado comprendido",     tri("3"), 2400, 0.01);
-  ver(G, "caso 4 — dos lados y el ángulo opuesto a uno",   tri("4"), 2400, 0.01);
-  ver(G, "caso 5 — dos lados y el ángulo opuesto al otro", tri("5"), 2400, 0.01);
-  ver(G, "caso 6 — dos ángulos y el lado opuesto a uno",   tri("6"), 2400, 0.01);
-  ver(G, "caso 7 — dos ángulos y el lado opuesto al otro", tri("7"), 2400, 0.01);
+  /* el mismo triángulo por los seis caminos: los seis tienen que dar 2400 m² */
+  ver(G, "caso 1 — tres lados",                              tri("1"), 2400, 0.01);
+  ver(G, "caso 2 — dos lados y el ángulo comprendido",       tri("2"), 2400, 0.01);
+  ver(G, "caso 3 — dos lados y el ángulo opuesto al otro",   tri("3"), 2400, 0.01);
+  ver(G, "caso 4 — dos lados y el ángulo opuesto a uno",     tri("4"), 2400, 0.01);
+  ver(G, "caso 5 — dos ángulos y el lado adyacente",         tri("5"), 2400, 0.01);
+  ver(G, "caso 6 — dos ángulos y el lado opuesto a uno",     tri("6"), 2400, 0.01);
   /* el caso 4 es ambiguo: con estos datos tiene que ofrecer los dos triángulos */
   tri("4");
   ver(G, "caso 4 — ofrece las dos soluciones",
@@ -3969,9 +3968,9 @@ function correrPruebas(){
   /* el botón de ejemplo no puede cambiar el caso que eligió el usuario */
   tab(/Tri/);
   var selTri = document.getElementById("tri-caso");
-  selTri.value = "6"; selTri.dispatchEvent(new Event("change"));
+  selTri.value = "5"; selTri.dispatchEvent(new Event("change"));
   document.getElementById("tri-ejemplo").click();
-  ver(G, "el ejemplo respeta el caso elegido", selTri.value, "6");
+  ver(G, "el ejemplo respeta el caso elegido", selTri.value, "5");
 
   return casos;
 }
