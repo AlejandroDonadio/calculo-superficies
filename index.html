@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "4.8";
+var APP_VER = "4.9";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -325,17 +325,17 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 @media print{ #trab-drawer{display:none !important;} }
 
 /* aviso de versión nueva encontrada mientras se está trabajando */
-#aviso-version{
+#aviso-version, #aviso-guardado{
   position:fixed; left:0; right:0; bottom:0; z-index:70;
   background:var(--ink); color:#fff;
   display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;
   padding:10px 14px; font-size:.9rem;
   box-shadow:0 -4px 14px rgba(0,0,0,.25);
 }
-#aviso-version button{padding:6px 14px; font-size:.85rem; background:var(--marca); border-color:var(--marca); color:#fff;}
-#aviso-version button.ghost{background:transparent; border-color:#777777; color:#EAEAEA;}
-#aviso-version button.ghost:hover{background:#333333;}
-@media print{ #aviso-version{display:none !important;} }
+#aviso-version button, #aviso-guardado button{padding:6px 14px; font-size:.85rem; background:var(--marca); border-color:var(--marca); color:#fff;}
+#aviso-version button.ghost, #aviso-guardado button.ghost{background:transparent; border-color:#777777; color:#EAEAEA;}
+#aviso-version button.ghost:hover, #aviso-guardado button.ghost:hover{background:#333333;}
+@media print{ #aviso-version, #aviso-guardado{display:none !important;} }
 
 /* panel de pruebas automáticas (solo con ?pruebas=1) */
 .pruebas-caja{border:2px solid var(--marca); padding:16px 18px; margin-bottom:18px;}
@@ -641,7 +641,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 4.8 · Última actualización: 27/08/2026 09:10 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 4.9 · Última actualización: 27/08/2026 09:16 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -1747,6 +1747,24 @@ function num(v){
   return parseFloat(s);
 }
 function fmt(v, d){ if(!isFinite(v)) return "—"; return v.toFixed(d === undefined ? 2 : d); }
+
+/* ---------- Antes de pisar lo cargado, preguntar ----------
+   Limpiar o cargar el ejemplo borra el trabajo sin posibilidad de deshacer, y el
+   guardado automático repite el borrado en el navegador enseguida después. Por eso
+   se pregunta; pero solo cuando de verdad hay algo cargado que se pueda perder. */
+function panelConDatos(idPanel){
+  var p = document.getElementById(idPanel);
+  if(!p) return false;
+  var ins = p.querySelectorAll("input[type=text]");
+  for(var i = 0; i < ins.length; i++){ if(String(ins[i].value).trim() !== "") return true; }
+  return false;
+}
+function confirmarPerder(idPanel, queVaAPasar){
+  if(!panelConDatos(idPanel)) return true;
+  return confirm("Hay datos cargados en este módulo y " + queVaAPasar + ".\n\n" +
+                 "Esto no se puede deshacer. Si los querés conservar, cancelá y usá «Guardar trabajo».\n\n" +
+                 "¿Seguimos?");
+}
 function rad(deg){ return deg * Math.PI / 180; }
 function norm360(a){ a = a % 360; if(a < 0) a += 360; return a; }
 function gmsToDec(g, m, s){ return g + m/60 + s/3600; }
@@ -2873,6 +2891,7 @@ function plMostrar(){
 }
 
 $("pl-ejemplo").addEventListener("click", function(){
+  if(!confirmarPerder("panel-planilla", "el ejemplo los va a reemplazar")) return;
   $("pl-n").value = "4"; plGenerar();
   var L = ["120.45","80.20","119.98","80.55"];
   var G = [90, 89, 90, 90], M = [0, 59, 0, 0], S = [0, 40, 10, 10];
@@ -2940,6 +2959,7 @@ $("co-calcular").addEventListener("click", function(){
 });
 
 $("co-ejemplo").addEventListener("click", function(){
+  if(!confirmarPerder("panel-coords", "el ejemplo los va a reemplazar")) return;
   $("co-n").value = "5"; coGenerar();
   var X = ["0","85.32","140.10","95.44","10.25"], Y = ["0","-12.40","55.80","118.60","96.30"];
   for(var i = 1; i <= 5; i++){ $("co-x" + i).value = X[i-1]; $("co-y" + i).value = Y[i-1]; }
@@ -3091,6 +3111,7 @@ $("cu-calcular").addEventListener("click", function(){
 });
 
 $("cu-ejemplo").addEventListener("click", function(){
+  if(!confirmarPerder("panel-cuadri", "el ejemplo los va a reemplazar")) return;
   var caso = $("cu-caso").value;
   if(caso === "2"){
     $("cu-a").value = "60"; $("cu-b").value = "98"; $("cu-c").value = "55"; $("cu-d").value = "100";
@@ -3159,6 +3180,7 @@ document.addEventListener("keydown", function(e){
 
 /* ---------- Nuevo cálculo: limpiar cada módulo ---------- */
 $("pl-nuevo").addEventListener("click", function(){
+  if(!confirmarPerder("panel-planilla", "se van a borrar")) return;
   $("pl-n").value = "";
   $("pl-tabla-box").innerHTML = ""; $("pl-cierre-ang").innerHTML = "";
   $("pl-az-g").value = ""; $("pl-az-m").value = ""; $("pl-az-s").value = "";
@@ -3167,6 +3189,7 @@ $("pl-nuevo").addEventListener("click", function(){
   sConfirm(); $("pl-n").focus();
 });
 $("co-nuevo").addEventListener("click", function(){
+  if(!confirmarPerder("panel-coords", "se van a borrar")) return;
   $("co-n").value = "";
   $("co-tabla-box").innerHTML = "";
   $("co-accion").style.display = "none"; $("co-resultados").style.display = "none";
@@ -3174,6 +3197,7 @@ $("co-nuevo").addEventListener("click", function(){
   sConfirm(); $("co-n").focus();
 });
 $("cu-nuevo").addEventListener("click", function(){
+  if(!confirmarPerder("panel-cuadri", "se van a borrar")) return;
   ["cu-a","cu-b","cu-c","cu-d","cu-e","cu-ag","cu-am","cu-as","cu-bg","cu-bm","cu-bs","cu-cg","cu-cm","cu-cs"].forEach(function(id){ $(id).value = ""; });
   $("cu-resultados").style.display = "none";
   sConfirm(); $("cu-a").focus();
@@ -3417,6 +3441,7 @@ $("tri-calcular").addEventListener("click", function(){
 });
 
 $("tri-ejemplo").addEventListener("click", function(){
+  if(!confirmarPerder("panel-tri", "el ejemplo los va a reemplazar")) return;
   /* Siempre el mismo triángulo 60–80–100, rectángulo en C, cargado con los datos que
      pide el caso elegido. Así se puede comprobar un caso contra otro: los siete tienen
      que dar 2400 m². Antes este botón volvía al caso 1, y eso tapaba el caso elegido. */
@@ -3437,6 +3462,7 @@ $("tri-ejemplo").addEventListener("click", function(){
   sConfirm();
 });
 $("tri-nuevo").addEventListener("click", function(){
+  if(!confirmarPerder("panel-tri", "se van a borrar")) return;
   ["tri-a","tri-b","tri-c","tri-Ag","tri-Am","tri-As","tri-Bg","tri-Bm","tri-Bs","tri-Cg","tri-Cm","tri-Cs"].forEach(function(id){ $(id).value = ""; });
   $("tri-resultados").style.display = "none";
   sConfirm(); $("tri-caso").focus();
@@ -3469,11 +3495,30 @@ function recogerEstado(){
     return st;
   }catch(e){ return null; }
 }
+var _avisoSinGuardar = false;
+/* Si el navegador no deja escribir, el trabajo deja de guardarse solo. Antes eso
+   pasaba en silencio y la promesa de "se guarda solo" quedaba rota sin que nadie
+   se enterara. Ahora se avisa una vez, sin interrumpir lo que se esté haciendo. */
+function avisarSinGuardado(){
+  if(_avisoSinGuardar || document.getElementById("aviso-guardado")) return;
+  _avisoSinGuardar = true;
+  var d = document.createElement("div");
+  d.id = "aviso-guardado";
+  d.className = "no-print";
+  d.innerHTML = "<span><b>El trabajo no se está guardando solo.</b> El navegador no deja escribir " +
+                "(puede ser falta de lugar, o una ventana de incógnito). Guardá el trabajo y exportalo " +
+                "a un archivo para no perderlo.</span>" +
+                "<button id='aviso-guardado-cerrar' class='ghost'>Entendido</button>";
+  document.body.appendChild(d);
+  document.getElementById("aviso-guardado-cerrar").addEventListener("click", function(){
+    if(d.parentNode) d.parentNode.removeChild(d);
+  });
+}
 function guardarEstado(){
   try{
     var st = recogerEstado();
     if(st) localStorage.setItem("calcsup_estado", JSON.stringify(st));
-  }catch(e){}
+  }catch(e){ avisarSinGuardado(); }
 }
 var _guardT = null;
 function programarGuardado(){ if(_guardT) clearTimeout(_guardT); _guardT = setTimeout(guardarEstado, 350); }
@@ -3585,6 +3630,12 @@ $("btn-trab-guardar").addEventListener("click", function(){
   var reg = { n: nom, f: trabFecha(), e: st };
   if(i >= 0) arr[i] = reg; else arr.unshift(reg);   /* el más nuevo, primero */
   if(trabEscribir(arr)){ sConfirm(); alert("Trabajo guardado: «" + nom + "»"); }
+  else {
+    sError();
+    alert("No se pudo guardar «" + nom + "».\n\n" +
+          "El navegador no deja escribir: puede que no quede lugar. Borrá algún trabajo " +
+          "viejo de la lista, o exportá éste a un archivo, e intentá de nuevo.");
+  }
 });
 
 function trabRender(){
@@ -3764,6 +3815,10 @@ $("btn-imprimir").addEventListener("click", function(){
 ===================================================================== */
 function correrPruebas(){
   var casos = [];
+  /* Las pruebas hacen clic en botones que ahora preguntan antes de pisar datos.
+     Se responde que sí durante la corrida, así no quedan diálogos esperando. */
+  var confirmOriginal = window.confirm;
+  window.confirm = function(){ return true; };
   function ver(grupo, nombre, obtenido, esperado, tol){
     var t = (tol === undefined) ? 0 : tol, pasa;
     if(typeof esperado === "number" && typeof obtenido === "number"){
@@ -3972,6 +4027,7 @@ function correrPruebas(){
   document.getElementById("tri-ejemplo").click();
   ver(G, "el ejemplo respeta el caso elegido", selTri.value, "5");
 
+  window.confirm = confirmOriginal;
   return casos;
 }
 
