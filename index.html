@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "4.9";
+var APP_VER = "5.0";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -595,13 +595,14 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
         <select id="tri-caso" style="font-family:inherit; font-size:.95rem; padding:7px; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink);">
           <option value="1">1 – Tres lados (a, b, c) según Fórmula de Herón</option>
           <option value="2">2 – Dos lados y el ángulo comprendido (a, b y áng. C)</option>
-          <option value="3">3 – Dos lados y el ángulo opuesto al otro (a, b y áng. B) — caso ambiguo</option>
-          <option value="4">4 – Dos lados y el ángulo opuesto a uno (a, b y áng. A) — caso ambiguo</option>
+          <option value="3">3 – Dos lados y el ángulo opuesto al otro (a, b y áng. B)</option>
+          <option value="4">4 – Dos lados y el ángulo opuesto a uno (a, b y áng. A)</option>
           <option value="5">5 – Dos ángulos y el lado adyacente a ellos (áng. A, áng. B y lado c)</option>
           <option value="6">6 – Dos ángulos y el lado opuesto a uno de ellos (áng. A, áng. B y lado b)</option>
         </select>
       </div>
     </div>
+    <div id="tri-aviso"></div>
     <div class="row">
       <div id="tri-f-a" style="display: none;"><label>Lado a</label><input type="text" id="tri-a" inputmode="decimal"></div>
       <div id="tri-f-b" style="display: none;"><label>Lado b</label><input type="text" id="tri-b" inputmode="decimal"></div>
@@ -641,7 +642,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 4.9 · Última actualización: 27/08/2026 09:16 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 5.0 · Última actualización: 27/08/2026 09:49 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -3315,6 +3316,15 @@ function triCampos(){
   }[$("tri-caso").value];
   ["a","b","c"].forEach(function(k){ $("tri-f-" + k).style.display = vis[k] ? "" : "none"; });
   ["A","B","C"].forEach(function(k){ $("tri-f-" + k).style.display = vis[k] ? "flex" : "none"; });
+  /* Los casos 3 y 4 son los del ángulo opuesto: el seno da dos ángulos posibles y
+     puede haber dos triángulos. El aviso va acá y no en el desplegable, que en el
+     celular recorta el texto. */
+  var cs = $("tri-caso").value;
+  $("tri-aviso").innerHTML = (cs === "3" || cs === "4")
+    ? "<div class='msg info' style='margin:8px 0 0;'>Con estos datos <b>puede haber dos triángulos</b> distintos, " +
+      "porque el ángulo está enfrentado a un lado y no entre los dos. Si pasa, se muestran los dos y elegís " +
+      "el que corresponde al terreno.</div>"
+    : "";
   triEsquema();
 }
 $("tri-caso").addEventListener("change", function(){ triCampos(); sTick(); });
