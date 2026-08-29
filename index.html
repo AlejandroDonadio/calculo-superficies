@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "5.9";
+var APP_VER = "6.0";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -662,7 +662,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 5.9 · Última actualización: 29/08/2026 19:17 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 6.0 · Última actualización: 29/08/2026 19:23 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2570,6 +2570,18 @@ function plMostrar(){
        "<td class='lbl'>Tolerancia Lineal " + ((($("pl-mensura") || {}).value) || "1") + "</td><td>" + fmt(tolR, 3) + " m &nbsp;" +
        (dentro ? "<span class='badge ok'>DENTRO</span>" : "<span class='badge no titila'>EXCEDE</span>") +
        "</td></tr></tbody></table>";
+
+  /* La insignia EXCEDE es chica y va dentro de una tabla que además se desplaza en
+     horizontal: en pantalla angosta puede quedar fuera de la vista. El error lineal
+     fuera de tolerancia se avisa entonces igual que el angular, a todo el ancho. */
+  if(!dentro){
+    h += "<div class='msg bad titila'>El <b>error de cierre lineal supera la tolerancia</b>: " +
+         fmt(errR, 3) + " m contra " + fmt(tolR, 3) + " m de la Tolerancia Lineal " +
+         ((($("pl-mensura") || {}).value) || "1") + "." +
+         "<br><span style='font-size:.82rem;'>Art. 42: el error tiene que ser <b>menor</b> que la tolerancia. " +
+         "Conviene revisar las distancias medidas antes de compensar: la compensación reparte el error, " +
+         "no corrige una medición equivocada.</span></div>";
+  }
 
   /* --- coordenadas totales de los vértices, con punto de arranque real --- */
   /* --- presentación según el Método de Cálculo elegido (menú del programa original) --- */
