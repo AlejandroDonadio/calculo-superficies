@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "5.5";
+var APP_VER = "5.6";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -472,7 +472,8 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
     <div class="row">
       <div><label for="pl-n">Número de lados</label><input type="text" id="pl-n" class="gms" inputmode="numeric"></div>
       <button id="pl-generar">Generar planilla</button>
-      <button class="ghost" id="pl-ejemplo">Cargar ejemplo</button>
+      <button class="ghost" id="pl-ejemplo2">Ejemplo que cierra</button>
+      <button class="ghost" id="pl-ejemplo">Ejemplo a compensar</button>
       <button class="ghost" id="pl-nuevo">Nuevo cálculo (limpiar)</button>
     </div>
     <div class="msg info" style="margin:8px 0 4px;">Los <b>ángulos</b> que se cargan deben ser los <b>internos del polígono</b>, y el recorrido de los vértices debe hacerse en <b>sentido horario</b>.</div>
@@ -652,7 +653,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 5.5 · Última actualización: 29/08/2026 18:37 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 5.6 · Última actualización: 29/08/2026 18:47 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2912,6 +2913,24 @@ function plMostrar(){
   });
 }
 
+/* Dos ejemplos, para los dos escenarios que se dan en la práctica:
+   "Ejemplo que cierra" entra holgado en la tolerancia del Art. 40 y sirve para ver el
+   cálculo de punta a punta; "Ejemplo a compensar" trae un error de cierre grande, que
+   es el que hace falta para practicar los tres métodos de compensación. */
+$("pl-ejemplo2").addEventListener("click", function(){
+  if(!confirmarPerder("panel-planilla", "el ejemplo los va a reemplazar")) return;
+  $("pl-n").value = "4"; plGenerar();
+  /* rectángulo de 120 × 80 con discrepancias de 4 cm y 3 cm entre lados opuestos:
+     un cierre normal de trabajo de campo */
+  var L = ["120.00","80.00","119.96","80.03"];
+  var G = [90, 89, 90, 90], M = [0, 59, 0, 0], S = [0, 50, 10, 0];
+  for(var i = 1; i <= 4; i++){
+    $("pl-l" + i).value = L[i-1];
+    $("pl-g" + i).value = G[i-1]; $("pl-m" + i).value = M[i-1]; $("pl-s" + i).value = S[i-1];
+  }
+  $("pl-az-g").value = "45"; $("pl-az-m").value = "0"; $("pl-az-s").value = "0";
+  plVerificar();
+});
 $("pl-ejemplo").addEventListener("click", function(){
   if(!confirmarPerder("panel-planilla", "el ejemplo los va a reemplazar")) return;
   $("pl-n").value = "4"; plGenerar();
@@ -3953,6 +3972,19 @@ function correrPruebas(){
   var s200= planilla([100,50,100,50],[90,90,90,90],200,1);
   ver(C, "azimut 0° y 45° dan la misma superficie", s45, s0, 0.01);
   ver(C, "azimut 0° y 200° dan la misma superficie", s200, s0, 0.01);
+
+  /* los dos ejemplos tienen que comportarse como anuncia su nombre */
+  tab(/Planilla/);
+  document.getElementById("pl-ejemplo2").click();
+  document.getElementById("pl-calcular").click();
+  ver(C, "el ejemplo que cierra entra en tolerancia",
+      PL.datos.error < PL.datos.tol, true);
+  tab(/Planilla/);
+  document.getElementById("pl-ejemplo").click();
+  document.getElementById("pl-az-g").value = 45;
+  document.getElementById("pl-calcular").click();
+  ver(C, "el ejemplo a compensar trae error para repartir",
+      PL.datos.error > 0.1, true);
 
   /* compensación: los tres métodos deben cerrar el error */
   var D = "D · Compensación";
