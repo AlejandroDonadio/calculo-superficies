@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "5.4";
+var APP_VER = "5.5";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -652,7 +652,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 5.4 · Última actualización: 29/08/2026 18:27 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 5.5 · Última actualización: 29/08/2026 18:37 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2546,11 +2546,11 @@ function plMostrar(){
          "<td>" + fmt(D.x[i], 3) + "</td><td>" + fmt(D.y[i], 3) + "</td></tr>";
   }
   h += "<tr class='total'><td class='lbl'>Σ</td><td>" + fmt(D.lt, 2) + "</td><td></td><td></td>" +
-       "<td>" + fmt(D.ex, 4) + "</td><td>" + fmt(D.ey, 4) + "</td></tr></tbody></table>";
+       "<td>" + fmt(D.ex, 3) + "</td><td>" + fmt(D.ey, 3) + "</td></tr></tbody></table>";
 
   h += "<table><tbody><tr>" +
-       "<td class='lbl'>ex</td><td>" + fmt(D.ex, 4) + " m</td>" +
-       "<td class='lbl'>ey</td><td>" + fmt(D.ey, 4) + " m</td>" +
+       "<td class='lbl'>ex</td><td>" + fmt(D.ex, 3) + " m</td>" +
+       "<td class='lbl'>ey</td><td>" + fmt(D.ey, 3) + " m</td>" +
        "<td class='lbl'>Error de cierre lineal</td><td><span class='resalta " + (dentro ? "ok" : "no") + "'>" +
        fmt(errR, 3) + " m</span></td>" +
        "<td class='lbl'>Tolerancia Lineal " + ((($("pl-mensura") || {}).value) || "1") + "</td><td>" + fmt(tolR, 3) + " m &nbsp;" +
@@ -2783,8 +2783,8 @@ function plMostrar(){
   if(bm) bm.addEventListener("click", function(){
     alcT.checked = true;               /* el editor usa el mismo espacio que la lista de lados */
     var box = $("pl-lados-box");
-    var c = "<div class='msg info' style='margin:4px 0 6px;'><b>Recordar:</b> ex = " + fmt(D.ex, 4) +
-            " m · ey = " + fmt(D.ey, 4) + " m. Corregí la longitud de los lados que haga falta " +
+    var c = "<div class='msg info' style='margin:4px 0 6px;'><b>Recordar:</b> ex = " + fmt(D.ex, 3) +
+            " m · ey = " + fmt(D.ey, 3) + " m. Corregí la longitud de los lados que haga falta " +
             "(los ángulos y azimuts no cambian) y recalculá.</div>";
     c += "<table><thead><tr><th>Lado</th><th>Longitud actual (m)</th><th>Nueva longitud (m)</th></tr></thead><tbody>";
     for(var i = 0; i < n; i++){
