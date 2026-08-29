@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "5.7";
+var APP_VER = "5.8";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -189,6 +189,15 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
   .titila{animation:none; box-shadow:0 0 0 3px var(--error-soft);}
 }
 @media print{ .titila{animation:none;} }
+/* Fuera de tolerancia el fondo se llena. El rojo pálido de .msg.bad pesaba menos
+   que el ámbar de "dentro de tolerancia", así que el aviso más grave terminaba
+   siendo el menos visible de los dos. */
+.msg.bad.titila{background:#B3261E; border-color:#7F1D17; color:#FFFFFF;}
+.msg.bad.titila b{color:#FFFFFF;}
+.badge.no.titila{background:#B3261E; border-color:#7F1D17; color:#FFFFFF;}
+[data-theme="dark"] .msg.bad.titila{background:#8C1D18; border-color:#C4372C; color:#FFECE9;}
+[data-theme="dark"] .msg.bad.titila b{color:#FFECE9;}
+[data-theme="dark"] .badge.no.titila{background:#8C1D18; border-color:#C4372C; color:#FFECE9;}
 /* ayuda breve para elegir el método de compensación (no se imprime) */
 .ayuda-comp{border:1px solid var(--line); border-left:3px solid var(--marca); border-radius:0;
   padding:10px 14px; margin:2px 0 12px; background:var(--card);}
@@ -653,7 +662,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 5.7 · Última actualización: 29/08/2026 18:53 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 5.8 · Última actualización: 29/08/2026 19:12 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
