@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "6.2";
+var APP_VER = "6.3";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -179,12 +179,13 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
 .msg.bad{background:var(--error-soft); border:1px solid var(--error); color:var(--error);}
 .msg.good{background:var(--ok-soft); border:1px solid var(--ok); color:var(--ok);}
 .msg.info{background:var(--warn-soft); border:1px solid var(--warn); color:var(--warn);}
-/* Lo que excede una tolerancia titila, para que no pase inadvertido: el cierre
-   angular del Art. 41 y el veredicto lineal del Art. 42. Se respeta a quien pidió
-   menos movimiento en pantalla: ahí no titila, pero queda remarcado. Impreso,
-   tampoco titila. */
+/* Lo que excede una tolerancia late tres veces al aparecer y después queda fijo:
+   alcanza el cierre angular del Art. 41 y el veredicto lineal del Art. 42. El latido
+   marca la llegada del aviso; el rojo lleno y el sonido ya lo sostienen después, sin
+   dejar movimiento reclamando atención mientras se revisa la planilla. Se respeta a
+   quien pidió menos movimiento en pantalla, y al imprimir tampoco se mueve. */
 @keyframes titilar-aviso{ 0%, 100%{opacity:1;} 50%{opacity:.35;} }
-.titila{animation:titilar-aviso 4.4s ease-in-out infinite;}
+.titila{animation:titilar-aviso 1.8s ease-in-out 3 both;}
 @media (prefers-reduced-motion: reduce){
   .titila{animation:none; box-shadow:0 0 0 3px var(--error-soft);}
 }
@@ -665,7 +666,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 6.2 · Última actualización: 29/08/2026 20:29 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 6.3 · Última actualización: 29/08/2026 20:34 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
