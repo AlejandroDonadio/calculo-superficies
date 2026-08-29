@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "5.2";
+var APP_VER = "5.3";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -651,7 +651,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 5.2 · Última actualización: 29/08/2026 18:13 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 5.3 · Última actualización: 29/08/2026 18:19 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -1714,6 +1714,13 @@ function tone(freq, dur, type, gain, delay){
 function sTick(){ var now = Date.now(); if(now - lastTick < 45) return; lastTick = now; tone(1180, .045, "sine", .045); }
 function sConfirm(){ tone(620, .09, "sine", .10); tone(830, .13, "sine", .10, .085); }
 function sError(){ tone(230, .16, "triangle", .13); tone(185, .22, "triangle", .11, .07); }
+/* Aviso doble para el error que excede la tolerancia: se distingue del sError
+   simple, que queda para los avisos comunes. Dos golpes graves separados llaman
+   más la atención que uno solo, sin volverse una melodía. */
+function sAlerta(){
+  tone(230, .16, "triangle", .14);        tone(185, .22, "triangle", .12, .07);
+  tone(230, .16, "triangle", .14, .34);   tone(185, .26, "triangle", .12, .41);
+}
 function sSuccess(){ tone(523, .13, "sine", .10); tone(659, .13, "sine", .10, .10); tone(784, .15, "sine", .10, .20); tone(1046, .32, "sine", .08, .30); }
 /* melodía de cálculo terminado (resultado dentro de tolerancia o cálculo directo) */
 function sMelodia(){
@@ -2387,7 +2394,9 @@ function plVerificar(){
            "<span style='display:block; font-size:.9rem; font-weight:700;'>Corrección manual asistida</span>" +
            "<span style='display:block; font-size:.7rem; font-weight:500; opacity:.8; text-align:center;'>Compensar el lado más corto</span></button>" +
          "</div><div id='pl-elegir-box'></div>";
-    sError();
+    /* dentro de tolerancia es una situación normal: alcanza un aviso suave.
+       Si la excede, hay que volver a los ángulos medidos, y eso se marca. */
+    if(dentroAng) sConfirm(); else sAlerta();
   }
   $("pl-cierre-ang").innerHTML = h;
 
