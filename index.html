@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "6.0";
+var APP_VER = "6.1";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -221,7 +221,10 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
   -webkit-print-color-adjust:exact; print-color-adjust:exact;
 }
 .resalta.ok{background:var(--ok-soft); color:var(--ok); box-shadow:inset 0 -2px 0 var(--ok);}
-.resalta.no{background:var(--error-soft); color:var(--error); box-shadow:inset 0 -2px 0 var(--error);}
+/* .resalta.no solo aparece con el error lineal fuera de tolerancia: va con el mismo
+   rojo lleno del cartel, para que el número no quede más flojo que el aviso. */
+.resalta.no{background:#B3261E; color:#FFFFFF; box-shadow:inset 0 -2px 0 #7F1D17;}
+[data-theme="dark"] .resalta.no{background:#8C1D18; color:#FFECE9; box-shadow:inset 0 -2px 0 #C4372C;}
 
 /* ============ Plano SVG ============ */
 .plano-box{border:1px solid var(--ink); border-radius:16px; overflow:hidden; background:#fff; margin-top:10px; padding:6px;}
@@ -662,7 +665,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 6.0 · Última actualización: 29/08/2026 19:23 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 6.1 · Última actualización: 29/08/2026 19:28 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
