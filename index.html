@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "5.1";
+var APP_VER = "5.2";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -179,6 +179,15 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
 .msg.bad{background:var(--error-soft); border:1px solid var(--error); color:var(--error);}
 .msg.good{background:var(--ok-soft); border:1px solid var(--ok); color:var(--ok);}
 .msg.info{background:var(--warn-soft); border:1px solid var(--warn); color:var(--warn);}
+/* El error de cierre angular que excede la tolerancia titila, para que no pase
+   inadvertido antes de compensar. Se respeta a quien pidió menos movimiento en
+   pantalla: ahí no titila, pero queda remarcado. Impreso, tampoco titila. */
+@keyframes titilar-aviso{ 0%, 100%{opacity:1;} 50%{opacity:.35;} }
+.msg.titila{animation:titilar-aviso 1.1s ease-in-out infinite;}
+@media (prefers-reduced-motion: reduce){
+  .msg.titila{animation:none; box-shadow:0 0 0 3px var(--error-soft);}
+}
+@media print{ .msg.titila{animation:none;} }
 /* ayuda breve para elegir el método de compensación (no se imprime) */
 .ayuda-comp{border:1px solid var(--line); border-left:3px solid var(--marca); border-radius:0;
   padding:10px 14px; margin:2px 0 12px; background:var(--card);}
@@ -642,7 +651,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 5.1 · Última actualización: 27/08/2026 10:10 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 5.2 · Última actualización: 29/08/2026 18:13 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -1780,9 +1789,8 @@ function decToGms(d){
   return { g:(neg?-g:g), m:m, s:s };
 }
 function gmsStr(d){ var x = decToGms(d); return x.g + "°" + x.m + "'" + x.s + '"'; }
-function segStr(seg){ /* segundos enteros -> g°m's" con signo */
-  var sg = seg < 0 ? "−" : "+";
-  return sg + gmsStr(Math.abs(seg) / 3600);
+function segStr(seg){ /* segundos enteros -> g°m's", siempre en valor absoluto */
+  return gmsStr(Math.abs(seg) / 3600);
 }
 function haStr(w){
   var he = Math.floor(w / 10000);
@@ -2367,7 +2375,7 @@ function plVerificar(){
     sSuccess();
     plHabilitarPaso2();
   } else {
-    h += "<div class='msg " + (dentroAng ? "info" : "bad") + "'>Error de cierre angular: " + segStr(difSeg) +
+    h += "<div class='msg " + (dentroAng ? "info" : "bad titila") + "'>Error de cierre angular: " + segStr(difSeg) +
          " &nbsp;" + (dentroAng ?
            "<span class='badge ok'>DENTRO de tolerancia</span><br><span style='font-size:.82rem;'>podés compensarlo con alguna de estas opciones:</span>" :
            "<span class='badge no'>EXCEDE la tolerancia</span><br><span style='font-size:.82rem;'>supera T = " + gmsStr(Tang / 3600) +
