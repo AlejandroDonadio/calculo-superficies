@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "7.6";
+var APP_VER = "7.7";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -189,6 +189,12 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
 @media (prefers-reduced-motion: reduce){
   .titila{animation:none; box-shadow:0 0 0 3px var(--error-soft);}
 }
+/* Resumen del cierre angular dentro del aviso: dos columnas, y una sola en celular.
+   Con auto-fit entraban tres en la primera fila y se rompía el emparejado. */
+.resumen-ang{display:grid; grid-template-columns:1fr 1fr; gap:3px 18px; font-size:.82rem;
+  margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,.35);}
+@media (max-width:700px){ .resumen-ang{grid-template-columns:1fr;} }
+
 /* Datos de la mensura: en pantalla se cargan al pie, antes de imprimir; al imprimir
    se reemplazan por un recuadro compacto que encabeza la hoja. Si están todos
    vacíos el recuadro no sale, y la impresión queda igual que antes. */
@@ -693,7 +699,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 7.6 · Última actualización: 30/08/2026 19:44 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 7.7 · Última actualización: 30/08/2026 19:50 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2430,8 +2436,7 @@ function plVerificar(){
            "<span class='badge no'>EXCEDE la tolerancia</span><br><span style='font-size:.82rem;'>supera T = " + gmsStr(Tang / 3600) +
            ": conviene revisar los ángulos medidos en campo antes de compensar.</span>") +
          (dentroAng ? "" :
-           "<div style='margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,.35); " +
-           "display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:3px 18px; font-size:.82rem;'>" +
+           "<div class='resumen-ang'>" +
            "<span>Suma Angular Teórica del Polígono: <b>" + cta + "°0'0\"</b></span>" +
            "<span>Tolerancia Angular: <b>" + kv + "″·√" + PL.n + " = " + gmsStr(Tang / 3600) + "</b></span>" +
            "<span>Suma Angular del Polígono o Mensura: <b>" + gmsStr(suma) + "</b></span>" +
