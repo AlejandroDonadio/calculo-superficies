@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "7.1";
+var APP_VER = "7.2";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -188,6 +188,16 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
 .titila{animation:titilar-aviso 1.8s ease-in-out 3 both;}
 @media (prefers-reduced-motion: reduce){
   .titila{animation:none; box-shadow:0 0 0 3px var(--error-soft);}
+}
+/* Datos de la mensura: en pantalla se cargan al pie, antes de imprimir; al imprimir
+   se reemplazan por un recuadro compacto que encabeza la hoja. Si están todos
+   vacíos el recuadro no sale, y la impresión queda igual que antes. */
+#dt-impreso{display:none;}
+@media print{
+  #datos-trabajo{display:none !important;}
+  #dt-impreso.tiene-datos{display:block !important; border:1px solid #1A1A1A; padding:8px 12px; margin:0 0 12px;}
+  #dt-impreso .dt-t{font-family:Poppins,"Segoe UI",sans-serif; font-weight:700; font-size:.92rem; margin-bottom:3px;}
+  #dt-impreso .dt-g{display:flex; flex-wrap:wrap; gap:2px 20px; font-size:.82rem;}
 }
 @media print{ .titila{animation:none;} }
 /* Fuera de tolerancia el fondo se llena. El rojo pálido de .msg.bad pesaba menos
@@ -463,6 +473,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <nav id="tabs"><button class="tab">Método</button><button class="tab active">Planilla (lados y ángulos)</button><button class="tab">Coordenadas</button><button class="tab">Cuadriláteros</button><button class="tab">Triángulos</button></nav>
 
 <main>
+<div id="dt-impreso"></div>
 
 <!-- ==================== INICIO: ELECCIÓN DE MÉTODO ==================== -->
 <section class="panel" id="panel-inicio">
@@ -661,12 +672,28 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
   </div>
 </section>
 
+<!-- ==================== DATOS DEL TRABAJO ==================== -->
+<section class="card" id="datos-trabajo">
+  <h2>Datos del trabajo</h2>
+  <p style="font-size:.82rem; color:var(--ink-soft); margin:-4px 0 10px;">Encabezan la planilla y el plano al imprimir. Si quedan vacíos, se imprime igual y el recuadro no sale.</p>
+  <div class="row">
+    <div><label for="dt-partida">Partida inmobiliaria</label><input type="text" id="dt-partida" style="width:170px;"></div>    <div><label for="dt-partido">Partido</label><input type="text" id="dt-partido" style="width:190px;"></div>    <div><label for="dt-localidad">Localidad</label><input type="text" id="dt-localidad" style="width:190px;"></div>
+  </div>
+  <p style="font-size:.8rem; color:var(--ink-soft); margin:12px 0 4px; text-transform:uppercase; letter-spacing:.04em;"><b>Nomenclatura catastral</b></p>
+  <div class="row">
+    <div><label for="dt-circ">Circ.</label><input type="text" id="dt-circ" style="width:70px;"></div>    <div><label for="dt-secc">Secc.</label><input type="text" id="dt-secc" style="width:70px;"></div>    <div><label for="dt-chacra">Chacra</label><input type="text" id="dt-chacra" style="width:80px;"></div>    <div><label for="dt-quinta">Quinta</label><input type="text" id="dt-quinta" style="width:80px;"></div>    <div><label for="dt-fraccion">Fracción</label><input type="text" id="dt-fraccion" style="width:80px;"></div>    <div><label for="dt-manzana">Manzana</label><input type="text" id="dt-manzana" style="width:85px;"></div>    <div><label for="dt-parcela">Parcela</label><input type="text" id="dt-parcela" style="width:85px;"></div>    <div><label for="dt-subparcela">Subparc.</label><input type="text" id="dt-subparcela" style="width:85px;"></div>
+  </div>
+  <p style="font-size:.78rem; color:var(--ink-soft); margin-top:2px;">Se completan solo los casilleros que correspondan: en mensura urbana, Circ. · Secc. · Manzana · Parcela; en rural suelen usarse Chacra, Quinta o Fracción.</p>
+  <div class="row" style="margin-top:10px;">
+    <div><label for="dt-titular">Titular de dominio</label><input type="text" id="dt-titular" style="width:250px;"></div>    <div><label for="dt-profesional">Profesional actuante</label><input type="text" id="dt-profesional" style="width:230px;"></div>    <div><label for="dt-matricula">Matrícula</label><input type="text" id="dt-matricula" style="width:100px;"></div>    <div><label for="dt-fecha">Fecha</label><input type="text" id="dt-fecha" style="width:120px;"></div>
+  </div>
+</section>
 </main>
 
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 7.1 · Última actualización: 30/08/2026 13:16 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 7.2 · Última actualización: 30/08/2026 15:47 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -3697,6 +3724,7 @@ function aplicarEstado(st){
     if(st.cures && $("cu-a").value !== "") $("cu-calcular").click();
     if(st.tries) $("tri-calcular").click();
     renderTabs();
+    if(typeof dtPorOmision === "function"){ dtPorOmision(); dtArmarEncabezado(); }
   }catch(e){}
 }
 function restaurarEstado(){
@@ -3908,6 +3936,69 @@ if(window.matchMedia){
   if(mq.addEventListener) mq.addEventListener("change", function(e){ if(!e.matches) restaurarTitulo(); });
 }
 window.addEventListener("afterprint", restaurarTitulo);
+
+/* ---------- Datos de la mensura ----------
+   El profesional y la matrícula no cambian de un trabajo a otro: vienen cargados y
+   se pueden editar. La fecha se pone sola con la del día. Todo lo demás se carga por
+   trabajo. Los campos son input[type=text] con id, así que el guardado automático y
+   los trabajos con nombre ya los conservan sin tocar nada más. */
+var DT_CAMPOS = ["dt-partida","dt-partido","dt-localidad","dt-circ","dt-secc","dt-chacra",
+                 "dt-quinta","dt-fraccion","dt-manzana","dt-parcela","dt-subparcela",
+                 "dt-titular","dt-profesional","dt-matricula","dt-fecha"];
+function dtValor(id){ var e = $(id); return e ? String(e.value).trim() : ""; }
+function dtPorOmision(){
+  if(!dtValor("dt-profesional")) $("dt-profesional").value = "Alejandro G. Donadio";
+  if(!dtValor("dt-matricula"))   $("dt-matricula").value   = "1520";
+  if(!dtValor("dt-fecha")){
+    var d = new Date(), dd = function(x){ return (x < 10 ? "0" : "") + x; };
+    $("dt-fecha").value = dd(d.getDate()) + "/" + dd(d.getMonth()+1) + "/" + d.getFullYear();
+  }
+}
+/* La nomenclatura se arma con los casilleros que tengan algo, en el orden de siempre */
+function dtNomenclatura(){
+  var partes = [], p = [["dt-circ","Circ."],["dt-secc","Secc."],["dt-chacra","Chacra"],
+                       ["dt-quinta","Quinta"],["dt-fraccion","Fracc."],["dt-manzana","Mz."],
+                       ["dt-parcela","Parc."],["dt-subparcela","Subparc."]];
+  for(var i = 0; i < p.length; i++){
+    var v = dtValor(p[i][0]);
+    if(v) partes.push(p[i][1] + " " + v);
+  }
+  return partes.join(" · ");
+}
+function dtArmarEncabezado(){
+  var caja = $("dt-impreso");
+  if(!caja) return;
+  var partes = [], identifica = false;
+  /* "identifica" marca los datos que dicen DE QUÉ parcela es el cálculo. El
+     profesional y la fecha vienen cargados de entrada, así que por sí solos no
+     alcanzan: sin ellos el recuadro no sale y un cálculo rápido se imprime como
+     siempre. */
+  function agrega(rot, v, cuenta){
+    if(!v) return;
+    partes.push("<span><b>" + rot + ":</b> " + v + "</span>");
+    if(cuenta) identifica = true;
+  }
+  agrega("Partida", dtValor("dt-partida"), true);
+  agrega("Partido", dtValor("dt-partido"), true);
+  agrega("Localidad", dtValor("dt-localidad"), true);
+  agrega("Nomenclatura", dtNomenclatura(), true);
+  agrega("Titular", dtValor("dt-titular"), true);
+  var prof = dtValor("dt-profesional");
+  var mat  = dtValor("dt-matricula");
+  agrega("Profesional", prof + (prof && mat ? " — Mat. " + mat : (mat ? "Mat. " + mat : "")));
+  agrega("Fecha", dtValor("dt-fecha"));
+  if(!identifica){ caja.className = ""; caja.innerHTML = ""; return; }
+  caja.className = "tiene-datos";
+  caja.innerHTML = "<div class='dt-t'>Cálculo de superficies</div>" +
+                   "<div class='dt-g'>" + partes.join("") + "</div>";
+}
+dtPorOmision();
+dtArmarEncabezado();
+DT_CAMPOS.forEach(function(id){
+  var e = $(id);
+  if(e) e.addEventListener("input", dtArmarEncabezado);
+});
+window.addEventListener("beforeprint", dtArmarEncabezado);
 
 $("btn-guardar").addEventListener("click", function(){
   sConfirm();
