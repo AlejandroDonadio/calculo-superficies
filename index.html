@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "7.9";
+var APP_VER = "8.0";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -191,8 +191,15 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
 }
 /* Resumen del cierre angular dentro del aviso: dos columnas, y una sola en celular.
    Con auto-fit entraban tres en la primera fila y se rompía el emparejado. */
-.resumen-ang{display:grid; grid-template-columns:1fr; gap:3px 18px; font-size:.82rem;
+.resumen-ang{display:grid; grid-template-columns:1fr 1fr; gap:3px 18px; font-size:.82rem;
   margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,.35);}
+/* Dos columnas para poder comparar: la teórica queda encima de la medida y la
+   tolerancia encima del error. En pantalla chica se apilan, y ahí el guion sobra. */
+.resumen-ang span:nth-child(2n)::before{content:"- ";}
+@media (max-width:700px){
+  .resumen-ang{grid-template-columns:1fr;}
+  .resumen-ang span:nth-child(2n)::before{content:none;}
+}
 
 /* Datos de la mensura: en pantalla se cargan al pie, antes de imprimir; al imprimir
    se reemplazan por un recuadro compacto que encabeza la hoja. Si están todos
@@ -698,7 +705,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 7.9 · Última actualización: 30/08/2026 20:01 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 8.0 · Última actualización: 30/08/2026 20:15 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
