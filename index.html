@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "6.6";
+var APP_VER = "6.7";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -666,7 +666,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 6.6 · Última actualización: 30/08/2026 11:04 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 6.7 · Última actualización: 30/08/2026 11:39 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2680,9 +2680,8 @@ function plMostrar(){
       "<div class='sub'>Según qué medición merece más confianza:</div>" +
       "<ul>" +
       "<li><b>1 · Método de Crandall</b> (fórmulas del libro de Gómez y Jiménez Cleves): " +
-      "supone los <b>ángulos más precisos que las distancias</b>: el error " +
-      "de cierre se descarga sobre los lados. " +
-      "<b>Corrige solo las longitudes: los ángulos quedan como se midieron y una vez ajustados.</b></li>" +
+      "es un <b>ajuste de mínimos cuadrados</b> orientado a <b>corregir las longitudes</b> cuando los " +
+      "ángulos se consideran como se midieron y una vez ajustados o mucho más precisos.</li>" +
       "<li><b>2 · Proporcional a los lados</b> (Método de Bowditch o Regla de la Brújula): " +
       "supone <b>ángulos y distancias de precisión pareja</b>: " +
       "cada lado absorbe una parte del error proporcional a su longitud. " +
