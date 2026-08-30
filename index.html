@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "7.5";
+var APP_VER = "7.6";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -693,7 +693,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 7.5 · Última actualización: 30/08/2026 18:13 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 7.6 · Última actualización: 30/08/2026 19:44 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2429,6 +2429,14 @@ function plVerificar(){
            "<span class='badge ok'>DENTRO de tolerancia</span><br><span style='font-size:.82rem;'>podés compensarlo con alguna de estas opciones:</span>" :
            "<span class='badge no'>EXCEDE la tolerancia</span><br><span style='font-size:.82rem;'>supera T = " + gmsStr(Tang / 3600) +
            ": conviene revisar los ángulos medidos en campo antes de compensar.</span>") +
+         (dentroAng ? "" :
+           "<div style='margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,.35); " +
+           "display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:3px 18px; font-size:.82rem;'>" +
+           "<span>Suma Angular Teórica del Polígono: <b>" + cta + "°0'0\"</b></span>" +
+           "<span>Tolerancia Angular: <b>" + kv + "″·√" + PL.n + " = " + gmsStr(Tang / 3600) + "</b></span>" +
+           "<span>Suma Angular del Polígono o Mensura: <b>" + gmsStr(suma) + "</b></span>" +
+           "<span>Error del Cierre Angular: <b>" + segStr(difSeg) + "</b></span>" +
+           "</div>") +
          "<br><span style='font-size:.78rem; opacity:.85;'>El signo dice de qué lado quedó la diferencia: " +
          "<b>(+)</b> la suma de los ángulos medidos supera la condición teórica · " +
          "<b>(−)</b> queda por debajo. La compensación la reparte en el sentido contrario.</span>" +
