@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "7.2";
+var APP_VER = "7.3";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -693,7 +693,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 7.2 · Última actualización: 30/08/2026 15:47 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 7.3 · Última actualización: 30/08/2026 15:59 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -3946,9 +3946,10 @@ var DT_CAMPOS = ["dt-partida","dt-partido","dt-localidad","dt-circ","dt-secc","d
                  "dt-quinta","dt-fraccion","dt-manzana","dt-parcela","dt-subparcela",
                  "dt-titular","dt-profesional","dt-matricula","dt-fecha"];
 function dtValor(id){ var e = $(id); return e ? String(e.value).trim() : ""; }
+/* El profesional y la matrícula NO vienen cargados: el programa es de uso general y
+   cada uno pone los suyos. Se escriben una sola vez, porque el guardado automático
+   los conserva en el navegador y reaparecen en el trabajo siguiente. */
 function dtPorOmision(){
-  if(!dtValor("dt-profesional")) $("dt-profesional").value = "Alejandro G. Donadio";
-  if(!dtValor("dt-matricula"))   $("dt-matricula").value   = "1520";
   if(!dtValor("dt-fecha")){
     var d = new Date(), dd = function(x){ return (x < 10 ? "0" : "") + x; };
     $("dt-fecha").value = dd(d.getDate()) + "/" + dd(d.getMonth()+1) + "/" + d.getFullYear();
