@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "6.3";
+var APP_VER = "6.4";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -666,7 +666,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 6.3 · Última actualización: 29/08/2026 20:34 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 6.4 · Última actualización: 30/08/2026 10:54 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2564,14 +2564,14 @@ function plMostrar(){
          "<td>" + fmt(D.x[i], 3) + "</td><td>" + fmt(D.y[i], 3) + "</td></tr>";
   }
   h += "<tr class='total'><td class='lbl'>Σ</td><td>" + fmt(D.lt, 2) + "</td><td></td><td></td>" +
-       "<td>" + fmt(D.ex, 3) + "</td><td>" + fmt(D.ey, 3) + "</td></tr></tbody></table>";
+       "<td>" + fmt(D.ex, 2) + "</td><td>" + fmt(D.ey, 2) + "</td></tr></tbody></table>";
 
   h += "<table><tbody><tr>" +
-       "<td class='lbl'>ex</td><td>" + fmt(D.ex, 3) + " m</td>" +
-       "<td class='lbl'>ey</td><td>" + fmt(D.ey, 3) + " m</td>" +
+       "<td class='lbl'>ex</td><td>" + fmt(D.ex, 2) + " m</td>" +
+       "<td class='lbl'>ey</td><td>" + fmt(D.ey, 2) + " m</td>" +
        "<td class='lbl'>Error de cierre lineal</td><td><span class='resalta " + (dentro ? "ok" : "no") + "'>" +
        fmt(errR, 3) + " m</span></td>" +
-       "<td class='lbl'>Tolerancia Lineal " + ((($("pl-mensura") || {}).value) || "1") + "</td><td>" + fmt(tolR, 3) + " m &nbsp;" +
+       "<td class='lbl'>Tolerancia Lineal " + ((($("pl-mensura") || {}).value) || "1") + "</td><td>" + fmt(tolR, 2) + " m &nbsp;" +
        (dentro ? "<span class='badge ok'>DENTRO</span>" : "<span class='badge no titila'>EXCEDE</span>") +
        "</td></tr></tbody></table>";
 
@@ -2580,7 +2580,7 @@ function plMostrar(){
      fuera de tolerancia se avisa entonces igual que el angular, a todo el ancho. */
   if(!dentro){
     h += "<div class='msg bad titila'>El <b>error de cierre lineal supera la tolerancia</b>: " +
-         fmt(errR, 3) + " m contra " + fmt(tolR, 3) + " m de la Tolerancia Lineal " +
+         fmt(errR, 3) + " m contra " + fmt(tolR, 2) + " m de la Tolerancia Lineal " +
          ((($("pl-mensura") || {}).value) || "1") + "." +
          "<br><span style='font-size:.82rem;'>Art. 42: el error tiene que ser <b>menor</b> que la tolerancia. " +
          "Conviene revisar las distancias medidas antes de compensar: la compensación reparte el error, " +
@@ -2680,8 +2680,8 @@ function plMostrar(){
       "<div class='sub'>Según qué medición merece más confianza:</div>" +
       "<ul>" +
       "<li><b>1 · Método de Crandall</b> — supone los <b>ángulos más precisos que las distancias</b>: el error " +
-      "de cierre se descarga sobre los lados. Caso clásico: teodolito y cinta. " +
-      "<b>Corrige solo las longitudes: los ángulos quedan como se midieron.</b></li>" +
+      "de cierre se descarga sobre los lados. " +
+      "<b>Corrige solo las longitudes: los ángulos quedan como se midieron y una vez ajustados.</b></li>" +
       "<li><b>2 · Proporcional a los lados</b> — supone <b>ángulos y distancias de precisión pareja</b>: " +
       "cada lado absorbe una parte del error proporcional a su longitud. " +
       "Es la regla de uso general, habitual con estación total. " +
@@ -2699,7 +2699,7 @@ function plMostrar(){
       "<label style='" + estRad + "'>" +
       "<input type='radio' name='pl-met' id='pl-met1' style='accent-color:var(--marca);'> 1 · Método de Crandall (mínimos cuadrados)</label>" +
       "<label style='" + estRad + "'>" +
-      "<input type='radio' name='pl-met' id='pl-met2' style='accent-color:var(--marca);'> 2 · Proporcional a los lados (regla de la brújula)</label>" +
+      "<input type='radio' name='pl-met' id='pl-met2' style='accent-color:var(--marca);'> 2 · Proporcional a los lados (Método Bowditch / Regla de la Brújula)</label>" +
       "<label style='" + estRad + "'>" +
       "<input type='radio' name='pl-met' id='pl-met3' style='accent-color:var(--marca);'> 3 · Proporcional con pesos por lado</label></div>" +
       "</div><div class='row'>" +
@@ -2813,8 +2813,8 @@ function plMostrar(){
   if(bm) bm.addEventListener("click", function(){
     alcT.checked = true;               /* el editor usa el mismo espacio que la lista de lados */
     var box = $("pl-lados-box");
-    var c = "<div class='msg info' style='margin:4px 0 6px;'><b>Recordar:</b> ex = " + fmt(D.ex, 3) +
-            " m · ey = " + fmt(D.ey, 3) + " m. Corregí la longitud de los lados que haga falta " +
+    var c = "<div class='msg info' style='margin:4px 0 6px;'><b>Recordar:</b> ex = " + fmt(D.ex, 2) +
+            " m · ey = " + fmt(D.ey, 2) + " m. Corregí la longitud de los lados que haga falta " +
             "(los ángulos y azimuts no cambian) y recalculá.</div>";
     c += "<table><thead><tr><th>Lado</th><th>Longitud actual (m)</th><th>Nueva longitud (m)</th></tr></thead><tbody>";
     for(var i = 0; i < n; i++){
