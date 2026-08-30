@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "6.8";
+var APP_VER = "6.9";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -666,7 +666,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 6.8 · Última actualización: 30/08/2026 12:30 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 6.9 · Última actualización: 30/08/2026 12:36 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2553,6 +2553,15 @@ function plMostrar(){
   /* compensada la poligonal, se muestran los azimuts ajustados: son los que corresponden
      a las proyecciones y longitudes de la misma fila */
   var Zver = (D.comp && D.Zaj) ? D.Zaj : D.Z;
+  /* Un solo criterio para el cierre lineal, en lugar de los dos umbrales sueltos que
+     había: por debajo de esto el polígono se da por cerrado —no hay nada que repartir y
+     no se ofrece compensar—; por encima aparece la caja de compensación. Antes convivían
+     el cartel "Error despreciable" y el botón Compensar para cualquier error entre 1e-9 y
+     1 cm, que se contradecían. El umbral queda en el mínimo posible para no quitar la
+     posibilidad de compensar errores chicos: un cierre de 3 mm igual se puede repartir,
+     y muchas veces conviene, para que las coordenadas cierren exactas. */
+  var CIERRA_EXACTO = 1e-9;
+  var cierraExacto  = D.error <= CIERRA_EXACTO;
   var h = "";
   if(!poligonoSimple(X, Y)) h += "<div class='msg info'><b>Atención:</b> con estos datos los lados del polígono se cruzan. Revisá los ángulos y las longitudes: la superficie no corresponde a una parcela cerrada simple.</div>";
   h += "<table><thead><tr><th>Lado</th><th>Long. (m)</th><th>" + ((D.comp && D.Zaj) ? "Azimut ajustado" : "Azimut") + "</th><th>Rumbo</th><th>Δx</th><th>Δy</th></tr></thead><tbody>";
@@ -2570,7 +2579,7 @@ function plMostrar(){
        "<td class='lbl'>ex</td><td>" + fmt(D.ex, 2) + " m</td>" +
        "<td class='lbl'>ey</td><td>" + fmt(D.ey, 2) + " m</td>" +
        "<td class='lbl'>Error de cierre lineal</td><td><span class='resalta " + (dentro ? "ok" : "no") + "'>" +
-       fmt(errR, 3) + " m</span></td>" +
+       fmt(errR, 2) + " m</span></td>" +
        "<td class='lbl'>Tolerancia Lineal " + ((($("pl-mensura") || {}).value) || "1") + "</td><td>" + fmt(tolR, 2) + " m &nbsp;" +
        (dentro ? "<span class='badge ok'>DENTRO</span>" : "<span class='badge no titila'>EXCEDE</span>") +
        "</td></tr></tbody></table>";
@@ -2580,7 +2589,7 @@ function plMostrar(){
      fuera de tolerancia se avisa entonces igual que el angular, a todo el ancho. */
   if(!dentro){
     h += "<div class='msg bad titila'>El <b>error de cierre lineal supera la tolerancia</b>: " +
-         fmt(errR, 3) + " m contra " + fmt(tolR, 2) + " m de la Tolerancia Lineal " +
+         fmt(errR, 2) + " m contra " + fmt(tolR, 2) + " m de la Tolerancia Lineal " +
          ((($("pl-mensura") || {}).value) || "1") + "." +
          "<br><span style='font-size:.82rem;'>Art. 42: el error tiene que ser <b>menor</b> que la tolerancia. " +
          "Conviene revisar las distancias medidas antes de compensar: la compensación reparte el error, " +
@@ -2672,7 +2681,7 @@ function plMostrar(){
        "<select id='pl-mensura-res' style='font-family:inherit; font-size:.95rem; padding:7px; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink);'>" +
        $("pl-mensura").innerHTML + "</select></div></div>";
 
-  if(!D.comp && D.error > 1e-9){
+  if(!D.comp && !cierraExacto){
     var estRad = "display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;";
     h += "<div class='no-print' id='pl-metodo-box'>" +
       "<div class='ayuda-comp'>" +
@@ -2715,8 +2724,13 @@ function plMostrar(){
   } else if(D.comp){
     h += "<div class='msg info'>Coordenadas compensadas por " + D.metodo + ". Lados recalculados a partir de las coordenadas.</div>";
   }
-  if(D.error < 0.01 && !D.comp){
-    h += "<div class='msg good'>Error despreciable.</div>";
+  if(!D.comp){
+    if(cierraExacto){
+      h += "<div class='msg good'>✔ El polígono cierra exacto: no hay error lineal para repartir.</div>";
+    } else if(D.error < 0.01){
+      h += "<div class='msg good'>Error de cierre menor a 1 cm. Podés dejarlo así o compensarlo igual, " +
+           "para que las coordenadas cierren exactas.</div>";
+    }
   }
 
   h += "<p style='font-size:.9rem; margin:10px 0 0; color:var(--ink);'>Superficie calculada " +
