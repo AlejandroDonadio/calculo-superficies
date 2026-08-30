@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "6.7";
+var APP_VER = "6.8";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -666,7 +666,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 6.7 · Última actualización: 30/08/2026 11:39 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 6.8 · Última actualización: 30/08/2026 12:30 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2868,6 +2868,20 @@ function plMostrar(){
       alert("Elegí primero el método de compensación (1, 2 o 3). Arriba de las opciones está la ayuda para decidir cuál corresponde.");
       return;
     }
+    /* Con un solo lado, los métodos proporcionales cierran igual —ese lado absorbe todo ex
+       y todo ey— pero queda groseramente deformado y los demás sin corregir. No es un error
+       de cálculo, así que se avisa con el número a la vista y decide el agrimensor. Crandall
+       no entra acá: con un solo lado no tiene solución y lo rechaza más abajo. */
+    if(sel.length === 1 && !$("pl-met1").checked){
+      var unico = sel[0];
+      var eTot = Math.sqrt(D.ex*D.ex + D.ey*D.ey);
+      sError();
+      if(!confirm("Marcaste un solo lado: el " + (unico+1) + "–" + (unico+2 > n ? 1 : unico+2) +
+                  ", de " + fmt(D.L[unico], 2) + " m.\n\n" +
+                  "Va a absorber él solo todo el error de cierre (" + fmt(eTot, 3) + " m). La poligonal " +
+                  "cierra, pero ese lado queda distorsionado y los demás sin corregir.\n\n" +
+                  "Conviene repartir entre dos o más. ¿Compensar igual?")) return;
+    }
     if($("pl-met3") && $("pl-met3").checked){
       /* --- proporcional con pesos: corrección de cada lado ∝ L/peso --- */
       var fs = [], Fs = 0;
@@ -2896,7 +2910,13 @@ function plMostrar(){
       }
       D.metodo = "el método proporcional a los lados (regla de la brújula)"; D.met = 2;
     } else {
-      /* --- método de Crandall, como el programa original, sobre los lados elegidos --- */
+      /* --- método de Crandall, como el programa original, sobre los lados elegidos ---
+         El peso de cada lado es 100·L. El 100 viene de las fórmulas publicadas y es solo
+         escala: si el peso pasa de w a c·w, entonces F1, G1 y H1 se dividen por c, el
+         determinante por c², y A y B quedan multiplicados por c — que es exactamente lo que
+         se vuelve a dividir al aplicar la corrección. Comprobado con pesos L, 10L, 100L,
+         1000L y 0.5L: las longitudes corregidas dan idénticas. Se conserva el 100 para que
+         el código se pueda cotejar renglón por renglón contra el libro. */
       var F1 = 0, G1 = 0, H1 = 0;
       for(j = 0; j < sel.length; j++){
         i = sel[j];
