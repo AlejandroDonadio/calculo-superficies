@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "8.5";
+var APP_VER = "8.6";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -707,7 +707,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 8.5 · Última actualización: 30/08/2026 20:54 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 8.6 · Última actualización: 30/08/2026 21:08 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2428,6 +2428,9 @@ function plVerificar(){
   if(kEl) kEl.value = String(kv) + "″";   /* el campo queda siempre con la marca de segundos */
   var Tang = Math.round(kv * Math.sqrt(PL.n));   /* tolerancia en segundos enteros */
   var dentroAng = Math.abs(difSeg) <= Tang;
+  /* Cada verificación replantea la decisión: si antes se había elegido seguir sin
+     compensar, ese permiso caduca acá. */
+  PL.sinCompensar = false;
   var h = "<table><tbody>" +
     "<tr><td class='lbl'>Σ Lados</td><td>" + fmt(lt, 2) + " m</td>" +
     "<td class='lbl'>Σ Ángulos</td><td>" + gmsStr(suma) + "</td>" +
@@ -2460,6 +2463,9 @@ function plVerificar(){
          "<button id='pl-rep-corto' style='line-height:1.3; text-align:left;'>" +
            "<span style='display:block; font-size:.9rem; font-weight:700;'>Corrección manual asistida</span>" +
            "<span style='display:block; font-size:.7rem; font-weight:500; opacity:.8; text-align:center;'>Compensar el lado más corto</span></button>" +
+         (dentroAng ? "<button id='pl-seguir' style='line-height:1.3; text-align:left;'>" +
+           "<span style='display:block; font-size:.9rem; font-weight:700;'>Como está en tolerancia</span>" +
+           "<span style='display:block; font-size:.7rem; font-weight:500; opacity:.8; text-align:center;'>sigo calculando</span></button>" : "") +
          "</div><div id='pl-elegir-box'></div>";
     /* dentro de tolerancia es una situación normal: alcanza un aviso suave.
        Si la excede, hay que volver a los ángulos medidos, y eso se marca. */
@@ -2532,6 +2538,17 @@ function plVerificar(){
     });
   });
 
+  /* Cuarta opción: no compensar. Solo existe dentro de tolerancia, deja constancia
+     de la decisión y abre el paso 2 para cargar el azimut inicial. */
+  var bs = $("pl-seguir");
+  if(bs) bs.addEventListener("click", function(){
+    PL.sinCompensar = true;
+    $("pl-elegir-box").innerHTML = "<div class='msg info'>Se calcula con el error de " + segStr(difSeg) +
+      ", sin compensar. Cargá el azimut inicial en el paso 2 y tocá «Calcular superficie».</div>";
+    sConfirm();
+    plHabilitarPaso2();
+  });
+
   var bc = $("pl-rep-corto");
   if(bc) bc.addEventListener("click", function(){
     /* el lado k une los vértices k y k+1: la corrección se reparte entre sus dos ángulos */
@@ -2568,6 +2585,9 @@ $("pl-calcular").addEventListener("click", function(){
     }
     /* Dentro de tolerancia el trabajo es válido y la decisión es del profesional:
        se puede compensar primero o calcular así. Se avisa qué implica y decide él. */
+    /* Si ya eligió seguir en el paso 1, no se le pregunta de nuevo */
+    if(PL.sinCompensar){ /* decidido */ }
+    else {
     sError();
     if(!confirm("El cierre angular tiene un error de " + segStr(difAng) + ", que entra en la tolerancia de " +
                 gmsStr(TCal / 3600) + ", pero todavía no se compensó.\n\n" +
@@ -2575,6 +2595,7 @@ $("pl-calcular").addEventListener("click", function(){
                 "de modo que el veredicto del Art. 42 va a mezclar las dos cosas.\n\n" +
                 "Cancelá para compensarlo primero en el paso 1, o seguí si preferís ver el cálculo sin compensar.\n\n" +
                 "¿Calcular igual?")) return;
+    }
   }
   var azg = num($("pl-az-g").value) || 0, azm = num($("pl-az-m").value) || 0, azs = num($("pl-az-s").value) || 0;
   if(!validGms(azg, azm, azs)){ sError(); alert("El azimut inicial no corresponde: g ≤ 360, m < 60, s < 60."); return; }
