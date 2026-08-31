@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "8.9";
+var APP_VER = "9.0";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -707,7 +707,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 8.9 · Última actualización: 31/08/2026 12:25 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 9.0 · Última actualización: 31/08/2026 15:06 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2655,6 +2655,10 @@ function plMostrar(){
      con los valores exactos; el redondeo es solo de presentación. */
   var errR = D.error, tolR = D.tol;
   var dentro = errR < tolR;
+  /* Si se cambió el tipo de mensura y el error dejó de entrar en tolerancia, la
+     decisión de no compensar caduca: deja de ser una opción válida, y sostenerla
+     haría imprimir que el error "entra en la tolerancia" junto a un EXCEDE. */
+  if(D.noComp && !dentro) D.noComp = false;
 
   /* compensada la poligonal, se muestran los azimuts ajustados: son los que corresponden
      a las proyecciones y longitudes de la misma fila */
