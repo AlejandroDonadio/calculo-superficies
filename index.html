@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "8.6";
+var APP_VER = "8.8";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -707,7 +707,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 8.6 · Última actualización: 30/08/2026 21:08 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 8.8 · Última actualización: 30/08/2026 21:45 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2369,6 +2369,7 @@ function plGenerar(){
   var n = Math.round(num($("pl-n").value));
   if(!isFinite(n) || n < 3 || n > 200){ sError(); alert("Ingresá un número de lados entre 3 y 200."); return; }
   PL.n = n;
+  PL.angMetodo = null; PL.sinCompensar = false;
   var h = "<table><thead><tr><th>#</th><th>Lado (m)</th><th>Ángulo g</th><th>m</th><th>s</th></tr></thead><tbody>";
   for(var i = 1; i <= n; i++){
     h += "<tr><td class='lbl'>" + i + "</td>" +
@@ -2517,6 +2518,7 @@ function plVerificar(){
     var todos = [];
     for(var i = 1; i <= PL.n; i++) todos.push(i);
     repartirEn(todos);
+    PL.angMetodo = "repartiendo entre todos los ángulos";
   });
 
   var be = $("pl-rep-elegir");
@@ -2535,6 +2537,7 @@ function plVerificar(){
       for(var j = 0; j < chks.length; j++){ if(chks[j].checked) sel.push(parseInt(chks[j].value, 10)); }
       if(sel.length === 0){ sError(); alert("Marcá al menos un vértice."); return; }
       repartirEn(sel);
+      PL.angMetodo = "repartiendo entre los vértices elegidos";
     });
   });
 
@@ -2543,6 +2546,7 @@ function plVerificar(){
   var bs = $("pl-seguir");
   if(bs) bs.addEventListener("click", function(){
     PL.sinCompensar = true;
+    PL.angMetodo = null;
     $("pl-elegir-box").innerHTML = "<div class='msg info'>Se calcula con el error de " + segStr(difSeg) +
       ", sin compensar. Cargá el azimut inicial en el paso 2 y tocá «Calcular superficie».</div>";
     sConfirm();
@@ -2558,6 +2562,7 @@ function plVerificar(){
     $("pl-elegir-box").innerHTML = "<div class='msg info'>Lado más corto: " + v1 + "–" + v2 + " (" + fmt(d.L[k], 2) +
       " m). La corrección se repartió entre sus vértices " + v1 + " y " + v2 + ".</div>";
     repartirEn([v1, v2]);
+    PL.angMetodo = "en el lado más corto";
   });
 }
 
@@ -2571,11 +2576,12 @@ $("pl-calcular").addEventListener("click", function(){
   var n = PL.n, i;
   var suma = d.A.reduce(function(a, b){ return a + b; }, 0);
   var difAng = Math.round((suma - 180 * (n - 2)) * 3600);   /* en segundos enteros */
+  /* Tolerancia del Art. 41, la misma que usa la verificación del paso 1. Se calcula
+     siempre, porque va a los resultados aunque el cierre haya dado exacto. */
+  var kCal = $("pl-k") ? num($("pl-k").value) : 20;
+  if(!isFinite(kCal) || kCal <= 0) kCal = 20;
+  var TCal = Math.round(kCal * Math.sqrt(n));
   if(Math.abs(difAng) > 0.5){
-    /* Tolerancia del Art. 41, la misma que usa la verificación del paso 1 */
-    var kCal = $("pl-k") ? num($("pl-k").value) : 20;
-    if(!isFinite(kCal) || kCal <= 0) kCal = 20;
-    var TCal = Math.round(kCal * Math.sqrt(n));
     if(Math.abs(difAng) > TCal){
       /* Fuera de tolerancia no se calcula: hay que volver a los ángulos medidos */
       sError();
@@ -2619,14 +2625,27 @@ $("pl-calcular").addEventListener("click", function(){
   var tol = TOL[$("pl-mensura").value](lt);
   var dentro = error < tol;   /* Art. 42: E debe ser MENOR que T, sin redondear */
 
-  PL.datos = { L:d.L, Z:Z, x:x, y:y, ex:ex, ey:ey, error:error, tol:tol, lt:lt, comp:false, mcalc: ($("pl-metcalc2") && $("pl-metcalc2").checked) ? 2 : 1 };
+  PL.datos = { L:d.L, Z:Z, x:x, y:y, ex:ex, ey:ey, error:error, tol:tol, lt:lt, comp:false,
+               difAng: difAng, tolAng: TCal, angMetodo: PL.angMetodo || null, mcalc: ($("pl-metcalc2") && $("pl-metcalc2").checked) ? 2 : 1 };
   plMostrar();
   /* mismo aviso grave que cuando se excede el cierre angular: el error lineal
      fuera de tolerancia no puede quedar tapado por una melodía */
   if(dentro) sMelodia(); else sAlerta();
 });
 
+/* Qué pasó con el cierre angular: compensado y por qué método, o sin compensar.
+   Va en los resultados y sale impreso, porque es una decisión del profesional que
+   cambia los números y tiene que quedar asentada. */
+function dtCierreAngular(D){
+  var dif = D.difAng || 0;
+  if(Math.abs(dif) <= 0.5){
+    return D.angMetodo ? "compensado " + D.angMetodo : "cierra exacto";
+  }
+  return "<b>sin compensar</b>: " + segStr(dif) + ", dentro de la tolerancia de " +
+         gmsStr((D.tolAng || 0) / 3600);
+}
 function plMostrar(){
+
   var D = PL.datos, n = PL.n, i;
   /* coordenadas totales */
   var X = [0], Y = [0];
@@ -2669,7 +2688,14 @@ function plMostrar(){
        fmt(errR, 2) + " m</span></td>" +
        "<td class='lbl'>Tolerancia Lineal " + ((($("pl-mensura") || {}).value) || "1") + "</td><td>" + fmt(tolR, 2) + " m &nbsp;" +
        (dentro ? "<span class='badge ok'>DENTRO</span>" : "<span class='badge no grave titila'>EXCEDE</span>") +
-       "</td></tr></tbody></table>";
+       "</td></tr>" +
+       /* El cierre angular, al lado del lineal: son los dos controles del trabajo y
+          conviene leerlos juntos, también en la hoja impresa. */
+       "<tr>" +
+       "<td class='lbl'>Error Angular</td><td>" + segStr(D.difAng || 0) + "</td>" +
+       "<td class='lbl'>Tolerancia Angular</td><td>" + gmsStr((D.tolAng || 0) / 3600) + "</td>" +
+       "<td class='lbl'>Cierre angular</td><td colspan='3'>" + dtCierreAngular(D) + "</td>" +
+       "</tr></tbody></table>";
 
   /* La insignia EXCEDE es chica y va dentro de una tabla que además se desplaza en
      horizontal: en pantalla angosta puede quedar fuera de la vista. El error lineal
@@ -2823,6 +2849,7 @@ function plMostrar(){
 
   h += "<p style='font-size:.9rem; margin:10px 0 0; color:var(--ink);'>Superficie calculada " +
        (D.mcalc === 2 ? "<b>por coordenadas</b>" : "<b>por planilla de cálculo (dobles superficies)</b>") +
+       " &nbsp;·&nbsp; Cierre angular: <b>" + dtCierreAngular(D) + "</b>" +
        " &nbsp;·&nbsp; Compensación lineal de los lados: " +
        (D.comp ? "<b>" + D.metodo + "</b>." + ((D.met === 2 || D.met === 3) ? " Se compensaron los lados y los ángulos." : "") : "<b>SIN COMPENSAR</b> — la superficie incluye el error de cierre lineal.") + "</p>";
 
