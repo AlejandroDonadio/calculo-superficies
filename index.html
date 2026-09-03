@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "9.0";
+var APP_VER = "9.1";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -707,7 +707,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 9.0 · Última actualización: 31/08/2026 15:06 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 9.1 · Última actualización: 03/09/2026 09:13 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2571,9 +2571,34 @@ function plHabilitarPaso2(){
   $("pl-az-g").focus();
 }
 
+/* El método de cálculo se leía solo al tocar "Calcular superficie": marcabas la otra
+   opción y la pantalla no cambiaba, así que parecía que daban lo mismo. Con la
+   poligonal sin cerrar pueden diferir en varios metros cuadrados. */
+["pl-metcalc1","pl-metcalc2"].forEach(function(id){
+  var r = $(id);
+  if(!r) return;
+  r.addEventListener("change", function(){
+    if(!PL.datos) return;
+    PL.datos.mcalc = (id === "pl-metcalc2") ? 2 : 1;
+    sTick();
+    plMostrar();
+  });
+});
+
 $("pl-calcular").addEventListener("click", function(){
+
   var d = plLeer(); if(!d) return;
+  /* Calcular relee la planilla, así que una compensación ya hecha se pierde. Antes
+     pasaba en silencio: se volvía al error de cierre original sin decir nada. */
+  if(PL.datos && PL.datos.comp){
+    sError();
+    if(!confirm("Este polígono ya está compensado por " + PL.datos.metodo + ".\n\n" +
+                "Volver a calcular parte otra vez de la planilla, así que esa compensación " +
+                "se descarta y el error de cierre vuelve al original.\n\n" +
+                "¿Calcular de nuevo?")) return;
+  }
   var n = PL.n, i;
+
   var suma = d.A.reduce(function(a, b){ return a + b; }, 0);
   var difAng = Math.round((suma - 180 * (n - 2)) * 3600);   /* en segundos enteros */
   /* Tolerancia del Art. 41, la misma que usa la verificación del paso 1. Se calcula
@@ -2835,7 +2860,7 @@ function plMostrar(){
       "<label style='" + estRad + "'>" +
       "<input type='radio' name='pl-alc' id='pl-alc-t' checked style='accent-color:var(--marca);'> Total (todos los lados)</label>" +
       "<label style='" + estRad + "'>" +
-      "<input type='radio' name='pl-alc' id='pl-alc-p' style='accent-color:var(--marca);'> Parcial (elegir los lados a compensar)</label></div>" +
+      "<input type='radio' name='pl-alc' id='pl-alc-p' style='accent-color:var(--marca);'> Parcial (elegir los lados a compensar, conviene compensar entre dos o más lados)</label></div>" +
       "<button class='primary' id='pl-compensar'>Compensar</button>" +
       /* Cuarta opción: no compensar. Solo si el error entra en tolerancia; si la excede,
          dejarlo así no es una decisión válida y el botón no aparece. */
@@ -2870,6 +2895,17 @@ function plMostrar(){
                     : "<b>SIN COMPENSAR</b> — la superficie incluye el error de cierre lineal.")) + "</p>";
 
   h += "<div class='big-result'>SUPERFICIE= " + fmt(w, 2) + "m² <small>= " + haStr(w) + "</small></div>";
+  /* Los dos métodos coinciden cuando la poligonal cierra; si no cierra, difieren. Como
+     el elegido define la superficie que va al plano, conviene ver qué daría el otro sin
+     ir a buscarlo. Si ya se pidió la comparación completa, no se repite. */
+  var difMetodos = Math.abs(wPlan - wCoord);
+  if(!D.verOtro && difMetodos >= 0.005){
+    h += "<p style='font-size:.82rem; color:var(--ink-soft); margin:6px 0 0;'>Por el método de <b>" +
+         (porCoord ? "planilla de cálculo" : "coordenadas") + "</b> daría <b>" +
+         fmt(porCoord ? wPlan : wCoord, 2) + " m²</b>: difieren en " + fmt(difMetodos, 2) +
+         " m², porque queda un error de cierre de " + fmt(D.error, 2) +
+         " m. Compensando la poligonal, los dos métodos coinciden.</p>";
+  }
   h += dibujaPlano(X, Y, D.L, w);
   $("pl-resultados").style.display = "block";
   $("pl-res-body").innerHTML = h;
