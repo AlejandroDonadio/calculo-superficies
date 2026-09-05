@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "11.3";
+var APP_VER = "11.4";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -200,11 +200,11 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
 .aviso-desp{ display:none; margin:2px 0 10px; }
 .aviso-desp .txt{ display:block; font-size:.76rem; font-weight:600; color:var(--marca);
   letter-spacing:.01em; margin-bottom:3px; }
-/* 10 px de alto: fina, pero agarrable. El alto solo importa para el toque inicial, porque
+/* 8 px de alto: fina, pero agarrable. El alto solo importa para el toque inicial, porque
    el puntero queda capturado y el arrastre sigue aunque el dedo se corra hacia arriba o
    hacia abajo. touch-action:none evita que el navegador se quede con el gesto para
    desplazar la página en vez de la tabla. */
-.barra-desp{ display:none; height:10px; background:var(--marca-suave); border-radius:5px;
+.barra-desp{ display:none; height:8px; background:var(--marca-suave); border-radius:4px;
   margin:0; position:relative; overflow:hidden; touch-action:none; cursor:grab; }
 .barra-desp:active{ cursor:grabbing; }
 .aviso-desp .barra-desp{ display:block; }
@@ -214,10 +214,10 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
    visible. Los puntos además le dan textura de indicador, para que no se lea como una
    línea decorativa más. */
 .barra-desp::before{ content:""; position:absolute; inset:0;
-  background:radial-gradient(circle, var(--marca) 1.9px, transparent 2.3px);
-  background-size:8px 10px; opacity:.5; }
+  background:radial-gradient(circle, var(--marca) 1.5px, transparent 1.9px);
+  background-size:7px 8px; opacity:.5; }
 .barra-desp > i{ position:absolute; top:0; bottom:0; left:0; display:block;
-  background:var(--marca); border-radius:5px; }
+  background:var(--marca); border-radius:4px; }
 @media print{ .aviso-desp, .barra-desp{ display:none !important; } }
 
 @keyframes titilar-aviso{ 0%, 100%{opacity:1;} 50%{opacity:.35;} }
@@ -758,7 +758,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 11.3 · Última actualización: 05/09/2026 15:30 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 11.4 · Última actualización: 05/09/2026 16:42 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -4803,18 +4803,31 @@ function barrasDesplazamiento(){
      propósito: pintarBarra escribe estilos en cada cuadro del arrastre, y sin el filtro cada
      uno de esos cambios volvería a disparar el observador. */
   var QUE_MIRAR = { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] };
+  /* La espera se hace con setTimeout y no con requestAnimationFrame: el navegador no ejecuta
+     rAF mientras la pantalla está oculta —pestaña en segundo plano, teléfono bloqueado, app
+     cambiada—, y ahí el repaso quedaba en cola sin correr nunca. El diseño sí se calcula en
+     esa situación, así que con setTimeout los avisos se crean igual y ya están cuando la
+     pantalla vuelve. Junta en una sola pasada las muchas mutaciones de un render, que es lo
+     único que se le pedía a rAF. */
   var pendiente = 0;
   var obs = new MutationObserver(function(){
     if(pendiente) return;
-    pendiente = requestAnimationFrame(function(){
+    pendiente = setTimeout(function(){
       pendiente = 0;
       obs.disconnect();
       barrasDesplazamiento();
       obs.observe(caja, QUE_MIRAR);
-    });
+    }, 16);
   });
   obs.observe(caja, QUE_MIRAR);
   addEventListener("resize", barrasDesplazamiento);
+  /* Si la página se carga con la pantalla oculta —una pestaña en segundo plano, el teléfono
+     bloqueado, la app cambiada— el navegador no calcula el diseño: las tablas miden cero de
+     ancho, no se detecta desborde y no se crea ningún aviso. Al volver a mostrarla no hay
+     mutación ni cambio de tamaño que dispare la revisión, así que quedaba sin avisos hasta
+     el cálculo siguiente. Estos dos avisan cuando la pantalla vuelve a verse. */
+  addEventListener("visibilitychange", barrasDesplazamiento);
+  addEventListener("pageshow", barrasDesplazamiento);
   addEventListener("load", barrasDesplazamiento);
 })();
 
