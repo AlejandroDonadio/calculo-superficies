@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "11.2";
+var APP_VER = "11.3";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -200,11 +200,11 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
 .aviso-desp{ display:none; margin:2px 0 10px; }
 .aviso-desp .txt{ display:block; font-size:.76rem; font-weight:600; color:var(--marca);
   letter-spacing:.01em; margin-bottom:3px; }
-/* 13 px de alto: fina, pero agarrable. El alto solo importa para el toque inicial, porque
+/* 10 px de alto: fina, pero agarrable. El alto solo importa para el toque inicial, porque
    el puntero queda capturado y el arrastre sigue aunque el dedo se corra hacia arriba o
    hacia abajo. touch-action:none evita que el navegador se quede con el gesto para
    desplazar la página en vez de la tabla. */
-.barra-desp{ display:none; height:13px; background:var(--marca-suave); border-radius:7px;
+.barra-desp{ display:none; height:10px; background:var(--marca-suave); border-radius:5px;
   margin:0; position:relative; overflow:hidden; touch-action:none; cursor:grab; }
 .barra-desp:active{ cursor:grabbing; }
 .aviso-desp .barra-desp{ display:block; }
@@ -215,9 +215,9 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
    línea decorativa más. */
 .barra-desp::before{ content:""; position:absolute; inset:0;
   background:radial-gradient(circle, var(--marca) 1.9px, transparent 2.3px);
-  background-size:9px 13px; opacity:.5; }
+  background-size:8px 10px; opacity:.5; }
 .barra-desp > i{ position:absolute; top:0; bottom:0; left:0; display:block;
-  background:var(--marca); border-radius:7px; }
+  background:var(--marca); border-radius:5px; }
 @media print{ .aviso-desp, .barra-desp{ display:none !important; } }
 
 @keyframes titilar-aviso{ 0%, 100%{opacity:1;} 50%{opacity:.35;} }
@@ -758,7 +758,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 11.2 · Última actualización: 05/09/2026 15:04 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 11.3 · Última actualización: 05/09/2026 15:30 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
