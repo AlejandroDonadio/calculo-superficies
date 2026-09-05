@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "9.6";
+var APP_VER = "9.7";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -713,7 +713,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 9.6 · Última actualización: 05/09/2026 01:23 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 9.7 · Última actualización: 05/09/2026 01:36 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2573,9 +2573,12 @@ function plVerificar(){
 }
 
 function plHabilitarPaso2(){
+  var yaEstaba = $("pl-paso2").style.display === "block";
   $("pl-paso2").style.display = "block";
   plTolPrevia();
-  $("pl-az-g").focus();
+  /* el foco va al azimut solo cuando el paso se abre: si ya estaba abierto —una
+     reverificación por haber cambiado k— sería robarle el cursor al usuario */
+  if(!yaEstaba) $("pl-az-g").focus();
 }
 
 /* La tolerancia del Art. 40 depende del perímetro, así que solo se puede mostrar con la
@@ -2702,8 +2705,13 @@ function dtCierreAngular(D){
   if(Math.abs(dif) <= 0.5){
     return D.angMetodo ? "compensado " + D.angMetodo : "cierra exacto";
   }
-  return "<b>sin compensar</b>: " + segStr(dif) + ", dentro de la tolerancia de " +
-         gmsStr((D.tolAng || 0) / 3600);
+  /* Decía "dentro de la tolerancia" siempre, sin comprobarlo. Al calcular es cierto —fuera
+     de tolerancia el programa no calcula—, pero k es editable después, así que la frase
+     podía quedar en pie cuando ya no correspondía. Y esta línea sale impresa. */
+  var tol = D.tolAng || 0;
+  return "<b>sin compensar</b>: " + segStr(dif) +
+         (Math.abs(dif) <= tol ? ", dentro de la tolerancia de " : ", <b>que EXCEDE la tolerancia de </b>") +
+         gmsStr(tol / 3600);
 }
 function plMostrar(){
 
@@ -2765,6 +2773,17 @@ function plMostrar(){
   /* La insignia EXCEDE es chica y va dentro de una tabla que además se desplaza en
      horizontal: en pantalla angosta puede quedar fuera de la vista. El error lineal
      fuera de tolerancia se avisa entonces igual que el angular, a todo el ancho. */
+  /* El cálculo solo se hace con el cierre angular dentro de tolerancia. Si después se
+     endurece k, esa premisa deja de valer y el resultado queda caduco: hay que decirlo
+     con todas las letras, porque la hoja se imprime igual. */
+  if(Math.abs(D.difAng || 0) > (D.tolAng || 0)){
+    h += "<div class='msg bad grave titila'>El <b>cierre angular ya no entra en la tolerancia</b>: " +
+         segStr(D.difAng || 0) + " contra " + gmsStr((D.tolAng || 0) / 3600) + "." +
+         "<br><span style='font-size:.82rem;'>Este cálculo se hizo con una tolerancia más holgada. " +
+         "Al cambiar <b>k</b> dejó de valer: compensá el cierre angular en el paso 1 y volvé a calcular, " +
+         "o devolvé <b>k</b> al valor que corresponda.</span></div>";
+  }
+
   if(!dentro){
     h += "<div class='msg bad grave titila'>El <b>error de cierre lineal supera la tolerancia</b>: " +
          fmt(errR, 2) + " m contra " + fmt(tolR, 2) + " m de la Tolerancia Lineal " +
@@ -3963,8 +3982,25 @@ function plNormalizarK(){
   el.value = (isFinite(v) && v > 0) ? (String(v) + "″") : "20″";
 }
 document.addEventListener("change", function(e){
-  if(e.target && e.target.id === "pl-k") plNormalizarK();
+  if(e.target && e.target.id === "pl-k"){ plNormalizarK(); plKCambio(); }
 });
+
+/* k fija la tolerancia angular (T = k·√n) y se puede editar después de verificar y de
+   calcular. No tenía manejador: cambiarlo dejaba en pie una verificación y un resumen
+   hechos con el k viejo —incluso el rótulo "T = 20″·√4", con el número cocido adentro—
+   mientras el campo mostraba otro. Las tres cosas se imprimen en la misma hoja, así que
+   la hoja se contradecía. Es lo mismo que se arregló en la 9.0 para el tipo de mensura,
+   del lado angular, que había quedado sin cubrir. */
+function plKCambio(){
+  var caja = $("pl-cierre-ang");
+  if(!caja || !caja.innerHTML) return;   /* todavía no verificó: no hay nada que rehacer */
+  plVerificar();                         /* rehace T, el veredicto, y caduca el permiso de seguir */
+  if(!PL.datos) return;                  /* sin cálculo hecho, alcanza con la verificación */
+  var kv = num(($("pl-k") || {}).value);
+  if(!isFinite(kv) || kv <= 0) kv = 20;
+  PL.datos.tolAng = Math.round(kv * Math.sqrt(PL.n));
+  plMostrar();                           /* el resumen queda con la tolerancia que rige ahora */
+}
 
 function aplicarEstado(st){
   if(!st) return;
