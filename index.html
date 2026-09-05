@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "9.4";
+var APP_VER = "9.5";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -531,7 +531,9 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
       <div><label style="font-weight:700; color:var(--ink);">Método de Cálculo de la Superficie</label>
         <label style="display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-metcalc" id="pl-metcalc1" checked style="accent-color:var(--marca);"> 1 · Por planilla de cálculo</label>
         <label style="display:inline-flex; align-items:center; gap:6px; margin-top:2px; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-metcalc" id="pl-metcalc2" style="accent-color:var(--marca);"> 2 · Por coordenadas</label>
-        <p style="font-size:.8rem; color:var(--ink-soft); margin-top:4px;"><b>1 · Por planilla de cálculo</b> — dobles superficies, como la planilla del programa original: promedia las dos sumas, ΔX·(Y<sub>i</sub>+Y<sub>i+1</sub>) y ΔY·(X<sub>i</sub>+X<sub>i+1</sub>). <b>2 · Por coordenadas</b> — fórmula de Gauss sobre las coordenadas de los vértices. Con la poligonal cerrada dan idéntico. Sin cerrar difieren, y la diferencia crece con el error de cierre.</p>
+        <!-- ayuda para elegir: no se imprime. Qué método se usó ya queda asentado en los
+             resultados, así que en la hoja terminada este párrafo sería explicación de más. -->
+        <p class="no-print" style="font-size:.8rem; color:var(--ink-soft); margin-top:4px;"><b>1 · Por planilla de cálculo</b> — dobles superficies, como la planilla del programa original: promedia las dos sumas, ΔX·(Y<sub>i</sub>+Y<sub>i+1</sub>) y ΔY·(X<sub>i</sub>+X<sub>i+1</sub>). <b>2 · Por coordenadas</b> — fórmula de Gauss sobre las coordenadas de los vértices. Con la poligonal cerrada dan idéntico. Sin cerrar difieren, y la diferencia crece con el error de cierre.</p>
       </div>
     </div>
     <div class="row">
@@ -711,7 +713,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 9.4 · Última actualización: 05/09/2026 00:52 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 9.5 · Última actualización: 05/09/2026 00:59 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
