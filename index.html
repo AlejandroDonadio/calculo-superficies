@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "10.6";
+var APP_VER = "10.7";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -756,7 +756,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 10.6 · Última actualización: 05/09/2026 13:07 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 10.7 · Última actualización: 05/09/2026 13:10 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -4783,6 +4783,13 @@ function barrasDesplazamiento(){
 (function(){
   var caja = document.querySelector("main");
   if(!caja || !window.MutationObserver) return;
+  /* También hay que vigilar el atributo "class": cambiar de módulo no toca ningún nodo, solo
+     mueve la clase "active" de un panel a otro. Sin esto, al salir de un módulo sus avisos se
+     retiraban —correcto, porque el panel deja de verse— pero al volver no reaparecían, y el
+     módulo quedaba con las tablas desplazables y sin ningún aviso. Se filtra a "class" a
+     propósito: pintarBarra escribe estilos en cada cuadro del arrastre, y sin el filtro cada
+     uno de esos cambios volvería a disparar el observador. */
+  var QUE_MIRAR = { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] };
   var pendiente = 0;
   var obs = new MutationObserver(function(){
     if(pendiente) return;
@@ -4790,10 +4797,10 @@ function barrasDesplazamiento(){
       pendiente = 0;
       obs.disconnect();
       barrasDesplazamiento();
-      obs.observe(caja, { childList: true, subtree: true });
+      obs.observe(caja, QUE_MIRAR);
     });
   });
-  obs.observe(caja, { childList: true, subtree: true });
+  obs.observe(caja, QUE_MIRAR);
   addEventListener("resize", barrasDesplazamiento);
   addEventListener("load", barrasDesplazamiento);
 })();
