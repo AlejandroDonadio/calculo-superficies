@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "10.0";
+var APP_VER = "10.1";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -732,7 +732,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 10.0 · Última actualización: 05/09/2026 11:10 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 10.1 · Última actualización: 05/09/2026 11:28 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2927,7 +2927,13 @@ function plMostrar(){
       "es para cuando tenés motivo para creer que el error viene de lados determinados: un tramo con " +
       "vegetación, quebrado, medido indirectamente o remedido. Los lados que no marques conservan " +
       "exactamente la longitud medida, así que los marcados absorben todo el error y reciben " +
-      "correcciones mayores que en una compensación total.</li>" +
+      "correcciones mayores que en una compensación total. " +
+      /* La regla es del alcance, no de los métodos: en una compensación total participan
+         todos los lados y no viene al caso. Y "se sugiere" es el verbo que sirve para los
+         tres: en Crandall el mínimo es obligatorio —por debajo el sistema no tiene
+         solución— y en los proporcionales es criterio. Puesta acá se lee al decidir el
+         alcance, no después de marcar Parcial. */
+      "<b>Se sugiere al menos dos lados para compensar ambos errores.</b></li>" +
       "</ul></div>" +
       "<div class='row'>" +
       "<div><label>Método de compensación lineal — teclas <b>1</b> / <b>2</b> / <b>3</b></label>" +
