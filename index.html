@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "11.5";
+var APP_VER = "11.6";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -758,7 +758,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 11.5 · Última actualización: 05/09/2026 17:23 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 11.6 · Última actualización: 05/09/2026 18:22 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2610,10 +2610,25 @@ function plVerificar(){
     var k = 0;
     for(var i = 1; i < PL.n; i++){ if(d.L[i] < d.L[k]) k = i; }
     var v1 = k + 1, v2 = (k + 1) % PL.n + 1;
-    $("pl-elegir-box").innerHTML = "<div class='msg info'>Lado más corto: " + v1 + "–" + v2 + " (" + fmt(d.L[k], 2) +
-      " m). La corrección se repartió entre sus vértices " + v1 + " y " + v2 + ".</div>";
     repartirEn([v1, v2]);
     PL.angMetodo = "en el lado más corto";
+    /* El aviso va DESPUÉS de repartir, y colgado del recuadro entero. Escrito antes —como
+       estaba— se borraba en el mismo instante: repartirEn termina reverificando el cierre, y
+       esa reverificación rehace el recuadro con todo lo que tenga adentro, incluido el
+       pl-elegir-box donde se escribía. Resultado: el único método donde el programa elige el
+       lado por su cuenta era el único que no decía cuál había elegido.
+       El fundamento va aparte y no se imprime: en la hoja terminada interesa qué se hizo, no
+       por qué ese método razona así. */
+    var caja = $("pl-cierre-ang");
+    if(caja){
+      var aviso = document.createElement("div");
+      aviso.className = "msg info";
+      aviso.innerHTML = "<b>Lado más corto: " + v1 + "–" + v2 + " (" + fmt(d.L[k], 2) + " m).</b> " +
+        "La corrección se repartió entre sus vértices " + v1 + " y " + v2 + "." +
+        "<span class='no-print'> Los errores de centrado y puntería pesan más cuanto más corta " +
+        "es la visual, así que es donde el error angular más probablemente se originó.</span>";
+      caja.appendChild(aviso);
+    }
   });
 }
 
