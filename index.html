@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "10.3";
+var APP_VER = "9.8";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -184,24 +184,6 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
    marca la llegada del aviso; el rojo lleno y el sonido ya lo sostienen después, sin
    dejar movimiento reclamando atención mientras se revisa la planilla. Se respeta a
    quien pidió menos movimiento en pantalla, y al imprimir tampoco se mueve. */
-/* Barra de desplazamiento propia: la dibuja el programa debajo de cada tabla que no
-   entra en la pantalla. Fuera del celular no aparece —ahí la del navegador se ve bien—
-   y nunca se imprime. El grosor del trazo rojo dice qué parte de la tabla estás viendo,
-   y su posición, en qué parte estás. */
-.barra-desp{ display:none; height:12px; background:var(--marca-suave); border-radius:7px;
-  margin:2px 0 10px; position:relative; overflow:hidden; }
-/* El tramo que todavía no estás viendo va punteado en rojo, no en rosa liso: así la barra
-   entera queda del color de la marca —llena donde estás, punteada hacia donde sigue la
-   tabla— y sobresale más. Puntear el trazo lleno habría sido al revés: menos tinta, menos
-   visible. Los puntos además le dan textura de indicador, para que no se lea como una
-   línea decorativa más. */
-.barra-desp::before{ content:""; position:absolute; inset:0;
-  background:radial-gradient(circle, var(--marca) 1.9px, transparent 2.3px);
-  background-size:9px 12px; opacity:.5; }
-.barra-desp > i{ position:absolute; top:0; bottom:0; left:0; display:block;
-  background:var(--marca); border-radius:7px; }
-@media print{ .barra-desp{ display:none !important; } }
-
 @keyframes titilar-aviso{ 0%, 100%{opacity:1;} 50%{opacity:.35;} }
 .titila{animation:titilar-aviso 1.8s ease-in-out 3 both;}
 @media (prefers-reduced-motion: reduce){
@@ -433,15 +415,6 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
   .metodo-btn{min-width:0; width:100%;}
   /* tablas anchas: se deslizan con el dedo en vez de romper la pantalla */
   table{display:block; overflow-x:auto; -webkit-overflow-scrolling:touch;}
-  /* La línea de desplazamiento es el único aviso de que la tabla sigue hacia la derecha,
-     y en el celular esconde casi la mitad del ancho: ahí quedan la Tolerancia angular y
-     la fila del Error Angular. La del navegador no sirve para avisarlo —en iPhone, Safari
-     ignora el estilo y además solo la dibuja mientras se arrastra el dedo, así que la
-     tabla parece terminar donde termina la pantalla—. Se apaga la del sistema y el
-     programa dibuja la suya (.barra-desp), siempre a la vista desde que la tabla aparece. */
-  table, .plano-box{ scrollbar-width:none; }
-  table::-webkit-scrollbar, .plano-box::-webkit-scrollbar{ display:none; }
-  .barra-desp{ display:block; }
   /* --- evitar desborde lateral en triángulos y cuadriláteros --- */
   html, body{max-width:100%; overflow-x:hidden;}
   .panel, .card, .row{max-width:100%; box-sizing:border-box;}
@@ -740,7 +713,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 10.3 · Última actualización: 05/09/2026 11:58 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 9.8 · Última actualización: 05/09/2026 10:14 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2491,27 +2464,6 @@ function plVerificar(){
          "<b>(+)</b> la suma de los ángulos medidos supera la condición teórica · " +
          "<b>(−)</b> queda por debajo. La compensación la reparte en el sentido contrario.</span>" +
          "</div>" +
-         /* El cierre angular ofrecía tres métodos y ninguna ayuda para elegirlos: el texto
-            de arriba manda a "alguno de los tres métodos de abajo" sin decir cuál conviene.
-            Del lado lineal esa ayuda existe desde siempre. Mismo formato y mismo encabezado,
-            para que las dos decisiones se lean igual. No se imprime. */
-         "<div class='ayuda-comp no-print'>" +
-         "<div class='tit'>¿Qué método de compensación conviene?</div>" +
-         "<div class='sub'>Según qué medición merece más confianza:</div>" +
-         "<ul>" +
-         "<li><b>Repartir entre todos los ángulos</b> — cuando todos se midieron igual, con " +
-         "el mismo instrumento y el mismo cuidado: no hay motivo para cargarle el error a " +
-         "ninguno en particular. El reparto va en segundos enteros y el resto se distribuye " +
-         "de a 1″, así el polígono cierra exacto.</li>" +
-         "<li><b>Elegir ángulos a compensar</b> — cuando sospechás de vértices determinados: " +
-         "una estación con mala visibilidad, una visual corta, un punto medido en peores " +
-         "condiciones. La corrección va solo a los que marques.</li>" +
-         "<li><b>Corrección manual asistida (compensar el lado más corto)</b> — el programa " +
-         "busca el lado más corto y reparte la corrección entre sus dos vértices. Los errores " +
-         "de centrado y puntería se traducen en un error angular tanto mayor cuanto más corta " +
-         "es la visual, así que el lado más corto es donde ese error más probablemente se " +
-         "originó.</li>" +
-         "</ul></div>" +
          "<div class='row no-print'>" +
          "<button id='pl-rep-todos'>Repartir entre todos los ángulos</button>" +
          "<button id='pl-rep-elegir'>Elegir ángulos a compensar…</button>" +
@@ -2956,15 +2908,7 @@ function plMostrar(){
       "es para cuando tenés motivo para creer que el error viene de lados determinados: un tramo con " +
       "vegetación, quebrado, medido indirectamente o remedido. Los lados que no marques conservan " +
       "exactamente la longitud medida, así que los marcados absorben todo el error y reciben " +
-      "correcciones mayores que en una compensación total. " +
-      /* La regla es del alcance, no de los métodos: en una compensación total participan
-         todos los lados y no viene al caso. Y "se sugiere" es el verbo que sirve para los
-         tres: en Crandall el mínimo es obligatorio —por debajo el sistema no tiene
-         solución— y en los proporcionales es criterio. Puesta acá se lee al decidir el
-         alcance, no después de marcar Parcial. */
-      /* "ambos errores" se nombra acá por primera vez: el paréntesis lo hace entenderse
-         solo, sin tener que haber visto antes la tabla de resultados */
-      "<b>Se sugiere al menos dos lados para compensar ambos errores (ex y ey).</b></li>" +
+      "correcciones mayores que en una compensación total.</li>" +
       "</ul></div>" +
       "<div class='row'>" +
       "<div><label>Método de compensación lineal — teclas <b>1</b> / <b>2</b> / <b>3</b></label>" +
@@ -4701,75 +4645,11 @@ if(location.search.indexOf("pruebas=1") >= 0){
   addEventListener("load", function(){ setTimeout(mostrarPruebas, 300); });
 }
 
-/* ============ barra de desplazamiento propia ============
-   En iPhone, Safari ignora el estilo de las barras del navegador y además solo dibuja la
-   suya mientras se arrastra el dedo: la tabla parece terminar donde termina la pantalla, y
-   quien no conoce el programa no se entera de que la Tolerancia angular y la fila del
-   Error Angular están más a la derecha. La barra la dibuja entonces el programa, siempre
-   a la vista desde que la tabla aparece y arrancando a la izquierda. */
-function pintarBarra(el, b){
-  var i = b.firstChild;
-  /* el trazo nunca baja de 12%: por angosto que quede, tiene que verse */
-  i.style.width = Math.max(el.clientWidth / el.scrollWidth * 100, 12) + "%";
-  i.style.left  = (el.scrollLeft / el.scrollWidth * 100) + "%";
-}
-
-function barrasDesplazamiento(){
-  var caja = document.querySelector("main");
-  if(!caja) return;
-  var els = caja.querySelectorAll("table, .plano-box");
-  for(var k = 0; k < els.length; k++){
-    var el = els[k];
-    var sig = el.nextElementSibling;
-    var tiene = sig && sig.className === "barra-desp";
-    /* sin desborde no hay nada que avisar; y si el elemento está oculto, clientWidth da 0 */
-    if(el.clientWidth === 0 || el.scrollWidth - el.clientWidth <= 2){
-      if(tiene) sig.parentNode.removeChild(sig);
-      continue;
-    }
-    if(!tiene){
-      var b = document.createElement("div");
-      b.className = "barra-desp";
-      b.setAttribute("aria-hidden", "true");   /* es una ayuda visual: al lector de pantalla no le aporta */
-      b.appendChild(document.createElement("i"));
-      el.parentNode.insertBefore(b, el.nextSibling);
-      (function(el2, b2){
-        el2.addEventListener("scroll", function(){ pintarBarra(el2, b2); }, { passive: true });
-      })(el, b);
-      sig = b;
-    }
-    pintarBarra(el, sig);
-  }
-}
-
-/* Las tablas se rehacen con innerHTML en cada cálculo, así que la barra hay que reponerla.
-   El observador se desconecta mientras trabaja: si no, sus propias inserciones lo
-   volverían a disparar. El rAF junta en una sola pasada las muchas mutaciones de un
-   render. */
-(function(){
-  var caja = document.querySelector("main");
-  if(!caja || !window.MutationObserver) return;
-  var pendiente = 0;
-  var obs = new MutationObserver(function(){
-    if(pendiente) return;
-    pendiente = requestAnimationFrame(function(){
-      pendiente = 0;
-      obs.disconnect();
-      barrasDesplazamiento();
-      obs.observe(caja, { childList: true, subtree: true });
-    });
-  });
-  obs.observe(caja, { childList: true, subtree: true });
-  addEventListener("resize", barrasDesplazamiento);
-  addEventListener("load", barrasDesplazamiento);
-})();
-
 /* ============ arranque ============ */
 triCampos();
 cuCampos();
 renderTabs();
 restaurarEstado();
-barrasDesplazamiento();
 </script>
 
 
