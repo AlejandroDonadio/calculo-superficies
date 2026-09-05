@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "10.1";
+var APP_VER = "10.2";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -190,6 +190,14 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
    y su posición, en qué parte estás. */
 .barra-desp{ display:none; height:12px; background:var(--marca-suave); border-radius:7px;
   margin:2px 0 10px; position:relative; overflow:hidden; }
+/* El tramo que todavía no estás viendo va punteado en rojo, no en rosa liso: así la barra
+   entera queda del color de la marca —llena donde estás, punteada hacia donde sigue la
+   tabla— y sobresale más. Puntear el trazo lleno habría sido al revés: menos tinta, menos
+   visible. Los puntos además le dan textura de indicador, para que no se lea como una
+   línea decorativa más. */
+.barra-desp::before{ content:""; position:absolute; inset:0;
+  background:radial-gradient(circle, var(--marca) 1.9px, transparent 2.3px);
+  background-size:9px 12px; opacity:.5; }
 .barra-desp > i{ position:absolute; top:0; bottom:0; left:0; display:block;
   background:var(--marca); border-radius:7px; }
 @media print{ .barra-desp{ display:none !important; } }
@@ -732,7 +740,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 10.1 · Última actualización: 05/09/2026 11:28 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 10.2 · Última actualización: 05/09/2026 11:42 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
