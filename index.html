@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "10.2";
+var APP_VER = "10.3";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -740,7 +740,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 10.2 · Última actualización: 05/09/2026 11:42 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 10.3 · Última actualización: 05/09/2026 11:58 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2491,6 +2491,27 @@ function plVerificar(){
          "<b>(+)</b> la suma de los ángulos medidos supera la condición teórica · " +
          "<b>(−)</b> queda por debajo. La compensación la reparte en el sentido contrario.</span>" +
          "</div>" +
+         /* El cierre angular ofrecía tres métodos y ninguna ayuda para elegirlos: el texto
+            de arriba manda a "alguno de los tres métodos de abajo" sin decir cuál conviene.
+            Del lado lineal esa ayuda existe desde siempre. Mismo formato y mismo encabezado,
+            para que las dos decisiones se lean igual. No se imprime. */
+         "<div class='ayuda-comp no-print'>" +
+         "<div class='tit'>¿Qué método de compensación conviene?</div>" +
+         "<div class='sub'>Según qué medición merece más confianza:</div>" +
+         "<ul>" +
+         "<li><b>Repartir entre todos los ángulos</b> — cuando todos se midieron igual, con " +
+         "el mismo instrumento y el mismo cuidado: no hay motivo para cargarle el error a " +
+         "ninguno en particular. El reparto va en segundos enteros y el resto se distribuye " +
+         "de a 1″, así el polígono cierra exacto.</li>" +
+         "<li><b>Elegir ángulos a compensar</b> — cuando sospechás de vértices determinados: " +
+         "una estación con mala visibilidad, una visual corta, un punto medido en peores " +
+         "condiciones. La corrección va solo a los que marques.</li>" +
+         "<li><b>Corrección manual asistida (compensar el lado más corto)</b> — el programa " +
+         "busca el lado más corto y reparte la corrección entre sus dos vértices. Los errores " +
+         "de centrado y puntería se traducen en un error angular tanto mayor cuanto más corta " +
+         "es la visual, así que el lado más corto es donde ese error más probablemente se " +
+         "originó.</li>" +
+         "</ul></div>" +
          "<div class='row no-print'>" +
          "<button id='pl-rep-todos'>Repartir entre todos los ángulos</button>" +
          "<button id='pl-rep-elegir'>Elegir ángulos a compensar…</button>" +
@@ -2941,7 +2962,9 @@ function plMostrar(){
          tres: en Crandall el mínimo es obligatorio —por debajo el sistema no tiene
          solución— y en los proporcionales es criterio. Puesta acá se lee al decidir el
          alcance, no después de marcar Parcial. */
-      "<b>Se sugiere al menos dos lados para compensar ambos errores.</b></li>" +
+      /* "ambos errores" se nombra acá por primera vez: el paréntesis lo hace entenderse
+         solo, sin tener que haber visto antes la tabla de resultados */
+      "<b>Se sugiere al menos dos lados para compensar ambos errores (ex y ey).</b></li>" +
       "</ul></div>" +
       "<div class='row'>" +
       "<div><label>Método de compensación lineal — teclas <b>1</b> / <b>2</b> / <b>3</b></label>" +
