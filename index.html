@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "12.1";
+var APP_VER = "12.2";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -762,7 +762,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 12.1 · Última actualización: 05/09/2026 20:44 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 12.2 · Última actualización: 05/09/2026 20:50 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2503,7 +2503,11 @@ function plVerificar(){
   } else {
     h += "<div class='msg " + (dentroAng ? "info" : "bad grave") + "'>Error de cierre angular: " + segStr(difSeg) +
          " &nbsp;" + (dentroAng ?
-           "<span class='badge ok'>DENTRO de tolerancia</span><br><span style='font-size:.82rem;'>tenés dos caminos: <b>compensarlo</b> por alguno de los tres métodos de abajo, o —como está dentro de tolerancia— <b>seguir calculando</b> con ese error. Al tocar «Calcular superficie» el programa te lo va a preguntar.</span>" :
+           /* La última oración promete una pregunta que deja de existir en cuanto se toca
+              "sigo calculando": ahí la decisión queda tomada y al calcular ya no se pregunta
+              nada. Va en su propio span para poder retirarla en ese momento, en vez de
+              dejarla en pantalla afirmando algo que dejó de ser cierto. */
+           "<span class='badge ok'>DENTRO de tolerancia</span><br><span style='font-size:.82rem;'>tenés dos caminos: <b>compensarlo</b> por alguno de los tres métodos de abajo, o —como está dentro de tolerancia— <b>seguir calculando</b> con ese error.<span id='pl-aviso-pregunta'> Al tocar «Calcular superficie» el programa te lo va a preguntar.</span></span>" :
            "<span class='badge no'>EXCEDE la tolerancia</span><br><span style='font-size:.82rem;'>Supera la tolerancia de " + gmsStr(Tang / 3600) +
            ". Conviene revisar los ángulos medidos en campo antes de compensar.</span>") +
          (dentroAng ? "" :
@@ -2627,6 +2631,10 @@ function plVerificar(){
   if(bs) bs.addEventListener("click", function(){
     PL.sinCompensar = true;
     PL.angMetodo = null;
+    /* la decisión ya está tomada: al calcular no se vuelve a preguntar, así que la frase
+       que lo prometía se retira en vez de quedar contradiciendo lo que va a pasar */
+    var avp = $("pl-aviso-pregunta");
+    if(avp && avp.parentNode) avp.parentNode.removeChild(avp);
     $("pl-elegir-box").innerHTML = "<div class='msg info'>Se calcula con el error de " + segStr(difSeg) +
       ", sin compensar. Cargá el azimut inicial en el paso 2 y tocá «Calcular superficie».</div>";
     sConfirm();
@@ -2831,7 +2839,11 @@ function plMostrar(){
   var CIERRA_EXACTO = 1e-9;
   var cierraExacto  = D.error <= CIERRA_EXACTO;
   var h = "";
-  if(!poligonoSimple(X, Y)) h += "<div class='msg info'><b>Atención:</b> con estos datos los lados del polígono se cruzan. Revisá los ángulos y las longitudes: la superficie no corresponde a una parcela cerrada simple.</div>";
+  /* El módulo Coordenadas avisaba lo mismo pero explicando qué es el número que se está
+     viendo —la suma algebraica de las dos hojas—, y este no. Se equipara, conservando el
+     consejo propio de la planilla: acá se revisan ángulos y longitudes, no el orden de los
+     vértices, que es lo que se revisa en Coordenadas. */
+  if(!poligonoSimple(X, Y)) h += "<div class='msg info'><b>Atención:</b> con estos datos los lados del polígono se cruzan. La superficie que sigue es la suma algebraica de las dos hojas y no representa una parcela. Revisá los ángulos y las longitudes.</div>";
   h += "<table><thead><tr><th>Lado</th><th>Long. (m)</th><th>" + ((D.comp && D.Zaj) ? "Azimut ajustado" : "Azimut") + "</th><th>Rumbo</th><th>Δx</th><th>Δy</th></tr></thead><tbody>";
   for(i = 0; i < n; i++){
     var r = rumbo(Zver[i]);
@@ -4241,7 +4253,14 @@ function trabEscribir(a){
   try{ localStorage.setItem(TRAB_KEY, JSON.stringify(a)); return true; }
   catch(e){
     sError();
-    alert("No hay lugar para guardar más trabajos. Borrá alguno desde «Abrir trabajo» y volvé a intentar.");
+    /* El navegador rechaza escribir por más de un motivo, y este aviso daba por sentado uno
+       solo. En una ventana de incógnito también rechaza, y ahí borrar trabajos no arregla
+       nada: se pierde trabajo guardado para nada. El aviso del guardado automático ya lo
+       decía bien —"puede ser falta de lugar, o una ventana de incógnito"— y este no. */
+    alert("El navegador no deja guardar.\n\n" +
+          "Puede ser falta de lugar —en ese caso, borrá algún trabajo desde «Abrir trabajo»— " +
+          "o una ventana de incógnito, donde no se guarda nada.\n\n" +
+          "Exportá el trabajo a un archivo para no perderlo.");
     return false;
   }
 }
