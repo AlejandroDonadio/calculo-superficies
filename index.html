@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "9.1";
+var APP_VER = "9.2";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -707,7 +707,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 9.1 · Última actualización: 03/09/2026 09:13 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 9.2 · Última actualización: 04/09/2026 23:55 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2841,11 +2841,19 @@ function plMostrar(){
       "<b>Corrige las longitudes y también los ángulos.</b></li>" +
       "<li><b>3 · Con pesos por lado</b> — cuando <b>algunos lados se midieron en peores condiciones</b> " +
       "que otros (vegetación, tramos quebrados, medición indirecta). A mayor peso, menos corrección " +
-      "recibe ese lado. <b>Corrige las longitudes y también los ángulos.</b></li>" +
+      "recibe ese lado. <b>Corrige las longitudes y también los ángulos.</b> " +
+      "Es además la alternativa graduada a la compensación parcial: dejar un lado fijo equivale a " +
+      "darle peso infinito, y el peso permite graduar lo que la parcial resuelve de golpe.</li>" +
       "<li><b>Mediciones con GNSS/GPS</b> — no corresponde ninguno de los tres: no hay error de cierre " +
       "que repartir, porque cada vértice se determina de forma independiente. Usar el módulo " +
       "<b>Coordenadas</b>. Si la poligonal es <b>mixta</b> (algunos vértices por GNSS y otros con " +
       "estación total o cinta), método <b>3</b>, dando mayor peso a los lados medidos por GNSS.</li>" +
+      "<li><b>Alcance: total o parcial</b> — la compensación <b>total</b> reparte el error entre todos " +
+      "los lados y es lo que corresponde cuando la poligonal se midió de manera pareja. La <b>parcial</b> " +
+      "es para cuando tenés motivo para creer que el error viene de lados determinados: un tramo con " +
+      "vegetación, quebrado, medido indirectamente o remedido. Los lados que no marques conservan " +
+      "exactamente la longitud medida, así que los marcados absorben todo el error y reciben " +
+      "correcciones mayores que en una compensación total.</li>" +
       "</ul></div>" +
       "<div class='row'>" +
       "<div><label>Método de compensación lineal — teclas <b>1</b> / <b>2</b> / <b>3</b></label>" +
@@ -2859,8 +2867,14 @@ function plMostrar(){
       "<div><label>Alcance de la compensación</label>" +
       "<label style='" + estRad + "'>" +
       "<input type='radio' name='pl-alc' id='pl-alc-t' checked style='accent-color:var(--marca);'> Total (todos los lados)</label>" +
-      "<label style='" + estRad + "'>" +
-      "<input type='radio' name='pl-alc' id='pl-alc-p' style='accent-color:var(--marca);'> Parcial (elegir los lados a compensar, conviene compensar entre dos o más lados)</label></div>" +
+      /* dos renglones, como el botón "Está en tolerancia / no compenso y sigo": arriba la
+         instrucción, abajo el consejo en chico. El primer renglón conserva el peso de
+         "Total (todos los lados)" para que los dos rótulos de la fila se lean parejos. */
+      "<label style='" + estRad.replace("align-items:center", "align-items:flex-start") + "'>" +
+      "<input type='radio' name='pl-alc' id='pl-alc-p' style='accent-color:var(--marca); margin-top:2px;'>" +
+      "<span style='display:block; line-height:1.3;'>Parcial (elegir los lados a compensar)" +
+      "<span style='display:block; font-size:.78rem; opacity:.8;'>conviene compensar entre dos o más lados</span>" +
+      "</span></label></div>" +
       "<button class='primary' id='pl-compensar'>Compensar</button>" +
       /* Cuarta opción: no compensar. Solo si el error entra en tolerancia; si la excede,
          dejarlo así no es una decisión válida y el botón no aparece. */
@@ -2944,9 +2958,10 @@ function plMostrar(){
   var alcP = $("pl-alc-p"), alcT = $("pl-alc-t");
   function pintaLados(){
     var box = $("pl-lados-box");
-    var m3 = $("pl-met3"), m1 = $("pl-met1");
+    var m3 = $("pl-met3"), m1 = $("pl-met1"), m2 = $("pl-met2");
     var conPesos = m3 && m3.checked;
     var esCrandall = m1 && m1.checked;
+    var esProp = m2 && m2.checked;
     var parcial = alcP.checked;
     /* conservar lo que ya estaba marcado o cargado antes de redibujar */
     var prevP = {}, prevC = {}, i2;
@@ -2959,8 +2974,38 @@ function plMostrar(){
 
     if(!conPesos && !parcial){ box.innerHTML = ""; return; }
     var c = "";
-    if(parcial) c += "<div class='msg info' style='margin:4px 0 6px;'>Compensación parcial: marcá los lados que van a absorber el error (los demás quedan fijos)." +
-         (esCrandall ? " Se sugieren <b>dos lados como mínimo</b> para compensar los dos errores (ex y ey): con un solo lado el Método de Crandall no tiene solución y no se garantiza el cierre." : "") +
+    /* El bloque común vale para los tres métodos; el renglón final cambia según cuál esté
+       marcado, porque el mínimo de dos es obligatorio en Crandall (el sistema no tiene
+       solución por debajo) y criterio en los proporcionales (cierran igual, pero mal). */
+    if(parcial) c += "<div class='msg info' style='margin:4px 0 6px;'>" +
+         "<b>Compensación parcial:</b> marcá los lados que van a absorber el error (los demás quedan fijos)." +
+         "<br><br><b>Mínimo dos lados.</b> Una compensación parcial necesita que existan al menos dos " +
+         "lados sobre los cuales distribuir las correcciones. Con un solo lado no tenés una distribución: " +
+         "cualquier corrección que quieras imponer sobre ese único lado queda completamente determinada. " +
+         "Con dos lados ya tenés grados de libertad para repartir el error respetando las condiciones de cierre." +
+         "<br><br>Mínimo para el polígono: 3 lados · Mínimo para el tramo de compensación parcial: 2 lados." +
+         "<br><br><b>Qué implica dejar los otros fijos.</b> Los lados no marcados conservan exactamente la " +
+         "longitud medida, así que todo el error se concentra en los marcados: reciben correcciones más " +
+         "grandes que en una compensación total. Cuantos menos marques, más se deforman. Eso es lo que hace " +
+         "que el mínimo de dos sea un piso y no un objetivo." +
+         "<br><br>El alcance queda asentado en el resumen del cálculo y sale impreso: <i>compensación " +
+         "parcial sobre los lados 1–2, 3–4</i>." +
+         "<br><br>" +
+         (esCrandall
+           ? "Con el <b>Método de Crandall</b> el mínimo es obligatorio: con un solo lado —o con lados todos " +
+             "paralelos entre sí— el sistema no tiene solución y el cálculo se rechaza."
+           : conPesos
+             ? "Vale lo mismo que en el proporcional. Y acá tenés una alternativa más fina: en vez de dejar " +
+               "lados afuera, dejalos a todos adentro con <b>pesos altos</b> en los que no querés tocar. " +
+               "Dejar un lado fijo equivale a darle peso infinito; el peso te deja graduar lo que la parcial " +
+               "resuelve de golpe."
+             : esProp
+               ? "Con el <b>método proporcional</b> la poligonal cierra igual con un solo lado, pero ese lado " +
+                 "absorbe él solo todo el error y queda deformado, mientras los demás siguen sin corregir. " +
+                 "El programa te deja hacerlo: te avisa antes, con el error a la vista, y decidís vos."
+               : "Elegí arriba el método de compensación: el mínimo de dos es <b>obligatorio</b> en Crandall " +
+                 "—por debajo el sistema no tiene solución— y <b>criterio</b> en los dos proporcionales, " +
+                 "que cierran igual con un solo lado aunque lo dejen deformado.") +
          "</div>";
     if(conPesos) c += "<div class='msg info' style='margin:4px 0 6px;'>Pesos: 1 = confianza normal. A <b>mayor</b> peso (medición más confiable), <b>menos</b> corrección recibe ese lado; a menor peso, más corrección absorbe.</div>";
     c += "<table><thead><tr>" + (parcial ? "<th>Comp.</th>" : "") +
@@ -3052,7 +3097,7 @@ function plMostrar(){
     if(alcP.checked){
       var chks = document.querySelectorAll(".pl-lado-chk");
       for(j = 0; j < chks.length; j++){ if(chks[j].checked) sel.push(parseInt(chks[j].value, 10)); }
-      if(sel.length === 0){ sError(); alert("Marcá al menos un lado para la compensación parcial."); return; }
+      if(sel.length === 0){ sError(); alert("Marcá los lados que van a absorber el error: conviene dos o más."); return; }
     } else {
       for(i = 0; i < n; i++) sel.push(i);
     }
@@ -3123,7 +3168,21 @@ function plMostrar(){
       var escala = Math.abs(G1 * H1) + Math.abs(F1 * F1);
       if(escala === 0 || Math.abs(den) < escala * 1e-6){
         sError();
-        alert("Con esos lados el método de Crandall no tiene solución (hacen falta al menos dos lados no paralelos). Elegí más lados o usá el método proporcional.");
+        /* Nombrar los lados que causan el problema en vez de dejarlo adivinando. Por
+           Cauchy-Schwarz, G1·H1 = F1² solo si todos los lados elegidos son proporcionales
+           en Δx y Δy, es decir paralelos entre sí: por eso el rumbo se toma módulo 180°,
+           que agrupa los dos sentidos de una misma dirección. */
+        var nomSel = sel.map(function(k){ return (k+1) + "–" + (k+2 > n ? 1 : k+2); }).join(", ");
+        var detalle;
+        if(sel.length === 1){
+          detalle = "Marcaste un solo lado, el " + nomSel + ": con uno no hay nada que distribuir.";
+        } else {
+          var dir = norm360(Math.atan2(D.y[sel[0]], D.x[sel[0]]) * 180 / Math.PI) % 180;
+          detalle = "Los lados que marcaste (" + nomSel + ") son todos paralelos entre sí, en la " +
+                    "dirección " + gmsStr(dir) + ": aportan una sola dirección y el sistema queda indeterminado.";
+        }
+        alert("Con esos lados el Método de Crandall no tiene solución: hacen falta al menos dos lados no paralelos.\n\n" +
+              detalle + "\n\nMarcá algún lado que corra en otra dirección, o usá el método proporcional.");
         return;
       }
       var Dd = ((D.ey * F1) - (D.ex * G1)) / den;
