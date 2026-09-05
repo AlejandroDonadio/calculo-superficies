@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "11.7";
+var APP_VER = "11.8";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -571,9 +571,9 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
   <div class="card" id="pl-paso2" style="display:none;">
     <h2>2 · Azimut inicial y tolerancia</h2>
     <div class="row">
-      <div><label>Azimut (1–2) — grados</label><input type="text" class="gms" id="pl-az-g" inputmode="numeric"></div>
-      <div><label>minutos</label><input type="text" class="gms" id="pl-az-m" inputmode="numeric"></div>
-      <div><label>segundos</label><input type="text" class="gms" id="pl-az-s" inputmode="decimal"></div>
+      <div><label for="pl-az-g">Azimut (1–2) — grados</label><input type="text" class="gms" id="pl-az-g" inputmode="numeric"></div>
+      <div><label for="pl-az-m">minutos</label><input type="text" class="gms" id="pl-az-m" inputmode="numeric"></div>
+      <div><label for="pl-az-s">segundos</label><input type="text" class="gms" id="pl-az-s" inputmode="decimal"></div>
     </div>
     <p style="font-size:.8rem; color:var(--ink-soft); margin-top:2px;">En una mensura real, el azimut de la línea 1–2 debe ser el verdadero (georreferenciado o de rumbo conocido): de él dependen las coordenadas de los vértices. Para un cálculo libre se puede designar cualquiera (solo rota el polígono), y el recomendado es <b>0° 0' 0"</b>, que deja el primer lado apuntando al Norte y facilita la verificación. La superficie y el error total de cierre lineal no cambian con el azimut elegido, y la compensación elimina el mismo error cualquiera sea el arranque.</p>
     <div class="row">
@@ -650,27 +650,27 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
     </div>
     <div class="msg info" id="cu-caso-info" style="margin-top:0;"></div>
     <div class="row">
-      <div id="cu-f-a"><label>Lado a</label><input type="text" id="cu-a" inputmode="decimal"></div>
-      <div id="cu-f-b" style=""><label>Lado b</label><input type="text" id="cu-b" inputmode="decimal"></div>
-      <div id="cu-f-c"><label>Lado c</label><input type="text" id="cu-c" inputmode="decimal"></div>
-      <div id="cu-f-d"><label>Lado d (base)</label><input type="text" id="cu-d" inputmode="decimal"></div>
-      <div id="cu-f-e" style="display: none;"><label>Diagonal B–D</label><input type="text" id="cu-e" inputmode="decimal"></div>
+      <div id="cu-f-a"><label for="cu-a">Lado a</label><input type="text" id="cu-a" inputmode="decimal"></div>
+      <div id="cu-f-b" style=""><label for="cu-b">Lado b</label><input type="text" id="cu-b" inputmode="decimal"></div>
+      <div id="cu-f-c"><label for="cu-c">Lado c</label><input type="text" id="cu-c" inputmode="decimal"></div>
+      <div id="cu-f-d"><label for="cu-d">Lado d (base)</label><input type="text" id="cu-d" inputmode="decimal"></div>
+      <div id="cu-f-e" style="display: none;"><label for="cu-e">Diagonal B–D</label><input type="text" id="cu-e" inputmode="decimal"></div>
     </div>
     <div class="row">
       <div id="cu-f-A" style="display:flex; gap:8px; align-items:flex-end;">
-        <div><label>Ángulo A — g</label><input type="text" class="gms" id="cu-ag" inputmode="numeric"></div>
-        <div><label>m</label><input type="text" class="gms" id="cu-am" inputmode="numeric"></div>
-        <div><label>s</label><input type="text" class="gms" id="cu-as" inputmode="decimal"></div>
+        <div><label for="cu-ag">Ángulo A — g</label><input type="text" class="gms" id="cu-ag" inputmode="numeric"></div>
+        <div><label for="cu-am">m</label><input type="text" class="gms" id="cu-am" inputmode="numeric"></div>
+        <div><label for="cu-as">s</label><input type="text" class="gms" id="cu-as" inputmode="decimal"></div>
       </div>
       <div id="cu-f-B" style="display: none; gap: 8px; align-items: flex-end;">
-        <div><label>Ángulo B — g</label><input type="text" class="gms" id="cu-bg" inputmode="numeric"></div>
-        <div><label>m</label><input type="text" class="gms" id="cu-bm" inputmode="numeric"></div>
-        <div><label>s</label><input type="text" class="gms" id="cu-bs" inputmode="decimal"></div>
+        <div><label for="cu-bg">Ángulo B — g</label><input type="text" class="gms" id="cu-bg" inputmode="numeric"></div>
+        <div><label for="cu-bm">m</label><input type="text" class="gms" id="cu-bm" inputmode="numeric"></div>
+        <div><label for="cu-bs">s</label><input type="text" class="gms" id="cu-bs" inputmode="decimal"></div>
       </div>
       <div id="cu-f-C" style="display: none; gap: 8px; align-items: flex-end;">
-        <div><label>Ángulo C — g</label><input type="text" class="gms" id="cu-cg" inputmode="numeric"></div>
-        <div><label>m</label><input type="text" class="gms" id="cu-cm" inputmode="numeric"></div>
-        <div><label>s</label><input type="text" class="gms" id="cu-cs" inputmode="decimal"></div>
+        <div><label for="cu-cg">Ángulo C — g</label><input type="text" class="gms" id="cu-cg" inputmode="numeric"></div>
+        <div><label for="cu-cm">m</label><input type="text" class="gms" id="cu-cm" inputmode="numeric"></div>
+        <div><label for="cu-cs">s</label><input type="text" class="gms" id="cu-cs" inputmode="decimal"></div>
       </div>
     </div>
     <div class="row">
@@ -708,9 +708,9 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
     </div>
     <div id="tri-aviso"></div>
     <div class="row">
-      <div id="tri-f-a" style="display: none;"><label>Lado a</label><input type="text" id="tri-a" inputmode="decimal"></div>
-      <div id="tri-f-b" style="display: none;"><label>Lado b</label><input type="text" id="tri-b" inputmode="decimal"></div>
-      <div id="tri-f-c"><label>Lado c</label><input type="text" id="tri-c" inputmode="decimal"></div>
+      <div id="tri-f-a" style="display: none;"><label for="tri-a">Lado a</label><input type="text" id="tri-a" inputmode="decimal"></div>
+      <div id="tri-f-b" style="display: none;"><label for="tri-b">Lado b</label><input type="text" id="tri-b" inputmode="decimal"></div>
+      <div id="tri-f-c"><label for="tri-c">Lado c</label><input type="text" id="tri-c" inputmode="decimal"></div>
     </div>
     <div class="row">
       <div id="tri-f-A" style="display: flex; gap: 8px; align-items: flex-end;">
@@ -762,7 +762,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 11.7 · Última actualización: 05/09/2026 18:51 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 11.8 · Última actualización: 05/09/2026 19:55 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2427,15 +2427,19 @@ function plGenerar(){
   PL.angMetodo = null; PL.sinCompensar = false;
   var h = "<table><thead><tr><th>#</th><th>Lado (m)</th><th>Ángulo g</th><th>m</th><th>s</th></tr></thead><tbody>";
   for(var i = 1; i <= n; i++){
+    /* aria-label: el encabezado de la columna se ve, pero un lector de pantalla lee campo
+       por campo y sin esto solo puede decir "casilla de texto". Con la etiqueta dice
+       "Lado 3, longitud en metros", que es lo que un vidente deduce de la fila y la columna. */
     h += "<tr><td class='lbl'>" + i + "</td>" +
-         "<td><input type='text' inputmode='decimal' id='pl-l" + i + "'></td>" +
-         "<td><input type='text' class='gms' inputmode='numeric' id='pl-g" + i + "'></td>" +
-         "<td><input type='text' class='gms' inputmode='numeric' id='pl-m" + i + "'></td>" +
-         "<td><input type='text' class='gms' inputmode='decimal' id='pl-s" + i + "'></td></tr>";
+         "<td><input type='text' inputmode='decimal' id='pl-l" + i + "' aria-label='Lado " + i + ", longitud en metros'></td>" +
+         "<td><input type='text' class='gms' inputmode='numeric' id='pl-g" + i + "' aria-label='Ángulo del vértice " + i + ", grados'></td>" +
+         "<td><input type='text' class='gms' inputmode='numeric' id='pl-m" + i + "' aria-label='Ángulo del vértice " + i + ", minutos'></td>" +
+         "<td><input type='text' class='gms' inputmode='decimal' id='pl-s" + i + "' aria-label='Ángulo del vértice " + i + ", segundos'></td></tr>";
   }
   h += "</tbody></table>";
   h += "<div class='row'><div><label style='font-weight:700; color:var(--ink);'>k — Tolerancia Angular T = k·√n (en segundos)</label>" +
        "<input type='text' class='gms' id='pl-k' inputmode='decimal' value='20&#8243;' " +
+       "aria-label='Coeficiente k de la tolerancia angular, en segundos' " +
        "title='Art. 41: 30&quot; poligonales principales o de rodeo · 60&quot; secundarias internas · 1&quot; a 10&quot; trabajos o redes geodésicos'></div>" +
        "<button id='pl-verificar'>Verificar cierre angular</button></div>" +
        "<p style='font-size:.78rem; color:var(--ink-soft); margin-top:2px;'>k según el Art. 41 de las Instrucciones Generales para Agrimensores e Instrucciones de la Dirección de Geodesia y Catastro, Prov. de Buenos Aires (ARBA): 30″ para poligonales principales o de rodeo · 60″ para poligonales secundarias internas. Para trabajos o redes geodésicos de alta precisión se usan valores de 1″ a 10″. El programa arranca en 20″ (Mensuras Urbanas o Rurales), más exigente que la norma, o se lo puede modificar.</p>";
@@ -2513,6 +2517,27 @@ function plVerificar(){
          "<b>(+)</b> la suma de los ángulos medidos supera la condición teórica · " +
          "<b>(−)</b> queda por debajo. La compensación la reparte en el sentido contrario.</span>" +
          "</div>" +
+         /* El cierre angular ofrecía tres métodos y ninguna ayuda para elegirlos: el aviso
+            manda a "alguno de los tres métodos de abajo" sin decir cuál corresponde. Del
+            lado lineal esa ayuda existe desde siempre. Mismo formato, título propio para no
+            confundirse con el del lado lineal, y no se imprime.
+            El tercero va corto a propósito: el fundamento —por qué el lado más corto es el
+            sospechoso— aparece cuando el programa lo aplica, no acá. Repetirlo en los dos
+            lugares sería decirlo dos veces al que ya eligió. */
+         "<div class='ayuda-comp no-print'>" +
+         "<div class='tit'>Compensación angular</div>" +
+         "<div class='sub'>Según qué medición merece más confianza:</div>" +
+         "<ul>" +
+         "<li><b>Repartir entre todos los ángulos</b> — cuando todos se midieron igual, con " +
+         "el mismo instrumento y el mismo cuidado: no hay motivo para cargarle el error a " +
+         "ninguno en particular. El reparto va en segundos enteros y el resto se distribuye " +
+         "de a 1″, así el polígono cierra exacto.</li>" +
+         "<li><b>Elegir ángulos a compensar</b> — cuando sospechás de vértices determinados: " +
+         "una estación con mala visibilidad, una visual corta, un punto medido en peores " +
+         "condiciones. La corrección va solo a los que marques.</li>" +
+         "<li><b>Corrección manual asistida (compensar el lado más corto)</b> — el programa " +
+         "busca el lado más corto y reparte la corrección entre sus dos vértices.</li>" +
+         "</ul></div>" +
          "<div class='row no-print'>" +
          "<button id='pl-rep-todos'>Repartir entre todos los ángulos</button>" +
          "<button id='pl-rep-elegir'>Elegir ángulos a compensar…</button>" +
@@ -2581,7 +2606,7 @@ function plVerificar(){
     var box = $("pl-elegir-box"), c = "<div class='msg info' style='margin-bottom:6px;'>Marcá los vértices cuyos ángulos querés corregir; la diferencia de " + segStr(difSeg) + " se reparte en partes iguales entre ellos.</div><div style='margin:6px 0;'>";
     for(var i = 1; i <= PL.n; i++){
       c += "<label style='display:inline-flex; align-items:center; gap:5px; margin:3px 14px 3px 0; font-size:.92rem; color:var(--ink); cursor:pointer;'>" +
-           "<input type='checkbox' class='pl-chk' value='" + i + "' style='width:16px;height:16px;accent-color:var(--marca);'> Vértice " + i + "</label>";
+           "<input type='checkbox' class='pl-chk' value='" + i + "' aria-label='Corregir el ángulo del vértice " + i + "' style='width:16px;height:16px;accent-color:var(--marca);'> Vértice " + i + "</label>";
     }
     c += "</div><div class='row no-print'><button class='primary' id='pl-aplicar-sel'>Aplicar a los seleccionados</button></div>";
     box.innerHTML = c;
@@ -2629,8 +2654,8 @@ function plVerificar(){
       aviso.className = "msg info";
       aviso.innerHTML = "<b>Lado más corto: " + v1 + "–" + v2 + " (" + fmt(d.L[k], 2) + " m).</b> " +
         "La corrección se repartió entre sus vértices " + v1 + " y " + v2 + "." +
-        "<span class='no-print'> Los errores de centrado y puntería pesan más cuanto más corta " +
-        "es la visual, así que es donde el error angular más probablemente se originó.</span>";
+        "<span class='no-print'> En la práctica es que el lado más corto es el sospechoso " +
+        "porque los errores de centrado y puntería pesan más cuanto más corta es la visual.</span>";
       caja.appendChild(aviso);
     }
   });
@@ -2967,12 +2992,13 @@ function plMostrar(){
       "que repartir, porque cada vértice se determina de forma independiente. Usar el módulo " +
       "<b>Coordenadas</b>. Si la poligonal es <b>mixta</b> (algunos vértices por GNSS y otros con " +
       "estación total o cinta), método <b>3</b>, dando mayor peso a los lados medidos por GNSS.</li>" +
-      "<li><b>Alcance: total o parcial</b> — la compensación <b>total</b> reparte el error entre todos " +
-      "los lados y es lo que corresponde cuando la poligonal se midió de manera pareja. La <b>parcial</b> " +
-      "es para cuando tenés motivo para creer que el error viene de lados determinados: un tramo con " +
-      "vegetación, quebrado, medido indirectamente o remedido. Los lados que no marques conservan " +
-      "exactamente la longitud medida, así que los marcados absorben todo el error y reciben " +
-      "correcciones mayores que en una compensación total. " +
+      /* Este recuadro se lee ANTES de elegir: dice qué es cada opción y nada más. La
+         consecuencia de dejar lados fijos vive en el recuadro de la parcial, que aparece
+         recién cuando esa opción se eligió. Antes estaba en los dos y se leía dos veces. */
+      "<li><b>Alcance: total o parcial</b> — la <b>total</b> reparte el error entre todos los " +
+      "lados, y corresponde cuando la poligonal se midió pareja. La <b>parcial</b> es para " +
+      "cuando el error viene de lados determinados: un tramo con vegetación, quebrado, medido " +
+      "indirectamente o remedido. " +
       /* La regla es del alcance, no de los métodos: en una compensación total participan
          todos los lados y no viene al caso. Y "se sugiere" es el verbo que sirve para los
          tres: en Crandall el mínimo es obligatorio —por debajo el sistema no tiene
@@ -3124,18 +3150,13 @@ function plMostrar(){
        marcado, porque el mínimo de dos es obligatorio en Crandall (el sistema no tiene
        solución por debajo) y criterio en los proporcionales (cierran igual, pero mal). */
     if(parcial) c += "<div class='msg info' style='margin:4px 0 6px;'>" +
-         "<b>Compensación parcial:</b> marcá los lados que van a absorber el error (los demás quedan fijos)." +
-         "<br><br><b>Mínimo dos lados.</b> Una compensación parcial necesita que existan al menos dos " +
-         "lados sobre los cuales distribuir las correcciones. Con un solo lado no tenés una distribución: " +
-         "cualquier corrección que quieras imponer sobre ese único lado queda completamente determinada. " +
-         "Con dos lados ya tenés grados de libertad para repartir el error respetando las condiciones de cierre." +
-         "<br><br>Mínimo para el polígono: 3 lados · Mínimo para el tramo de compensación parcial: 2 lados." +
-         "<br><br><b>Qué implica dejar los otros fijos.</b> Los lados no marcados conservan exactamente la " +
-         "longitud medida, así que todo el error se concentra en los marcados: reciben correcciones más " +
-         "grandes que en una compensación total. Cuantos menos marques, más se deforman. Eso es lo que hace " +
-         "que el mínimo de dos sea un piso y no un objetivo." +
-         "<br><br>El alcance queda asentado en el resumen del cálculo y sale impreso: <i>compensación " +
-         "parcial sobre los lados 1–2, 3–4</i>." +
+         "<b>Compensación parcial:</b> marcá los lados que van a absorber el error. Los que no marques " +
+         "conservan exactamente la longitud medida, así que los marcados reciben correcciones más grandes " +
+         "que en una compensación total: cuantos menos marques, más se deforman." +
+         "<br><br><b>Mínimo dos lados.</b> Con uno solo no hay distribución: la corrección sobre ese único " +
+         "lado queda completamente determinada." +
+         "<br><br>Queda asentado en el resumen del cálculo y sale impreso: <i>compensación parcial sobre " +
+         "los lados 1–2, 3–4</i>." +
          "<br><br>" +
          (esCrandall
            ? "Con el <b>Método de Crandall</b> el mínimo es obligatorio: con un solo lado —o con lados todos " +
@@ -3160,11 +3181,14 @@ function plMostrar(){
       c += "<tr>";
       if(parcial){
         c += "<td><input type='checkbox' class='pl-lado-chk' value='" + i + "'" +
-             (prevC[String(i)] ? " checked" : "") + " style='width:16px;height:16px;accent-color:var(--marca);'></td>";
+             (prevC[String(i)] ? " checked" : "") +
+             " aria-label='Compensar el lado " + (i+1) + "–" + (i+2 > n ? 1 : i+2) + "'" +
+             " style='width:16px;height:16px;accent-color:var(--marca);'></td>";
       }
       c += "<td class='lbl'>" + (i+1) + "–" + (i+2 > n ? 1 : i+2) + "</td><td>" + fmt(D.L[i], 2) + "</td>";
       if(conPesos){
-        c += "<td><input type='text' inputmode='decimal' class='gms' id='pl-peso-" + (i+1) + "' value='" +
+        c += "<td><input type='text' inputmode='decimal' class='gms' id='pl-peso-" + (i+1) + "'" +
+             " aria-label='Peso del lado " + (i+1) + "–" + (i+2 > n ? 1 : i+2) + "' value='" +
              (prevP[i] !== undefined ? prevP[i] : "1") + "'></td>";
       }
       c += "</tr>";
@@ -3192,7 +3216,9 @@ function plMostrar(){
     c += "<table><thead><tr><th>Lado</th><th>Longitud actual (m)</th><th>Nueva longitud (m)</th></tr></thead><tbody>";
     for(var i = 0; i < n; i++){
       c += "<tr><td class='lbl'>" + (i+1) + "–" + (i+2 > n ? 1 : i+2) + "</td><td>" + fmt(D.L[i], 2) + "</td>" +
-           "<td><input type='text' inputmode='decimal' class='pl-mod-l' value='" + fmt(D.L[i], 2) + "'></td></tr>";
+           "<td><input type='text' inputmode='decimal' class='pl-mod-l'" +
+           " aria-label='Nueva longitud del lado " + (i+1) + "–" + (i+2 > n ? 1 : i+2) + ", en metros'" +
+           " value='" + fmt(D.L[i], 2) + "'></td></tr>";
     }
     c += "</tbody></table><div class='row no-print'><button class='primary' id='pl-recalc'>Recalcular con estos lados</button></div>";
     box.innerHTML = c;
@@ -3425,8 +3451,8 @@ function coGenerar(){
   var h = "<table><thead><tr><th>Vértice</th><th>X (m)</th><th>Y (m)</th></tr></thead><tbody>";
   for(var i = 1; i <= n; i++){
     h += "<tr><td class='lbl'>" + i + "</td>" +
-         "<td><input type='text' inputmode='decimal' id='co-x" + i + "'></td>" +
-         "<td><input type='text' inputmode='decimal' id='co-y" + i + "'></td></tr>";
+         "<td><input type='text' inputmode='decimal' id='co-x" + i + "' aria-label='Vértice " + i + ", coordenada X en metros'></td>" +
+         "<td><input type='text' inputmode='decimal' id='co-y" + i + "' aria-label='Vértice " + i + ", coordenada Y en metros'></td></tr>";
   }
   h += "</tbody></table>";
   $("co-tabla-box").innerHTML = h;
@@ -4595,6 +4621,64 @@ function correrPruebas(){
     maxDesvio = Math.max(maxDesvio, Math.abs(dd.Zaj[w] - real) * 3600);
   }
   ver(D, "azimut ajustado coherente (segundos)", maxDesvio, 0, 0.001);
+
+  /* ---------- H · Lo que dicen los resultados ----------
+     Las demás áreas verifican magnitudes: superficies, tolerancias, ángulos. Ninguna mira
+     las frases, y de ahí salieron los tres defectos de la 9.0, la 9.6 y la 9.7 —una
+     afirmación que deja de ser cierta porque no contempla un caso, y que además sale
+     impresa—. Estas comprueban lo que el resumen AFIRMA, que es la mitad que menos se
+     controlaba. */
+  var H = "H · Lo que dicen los resultados";
+
+  /* 9.6: con el polígono cerrado exacto no hay error de cierre que incluir */
+  ver(H, "cierra exacto: no dice que incluye el error de cierre",
+      dtCierreAngular({ difAng: 0, tolAng: 40 }), "cierra exacto");
+
+  /* 9.7: la tolerancia angular puede quedar vieja si se endurece k después de calcular */
+  ver(H, "dentro de tolerancia: lo dice",
+      dtCierreAngular({ difAng: 40, tolAng: 40 }).indexOf("dentro de la tolerancia") >= 0, true);
+  ver(H, "fuera de tolerancia: no lo llama 'dentro'",
+      dtCierreAngular({ difAng: 40, tolAng: 10 }).indexOf("dentro de la tolerancia") >= 0, false);
+  ver(H, "fuera de tolerancia: dice EXCEDE",
+      dtCierreAngular({ difAng: 40, tolAng: 10 }).indexOf("EXCEDE") >= 0, true);
+
+  /* el método usado tiene que quedar asentado, no perderse detrás del "cierra exacto" */
+  ver(H, "compensado: informa el método, no 'cierra exacto'",
+      dtCierreAngular({ difAng: 0, tolAng: 40, angMetodo: "en el lado más corto" }),
+      "compensado en el lado más corto");
+
+  /* 9.6, del lado del resumen entero: el polígono cerrado exacto no puede decir que la
+     superficie incluye un error que no existe, y el compensado tiene que seguir
+     informando su método aunque compensar haya dejado el error en cero */
+  function resumenLineal(){
+    var t = document.getElementById("pl-res-body").innerText;
+    var i = t.indexOf("Compensación lineal de los lados:");
+    return i < 0 ? "" : t.substring(i, i + 160);
+  }
+  tab(/Planilla/);
+  document.getElementById("pl-n").value = "4";
+  document.getElementById("pl-generar").click();
+  for(var q = 1; q <= 4; q++){
+    document.getElementById("pl-l" + q).value = "100";
+    document.getElementById("pl-g" + q).value = "90";
+    document.getElementById("pl-m" + q).value = "0";
+    document.getElementById("pl-s" + q).value = "0";
+  }
+  document.getElementById("pl-verificar").click();
+  document.getElementById("pl-az-g").value = 0;
+  document.getElementById("pl-az-m").value = 0;
+  document.getElementById("pl-az-s").value = 0;
+  document.getElementById("pl-calcular").click();
+  ver(H, "cuadrado exacto: el resumen no afirma que incluye el error",
+      resumenLineal().indexOf("incluye el error de cierre") >= 0, false);
+  ver(H, "cuadrado exacto: el resumen dice que cierra exacto",
+      resumenLineal().indexOf("cierra exacto") >= 0, true);
+
+  var c4 = compensar("pl-met2");
+  ver(H, "compensado: el resumen nombra el método usado",
+      resumenLineal().indexOf("regla de la brújula") >= 0, true);
+  ver(H, "compensado: el resumen no lo llama 'cierra exacto'",
+      resumenLineal().indexOf("cierra exacto") >= 0, false);
 
   /* ---------- E · Coordenadas ---------- */
   var E = "E · Coordenadas";
