@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "10.7";
+var APP_VER = "10.8";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -756,7 +756,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 10.7 · Última actualización: 05/09/2026 13:10 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 10.8 · Última actualización: 05/09/2026 14:27 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2957,7 +2957,10 @@ function plMostrar(){
          tres: en Crandall el mínimo es obligatorio —por debajo el sistema no tiene
          solución— y en los proporcionales es criterio. Puesta acá se lee al decidir el
          alcance, no después de marcar Parcial. */
-      "<b>Se sugiere al menos dos lados para compensar ambos errores.</b></li>" +
+      /* "no paralelos" es el requisito que Crandall rechaza cuando no se cumple: con lados
+         todos paralelos aportan una sola dirección y el determinante se anula. Dicho acá se
+         lee al elegir el alcance, en vez de descubrirlo con el cálculo rechazado. */
+      "<b>Se sugiere al menos dos lados no paralelos para compensar ambos errores.</b></li>" +
       "</ul></div>" +
       "<div class='row'>" +
       "<div><label>Método de compensación lineal — teclas <b>1</b> / <b>2</b> / <b>3</b></label>" +
