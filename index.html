@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "10.4";
+var APP_VER = "10.5";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -191,12 +191,15 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
 /* Una barra sola no alcanza: es un indicador que hay que saber leer, y si nunca viste una
    tabla que se desliza no te dice nada —sin tocar la pantalla no te enterás de que sigue—.
    El aviso en palabras no depende de que el usuario interprete nada, ni de que el navegador
-   dibuje la barra: el texto se pinta siempre, también en Safari de iPhone. Desaparece solo
-   al llegar al final, que es cuando ya no hay nada que avisar. */
+   dibuje la barra: el texto se pinta siempre, también en Safari de iPhone.
+
+   Todo el conjunto es FIJO: ni el trazo se corre ni el texto se apaga. Por eso la barra ya
+   no indica dónde estás dentro de la tabla —eso obligaba a moverse— sino cuánto más ancha
+   es la tabla que la pantalla, que es un dato que no cambia al deslizar y por lo tanto se
+   puede afirmar quieto sin mentir en ningún momento. */
 .aviso-desp{ display:none; margin:2px 0 10px; }
 .aviso-desp .txt{ display:block; font-size:.76rem; font-weight:600; color:var(--marca);
   letter-spacing:.01em; margin-bottom:3px; }
-.aviso-desp.al-final .txt{ visibility:hidden; }
 .barra-desp{ display:none; height:12px; background:var(--marca-suave); border-radius:7px;
   margin:0; position:relative; overflow:hidden; }
 .aviso-desp .barra-desp{ display:block; }
@@ -750,7 +753,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 10.4 · Última actualización: 05/09/2026 12:48 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 10.5 · Última actualización: 05/09/2026 12:58 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -4696,13 +4699,11 @@ if(location.search.indexOf("pruebas=1") >= 0){
    a la vista desde que la tabla aparece y arrancando a la izquierda. */
 function pintarBarra(el, aviso){
   var b = aviso.lastChild, i = b.firstChild;
-  /* el trazo nunca baja de 12%: por angosto que quede, tiene que verse */
+  /* El trazo queda anclado a la izquierda y no se mueve al deslizar: lo que muestra es qué
+     parte de la tabla entra en la pantalla, no en qué parte estás. Así se ve enseguida y
+     queda siempre en el mismo lugar. Nunca baja de 12%: por angosto que quede, tiene que
+     verse. */
   i.style.width = Math.max(el.clientWidth / el.scrollWidth * 100, 12) + "%";
-  i.style.left  = (el.scrollLeft / el.scrollWidth * 100) + "%";
-  /* el aviso en palabras se apaga al llegar al final: ya no hay nada que avisar, y así no
-     queda un cartel fijo repetido debajo de cada tabla */
-  var alFinal = el.scrollLeft >= el.scrollWidth - el.clientWidth - 2;
-  aviso.className = alFinal ? "aviso-desp al-final" : "aviso-desp";
 }
 
 function barrasDesplazamiento(){
@@ -4724,16 +4725,17 @@ function barrasDesplazamiento(){
       a.setAttribute("aria-hidden", "true");   /* es una ayuda visual: al lector de pantalla no le aporta */
       var t = document.createElement("span");
       t.className = "txt";
-      t.textContent = "La tabla sigue a la derecha — deslizala con el dedo";
+      /* Redacción que vale en todo momento, también con la tabla deslizada hasta el final:
+         si el cartel no se apaga nunca, no puede decir "sigue a la derecha". */
+      t.textContent = "La tabla es más ancha que la pantalla — deslizala con el dedo";
       var b = document.createElement("div");
       b.className = "barra-desp";
       b.appendChild(document.createElement("i"));
       a.appendChild(t);
       a.appendChild(b);
       el.parentNode.insertBefore(a, el.nextSibling);
-      (function(el2, a2){
-        el2.addEventListener("scroll", function(){ pintarBarra(el2, a2); }, { passive: true });
-      })(el, a);
+      /* Sin manejador de "scroll": el aviso es fijo, así que deslizar no cambia nada que
+         haya que redibujar. El ancho lo rehacen el observador y el cambio de tamaño. */
       sig = a;
     }
     pintarBarra(el, sig);
