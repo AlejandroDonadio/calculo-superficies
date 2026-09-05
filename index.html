@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "9.3";
+var APP_VER = "9.4";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -711,7 +711,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 9.3 · Última actualización: 05/09/2026 00:37 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 9.4 · Última actualización: 05/09/2026 00:52 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -4278,7 +4278,25 @@ DT_CAMPOS.forEach(function(id){
 });
 window.addEventListener("beforeprint", dtArmarEncabezado);
 
+/* Imprimir y Guardar PDF sacaban la hoja sin mirar si había algo calculado. No sale en
+   blanco —salen el encabezado y las tarjetas de datos del módulo activo, que a veces es
+   justo lo que se quiere: la planilla cargada como hoja de campo—, pero sin superficie ni
+   verificaciones. Por eso se avisa y decide el usuario, en vez de bloquear. Solo se
+   imprime el módulo activo: los otros paneles están ocultos. */
+function confirmarImprimir(verbo){
+  var panel = document.querySelector(".panel.active");
+  var res = panel ? panel.querySelector("[id$='-resultados']") : null;
+  if(res && res.style.display !== "none") return true;   /* hay resultados a la vista */
+  sError();
+  return confirm("Todavía no hay resultados calculados.\n\n" +
+    (res ? "La hoja va a salir con el encabezado y los datos cargados, pero sin superficie " +
+           "ni verificaciones."
+         : "Todavía no elegiste un módulo, así que la hoja va a salir prácticamente vacía.") +
+    "\n\n¿" + verbo + " igual?");
+}
+
 $("btn-guardar").addEventListener("click", function(){
+  if(!confirmarImprimir("Guardar el PDF")) return;
   sConfirm();
   document.title = pdfNombre();   /* el navegador lo propone como nombre del PDF */
   window.print();                 /* en el diálogo: destino "Guardar como PDF" */
@@ -4286,6 +4304,7 @@ $("btn-guardar").addEventListener("click", function(){
 });
 
 $("btn-imprimir").addEventListener("click", function(){
+  if(!confirmarImprimir("Imprimir")) return;
   sConfirm();
   window.print();   /* en el diálogo: elegir la impresora */
 });
