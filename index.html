@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "10.5";
+var APP_VER = "10.6";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -193,15 +193,18 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
    El aviso en palabras no depende de que el usuario interprete nada, ni de que el navegador
    dibuje la barra: el texto se pinta siempre, también en Safari de iPhone.
 
-   Todo el conjunto es FIJO: ni el trazo se corre ni el texto se apaga. Por eso la barra ya
-   no indica dónde estás dentro de la tabla —eso obligaba a moverse— sino cuánto más ancha
-   es la tabla que la pantalla, que es un dato que no cambia al deslizar y por lo tanto se
-   puede afirmar quieto sin mentir en ningún momento. */
+   El aviso no desaparece nunca —ni al llegar al final de la tabla—, y por eso su redacción
+   vale en todo momento: dice que la tabla es más ancha que la pantalla, que sigue siendo
+   cierto estés donde estés. El trazo, en cambio, sí se corre: muestra en qué parte estás y
+   se puede arrastrar con el dedo para desplazar la tabla. */
 .aviso-desp{ display:none; margin:2px 0 10px; }
 .aviso-desp .txt{ display:block; font-size:.76rem; font-weight:600; color:var(--marca);
   letter-spacing:.01em; margin-bottom:3px; }
-.barra-desp{ display:none; height:12px; background:var(--marca-suave); border-radius:7px;
-  margin:0; position:relative; overflow:hidden; }
+/* 16 px de alto para que el trazo se pueda agarrar con el dedo; touch-action:none evita que
+   el navegador se quede con el gesto para desplazar la página en vez de la tabla */
+.barra-desp{ display:none; height:16px; background:var(--marca-suave); border-radius:8px;
+  margin:0; position:relative; overflow:hidden; touch-action:none; cursor:grab; }
+.barra-desp:active{ cursor:grabbing; }
 .aviso-desp .barra-desp{ display:block; }
 /* El tramo que todavía no estás viendo va punteado en rojo, no en rosa liso: así la barra
    entera queda del color de la marca —llena donde estás, punteada hacia donde sigue la
@@ -210,9 +213,9 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
    línea decorativa más. */
 .barra-desp::before{ content:""; position:absolute; inset:0;
   background:radial-gradient(circle, var(--marca) 1.9px, transparent 2.3px);
-  background-size:9px 12px; opacity:.5; }
+  background-size:9px 16px; opacity:.5; }
 .barra-desp > i{ position:absolute; top:0; bottom:0; left:0; display:block;
-  background:var(--marca); border-radius:7px; }
+  background:var(--marca); border-radius:8px; }
 @media print{ .aviso-desp, .barra-desp{ display:none !important; } }
 
 @keyframes titilar-aviso{ 0%, 100%{opacity:1;} 50%{opacity:.35;} }
@@ -753,7 +756,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 10.5 · Última actualización: 05/09/2026 12:58 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 10.6 · Última actualización: 05/09/2026 13:07 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -4699,11 +4702,38 @@ if(location.search.indexOf("pruebas=1") >= 0){
    a la vista desde que la tabla aparece y arrancando a la izquierda. */
 function pintarBarra(el, aviso){
   var b = aviso.lastChild, i = b.firstChild;
-  /* El trazo queda anclado a la izquierda y no se mueve al deslizar: lo que muestra es qué
-     parte de la tabla entra en la pantalla, no en qué parte estás. Así se ve enseguida y
-     queda siempre en el mismo lugar. Nunca baja de 12%: por angosto que quede, tiene que
-     verse. */
-  i.style.width = Math.max(el.clientWidth / el.scrollWidth * 100, 12) + "%";
+  /* El ancho dice qué parte de la tabla entra en la pantalla; la posición, en qué parte
+     estás. El trazo nunca baja de 12%: por angosto que quede, tiene que poder agarrarse con
+     el dedo. Ese mínimo rompe la proporción exacta, así que el tope evita que se pase del
+     borde derecho al llegar al final. */
+  var ancho = Math.max(el.clientWidth / el.scrollWidth * 100, 12);
+  var izq   = el.scrollLeft / el.scrollWidth * 100;
+  if(izq + ancho > 100) izq = 100 - ancho;
+  i.style.width = ancho + "%";
+  i.style.left  = izq + "%";
+}
+
+/* Arrastrar el trazo desplaza la tabla. El dedo queda en el centro del trazo, y su recorrido
+   —el ancho de la barra menos el del trazo— se mapea contra lo que queda por desplazar. */
+function arrastrarBarra(el, b){
+  var agarrado = false;
+  function mover(x){
+    var r = b.getBoundingClientRect();
+    var recorrido = r.width - b.firstChild.offsetWidth;
+    if(recorrido <= 0) return;
+    var f = (x - r.left - b.firstChild.offsetWidth / 2) / recorrido;
+    f = Math.min(Math.max(f, 0), 1);
+    el.scrollLeft = f * (el.scrollWidth - el.clientWidth);
+  }
+  b.addEventListener("pointerdown", function(e){
+    agarrado = true;
+    if(b.setPointerCapture) b.setPointerCapture(e.pointerId);
+    mover(e.clientX);
+    e.preventDefault();
+  });
+  b.addEventListener("pointermove", function(e){ if(agarrado) mover(e.clientX); });
+  b.addEventListener("pointerup",     function(){ agarrado = false; });
+  b.addEventListener("pointercancel", function(){ agarrado = false; });
 }
 
 function barrasDesplazamiento(){
@@ -4734,8 +4764,12 @@ function barrasDesplazamiento(){
       a.appendChild(t);
       a.appendChild(b);
       el.parentNode.insertBefore(a, el.nextSibling);
-      /* Sin manejador de "scroll": el aviso es fijo, así que deslizar no cambia nada que
-         haya que redibujar. El ancho lo rehacen el observador y el cambio de tamaño. */
+      /* Los dos sentidos: deslizar la tabla corre el trazo, y arrastrar el trazo desplaza
+         la tabla. El "scroll" va en pasivo porque solo dibuja, no cancela el gesto. */
+      (function(el2, a2, b2){
+        el2.addEventListener("scroll", function(){ pintarBarra(el2, a2); }, { passive: true });
+        arrastrarBarra(el2, b2);
+      })(el, a, b);
       sig = a;
     }
     pintarBarra(el, sig);
