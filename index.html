@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "11.9";
+var APP_VER = "12.0";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -762,7 +762,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 11.9 · Última actualización: 05/09/2026 20:11 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 12.0 · Última actualización: 05/09/2026 20:16 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2959,6 +2959,18 @@ function plMostrar(){
          (D.comp ? "compensado " : "") + "quiere calcularlo por el método de " +
          (porCoord ? "Planilla de cálculo" : "Coordenadas") + "?</button></div>";
   }
+  /* Las coordenadas se calculaban y se mostraban, pero no había forma de sacarlas: para
+     llevarlas al CAD había que copiarlas a mano de la tabla. El botón va acá y no dentro de
+     la tabla de coordenadas a propósito: esa tabla solo se dibuja cuando el método elegido
+     es "por coordenadas", y el que viene puesto es el otro. Las coordenadas existen igual
+     con los dos métodos —son las mismas—, así que se pueden copiar siempre. Salen con los
+     mismos tres decimales que se ven y con el punto de partida ya sumado. */
+  h += "<div class='row no-print'>" +
+       "<button id='pl-copiar-coord'>Copiar coordenadas de los vértices</button>" +
+       "<div style='align-self:center; font-size:.8rem; color:var(--ink-soft);'>Una línea por vértice, " +
+       "separadas por comas: se pegan en el CAD o en una planilla de cálculo.</div>" +
+       "</div><div id='pl-coord-salida' class='no-print'></div>";
+
   w = porCoord ? wCoord : wPlan;   /* la superficie definitiva es la del método elegido */
 
   /* tipo de mensura cambiable acá mismo: al elegir otro, la tolerancia y el
@@ -3104,6 +3116,51 @@ function plMostrar(){
       sTick();
       plMostrar();
     });
+  });
+
+  /* Copiar las coordenadas al portapapeles. Se intenta por los dos caminos porque el
+     programa también se usa abriendo el archivo con doble clic, y ahí el navegador suele
+     negarle el portapapeles moderno a una página local. Si los dos fallan, en vez de dejar
+     al usuario sin nada se muestra el texto ya seleccionado para que lo copie a mano. */
+  var bcc = $("pl-copiar-coord");
+  if(bcc) bcc.addEventListener("click", function(){
+    var lineas = ["Vertice,X,Y"];
+    for(var q = 0; q < n; q++){
+      lineas.push((q+1) + "," + fmt(D.bx + X[q], 3) + "," + fmt(D.by + Y[q], 3));
+    }
+    var txt = lineas.join("\n");
+    var salida = $("pl-coord-salida");
+    function aviso(t, ok){
+      salida.innerHTML = "<div class='msg " + (ok ? "good" : "info") + "'>" + t + "</div>";
+    }
+    function aMano(){
+      salida.innerHTML = "<div class='msg info' style='margin:6px 0;'>Este navegador no deja copiar solo. " +
+        "El texto queda seleccionado acá abajo: copialo con Ctrl+C.</div>" +
+        "<textarea readonly rows='" + Math.min(n + 1, 12) + "' aria-label='Coordenadas para copiar' " +
+        "style='width:100%; font-family:Consolas,monospace; font-size:.85rem; padding:8px; " +
+        "border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--ink);'>" +
+        txt + "</textarea>";
+      var ta = salida.querySelector("textarea");
+      ta.focus(); ta.select();
+    }
+    function viejo(){
+      try{
+        var ta = document.createElement("textarea");
+        ta.value = txt;
+        ta.style.position = "fixed"; ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        var listo = document.execCommand("copy");
+        document.body.removeChild(ta);
+        if(listo){ sConfirm(); aviso("✔ " + n + " vértices copiados. Pegalos con Ctrl+V.", true); }
+        else aMano();
+      }catch(e){ aMano(); }
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(function(){
+        sConfirm(); aviso("✔ " + n + " vértices copiados. Pegalos con Ctrl+V.", true);
+      }, viejo);
+    } else viejo();
   });
 
   /* agrega debajo el cálculo por el otro método, sin perder nada de lo ya hecho */
