@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "12.0";
+var APP_VER = "12.1";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -762,7 +762,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 12.0 · Última actualización: 05/09/2026 20:16 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 12.1 · Última actualización: 05/09/2026 20:44 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2998,8 +2998,14 @@ function plMostrar(){
       "<li><b>3 · Con pesos por lado</b> — cuando <b>algunos lados se midieron en peores condiciones</b> " +
       "que otros (vegetación, tramos quebrados, medición indirecta). A mayor peso, menos corrección " +
       "recibe ese lado. <b>Corrige las longitudes y también los ángulos.</b> " +
-      "Es además la alternativa graduada a la compensación parcial: dejar un lado fijo equivale a " +
-      "darle peso infinito, y el peso permite graduar lo que la parcial resuelve de golpe.</li>" +
+      /* Reemplaza a la observación del peso infinito —que dejar un lado fijo equivale a
+         darle peso infinito, y que el peso gradúa lo que la parcial resuelve de golpe—.
+         Era cierta y elegante, pero teórica: el que está eligiendo método no la necesita
+         para decidir. Esta avisa de un error que se puede cometer hoy: elegir el 3 creyendo
+         que gana precisión, dejar todos los pesos en 1 y obtener el 2. Medido sobre el
+         ejemplo: mismos lados y mismos azimuts, hasta el último decimal. */
+      "<b>Con todos los pesos en 1 equivale al método 2</b>, porque la corrección queda " +
+      "proporcional a la longitud.</li>" +
       "<li><b>Mediciones con GNSS/GPS</b> — no corresponde ninguno de los tres: no hay error de cierre " +
       "que repartir, porque cada vértice se determina de forma independiente. Usar el módulo " +
       "<b>Coordenadas</b>. Si la poligonal es <b>mixta</b> (algunos vértices por GNSS y otros con " +
