@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "9.9";
+var APP_VER = "10.0";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -184,6 +184,16 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
    marca la llegada del aviso; el rojo lleno y el sonido ya lo sostienen después, sin
    dejar movimiento reclamando atención mientras se revisa la planilla. Se respeta a
    quien pidió menos movimiento en pantalla, y al imprimir tampoco se mueve. */
+/* Barra de desplazamiento propia: la dibuja el programa debajo de cada tabla que no
+   entra en la pantalla. Fuera del celular no aparece —ahí la del navegador se ve bien—
+   y nunca se imprime. El grosor del trazo rojo dice qué parte de la tabla estás viendo,
+   y su posición, en qué parte estás. */
+.barra-desp{ display:none; height:12px; background:var(--marca-suave); border-radius:7px;
+  margin:2px 0 10px; position:relative; overflow:hidden; }
+.barra-desp > i{ position:absolute; top:0; bottom:0; left:0; display:block;
+  background:var(--marca); border-radius:7px; }
+@media print{ .barra-desp{ display:none !important; } }
+
 @keyframes titilar-aviso{ 0%, 100%{opacity:1;} 50%{opacity:.35;} }
 .titila{animation:titilar-aviso 1.8s ease-in-out 3 both;}
 @media (prefers-reduced-motion: reduce){
@@ -416,26 +426,14 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
   /* tablas anchas: se deslizan con el dedo en vez de romper la pantalla */
   table{display:block; overflow-x:auto; -webkit-overflow-scrolling:touch;}
   /* La línea de desplazamiento es el único aviso de que la tabla sigue hacia la derecha,
-     y la del sistema es un hilo gris de 3 px. En el celular, la verificación del cierre
-     angular y la tabla de errores esconden casi la mitad de su ancho —ahí quedan la
-     Tolerancia angular y la fila del Error Angular—, así que quien no conoce el programa
-     no se entera de que están. Se pinta con el rojo de la marca, se le da alto de sobra y
-     queda siempre a la vista: arranca a la izquierda y su largo dice cuánto falta ver. */
-  table, .plano-box{
-    scrollbar-width:auto;                          /* Firefox */
-    scrollbar-color:var(--marca) var(--marca-suave);
-    padding-bottom:3px;
-  }
-  table::-webkit-scrollbar, .plano-box::-webkit-scrollbar{ height:12px; }
-  table::-webkit-scrollbar-track, .plano-box::-webkit-scrollbar-track{
-    background:var(--marca-suave); border-radius:7px;
-  }
-  table::-webkit-scrollbar-thumb, .plano-box::-webkit-scrollbar-thumb{
-    background:var(--marca); border-radius:7px; border:2px solid var(--marca-suave);
-  }
-  table::-webkit-scrollbar-thumb:active, .plano-box::-webkit-scrollbar-thumb:active{
-    background:var(--ink);
-  }
+     y en el celular esconde casi la mitad del ancho: ahí quedan la Tolerancia angular y
+     la fila del Error Angular. La del navegador no sirve para avisarlo —en iPhone, Safari
+     ignora el estilo y además solo la dibuja mientras se arrastra el dedo, así que la
+     tabla parece terminar donde termina la pantalla—. Se apaga la del sistema y el
+     programa dibuja la suya (.barra-desp), siempre a la vista desde que la tabla aparece. */
+  table, .plano-box{ scrollbar-width:none; }
+  table::-webkit-scrollbar, .plano-box::-webkit-scrollbar{ display:none; }
+  .barra-desp{ display:block; }
   /* --- evitar desborde lateral en triángulos y cuadriláteros --- */
   html, body{max-width:100%; overflow-x:hidden;}
   .panel, .card, .row{max-width:100%; box-sizing:border-box;}
@@ -734,7 +732,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 9.9 · Última actualización: 05/09/2026 10:58 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 10.0 · Última actualización: 05/09/2026 11:10 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -4666,11 +4664,75 @@ if(location.search.indexOf("pruebas=1") >= 0){
   addEventListener("load", function(){ setTimeout(mostrarPruebas, 300); });
 }
 
+/* ============ barra de desplazamiento propia ============
+   En iPhone, Safari ignora el estilo de las barras del navegador y además solo dibuja la
+   suya mientras se arrastra el dedo: la tabla parece terminar donde termina la pantalla, y
+   quien no conoce el programa no se entera de que la Tolerancia angular y la fila del
+   Error Angular están más a la derecha. La barra la dibuja entonces el programa, siempre
+   a la vista desde que la tabla aparece y arrancando a la izquierda. */
+function pintarBarra(el, b){
+  var i = b.firstChild;
+  /* el trazo nunca baja de 12%: por angosto que quede, tiene que verse */
+  i.style.width = Math.max(el.clientWidth / el.scrollWidth * 100, 12) + "%";
+  i.style.left  = (el.scrollLeft / el.scrollWidth * 100) + "%";
+}
+
+function barrasDesplazamiento(){
+  var caja = document.querySelector("main");
+  if(!caja) return;
+  var els = caja.querySelectorAll("table, .plano-box");
+  for(var k = 0; k < els.length; k++){
+    var el = els[k];
+    var sig = el.nextElementSibling;
+    var tiene = sig && sig.className === "barra-desp";
+    /* sin desborde no hay nada que avisar; y si el elemento está oculto, clientWidth da 0 */
+    if(el.clientWidth === 0 || el.scrollWidth - el.clientWidth <= 2){
+      if(tiene) sig.parentNode.removeChild(sig);
+      continue;
+    }
+    if(!tiene){
+      var b = document.createElement("div");
+      b.className = "barra-desp";
+      b.setAttribute("aria-hidden", "true");   /* es una ayuda visual: al lector de pantalla no le aporta */
+      b.appendChild(document.createElement("i"));
+      el.parentNode.insertBefore(b, el.nextSibling);
+      (function(el2, b2){
+        el2.addEventListener("scroll", function(){ pintarBarra(el2, b2); }, { passive: true });
+      })(el, b);
+      sig = b;
+    }
+    pintarBarra(el, sig);
+  }
+}
+
+/* Las tablas se rehacen con innerHTML en cada cálculo, así que la barra hay que reponerla.
+   El observador se desconecta mientras trabaja: si no, sus propias inserciones lo
+   volverían a disparar. El rAF junta en una sola pasada las muchas mutaciones de un
+   render. */
+(function(){
+  var caja = document.querySelector("main");
+  if(!caja || !window.MutationObserver) return;
+  var pendiente = 0;
+  var obs = new MutationObserver(function(){
+    if(pendiente) return;
+    pendiente = requestAnimationFrame(function(){
+      pendiente = 0;
+      obs.disconnect();
+      barrasDesplazamiento();
+      obs.observe(caja, { childList: true, subtree: true });
+    });
+  });
+  obs.observe(caja, { childList: true, subtree: true });
+  addEventListener("resize", barrasDesplazamiento);
+  addEventListener("load", barrasDesplazamiento);
+})();
+
 /* ============ arranque ============ */
 triCampos();
 cuCampos();
 renderTabs();
 restaurarEstado();
+barrasDesplazamiento();
 </script>
 
 
