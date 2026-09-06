@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "13.5";
+var APP_VER = "13.6";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -764,7 +764,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 13.5 · Última actualización: 06/09/2026 18:55 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 13.6 · Última actualización: 06/09/2026 19:04 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -3486,7 +3486,12 @@ function plMostrar(){
          que guardan proporción con el error que se está repartiendo. El control de arriba
          previene la causa conocida (lados casi paralelos); éste mide la consecuencia y
          atrapa cualquier otra. Hace falta porque Crandall cierra por construcción: después
-         de compensar el error da ~0 y una corrección disparatada se ve igual que una buena. */
+         de compensar el error da ~0 y una corrección disparatada se ve igual que una buena.
+         El factor 5 sale de medir: con la geometría bien condicionada la corrección queda
+         por debajo del error a repartir (0,8x a 90° entre los lados marcados, 1,4x a 45°,
+         2,8x a 20°). Recién pasando los 5x la compensación deja de repartir y empieza a
+         amplificar. Estaba en 10x y se bajó a 5x para cerrar la banda intermedia, a costa
+         de rechazar también selecciones con los lados a menos de ~10° entre sí. */
       var corrJ = [], corrS = [], corrMax = 0;
       for(j = 0; j < sel.length; j++){
         i = sel[j];
@@ -3497,7 +3502,7 @@ function plMostrar(){
         if(mod > corrMax) corrMax = mod;
       }
       var errCierre = Math.sqrt(D.ex * D.ex + D.ey * D.ey);
-      if(errCierre > 0 && corrMax > 10 * errCierre){
+      if(errCierre > 0 && corrMax > 5 * errCierre){
         sError();
         alert("El Método de Crandall está devolviendo correcciones desproporcionadas, así que no se aplicaron.\n\n" +
               "Error de cierre a repartir: " + fmt(errCierre, 3) + " m\n" +
