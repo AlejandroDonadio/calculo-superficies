@@ -529,7 +529,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 
 <div class="hint-bar">
   <span><kbd>Enter</kbd> (también el del teclado numérico) pasa al campo siguiente</span>
-  <span><kbd>+</kbd> del teclado numérico ejecuta el cálculo del módulo activo</span>\n  <span><kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> eligen el método de compensación (fuera de un campo)</span>
+  <span><kbd>+</kbd> del teclado numérico ejecuta el cálculo del módulo activo</span>\n  <span><kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> / <kbd>4</kbd> eligen el método de compensación (fuera de un campo)</span>
   <span>Se aceptan coma o punto como decimal</span>
 </div>
 
@@ -3260,7 +3260,7 @@ function plMostrar(){
                ? "Con el <b>método proporcional</b> la poligonal cierra igual con un solo lado, pero ese lado " +
                  "absorbe él solo todo el error y queda deformado, mientras los demás siguen sin corregir. " +
                  "El programa te deja hacerlo: te avisa antes, con el error a la vista, y decidís vos."
-               : "Elegí arriba el método de compensación: el mínimo de dos es <b>obligatorio</b> en Crandall " +
+               : "Elegí arriba el método de compensación (1, 2, 3 o 4): el mínimo de dos es <b>obligatorio</b> en Crandall " +
                  "—por debajo el sistema no tiene solución— y <b>criterio</b> en los dos proporcionales, " +
                  "que cierran igual con un solo lado aunque lo dejen deformado.") +
          "</div>";
@@ -3387,7 +3387,7 @@ function plMostrar(){
     /* ningún método viene marcado: hay que elegirlo a conciencia */
     if(!$("pl-met1").checked && !$("pl-met2").checked && !($("pl-met3") && $("pl-met3").checked)){
       sError();
-      alert("Elegí primero el método de compensación (1, 2 o 3). Arriba de las opciones está la ayuda para decidir cuál corresponde.");
+      alert("Elegí primero el método de compensación (1, 2, 3 o 4). Arriba de las opciones está la ayuda para decidir cuál corresponde.");
       return;
     }
     /* Con un solo lado, los métodos proporcionales cierran igual —ese lado absorbe todo ex
