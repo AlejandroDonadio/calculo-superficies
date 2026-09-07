@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "14.8";
+var APP_VER = "14.9";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -2893,8 +2893,13 @@ function plMostrar(){
        "</tr></tbody></table>";
 
   /* Qué es cada número del cuadro de control. Va acá y no en la ayuda porque es donde se
-     leen las cifras, y porque esta parte sale impresa: en el papel no hay ayuda a la que ir. */
-  h += "<p style='font-size:.8rem; color:var(--ink-soft); margin:4px 0 10px;'>" +
+     leen las cifras.
+     Antes salía impreso, con el argumento de que en el papel no hay ayuda a la que ir. Dejó
+     de imprimirse en la v14.9: la hoja se había ido a tres páginas y este párrafo explica la
+     notación, no aporta un dato de la mensura. Medido: sacándolo junto con el control de
+     azimuts, la planilla vuelve de 2,09 a 1,95 páginas, que es el valor con el que la v13.8
+     salió en dos hojas. En pantalla se sigue viendo. */
+  h += "<p class='no-print' style='font-size:.8rem; color:var(--ink-soft); margin:4px 0 10px;'>" +
        "<b>ex</b> y <b>ey</b> son las sumas de las proyecciones (Σ Δx y Σ Δy), y el " +
        "<b>error de cierre lineal</b> es √(ex² + ey²). El <b>error angular</b> es la diferencia " +
        "entre la suma de los ángulos interiores observados y la teórica 180°·(n−2) = <b>" +
@@ -2906,7 +2911,11 @@ function plMostrar(){
   if(D.comp && D.met === 1 && D.Zaj){
     var difAz = 0;
     for(i = 0; i < n; i++) difAz = Math.max(difAz, Math.abs(D.Zaj[i] - D.Z[i]));
-    h += "<div class='msg " + (difAz < 1e-9 ? "good" : "bad grave") + "'>" +
+    /* El caso bueno no se imprime: es una verificación de que el cálculo hizo lo suyo, no un
+       dato de la mensura, y ocupaba 85 px que empujaban la hoja a una tercera página. El caso
+       GRAVE sí se imprime: si los azimuts cambiaron hay una inconsistencia, y esa advertencia
+       tiene que viajar con el documento. */
+    h += "<div class='msg " + (difAz < 1e-9 ? "good no-print" : "bad grave") + "'>" +
          (difAz < 1e-9
            ? "<b>Control — azimuts conservados.</b> El Método de Crandall ajusta las longitudes " +
              "manteniendo fijas las direcciones, así que los azimuts ajustados coinciden con los " +
