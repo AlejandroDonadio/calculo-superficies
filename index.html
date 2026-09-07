@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "14.7";
+var APP_VER = "14.8";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -526,7 +526,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <div id="modulos-panel">
   <strong style="font-size:.85rem; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft);">Métodos habilitados para el cálculo de superficies</strong><br>
   <label><input type="checkbox" id="mod-planilla" checked=""> Planilla (lados y ángulos)</label>
-  <label><input type="checkbox" id="mod-coords" checked=""> Coordenadas de los vértices</label>
+  <label><input type="checkbox" id="mod-coords" checked=""> Coordenadas (Gauss)</label>
   <label><input type="checkbox" id="mod-cuadri" checked=""> Cuadriláteros</label>
   <label><input type="checkbox" id="mod-tri" checked=""> Triángulos</label>
 </div>
