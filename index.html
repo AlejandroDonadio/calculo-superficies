@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "14.1";
+var APP_VER = "14.2";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -4057,8 +4057,10 @@ $("tri-calcular").addEventListener("click", function(){
   var a = num($("tri-a").value), b = num($("tri-b").value), c = num($("tri-c").value);
   var A = triAng("A"), B = triAng("B"), C = triAng("C");
   var sols = [], err = null;
-  /* en los casos ambiguos (4 y 5) éste es el ángulo que admite dos valores */
+  /* en los casos ambiguos (3 y 4) éste es el ángulo que admite dos valores */
   var ambigua = "B";
+  /* tangencia: el caso límite de la ambigüedad, donde los dos triángulos son el mismo */
+  var tangente = false, tangRel = "";
 
   if(caso === "1"){
     if(!(a > 0 && b > 0 && c > 0)) err = "Cargá los tres lados con valores mayores que cero.";
@@ -4094,7 +4096,15 @@ $("tri-calcular").addEventListener("click", function(){
         err = "No existe triángulo con esos datos: b·sen(A)/a = " + fmt(sB, 4) + " es mayor que 1.";
       } else {
         var B1c = asind(sB), cands = [B1c];
-        if(Math.abs(B1c - 90) > 1e-9 && (180 - B1c) !== B1c) cands.push(180 - B1c);
+        /* Hay dos triángulos sólo si los dos valores de B se distinguen al segundo, que
+           es la resolución con que el programa informa los ángulos.
+           El control va sobre sB y NO sobre el ángulo: cerca de la tangencia asin
+           amplifica el ruido —su derivada es 1/√(1−sB²)— y un ULP en sB (2,2e-16) se
+           vuelve 1,2e-6° en B. Con a=5, b=10, A=30° eso hacía pasar la guarda vieja
+           (|B−90| > 1e-9) y se mostraban dos soluciones idénticas de 21,65 m².
+           1 − sB ≥ 3e-12  ⇔  B₂ − B₁ ≥ 1″. */
+        if(1 - sB >= 3e-12) cands.push(180 - B1c);
+        else { tangente = true; tangRel = "b·sen(A) = a"; cands = [90]; }
         cands.forEach(function(Bc){
           var Cc = 180 - A - Bc;
           if(Cc > 1e-9) sols.push({ a:a, b:b, c: a * sind(Cc) / sind(A), A:A, B:Bc, C:Cc });
@@ -4112,7 +4122,9 @@ $("tri-calcular").addEventListener("click", function(){
         err = "No existe triángulo con esos datos: a·sen(B)/b = " + fmt(sA, 4) + " es mayor que 1.";
       } else {
         var A5 = asind(sA), cands5 = [A5];
-        if(Math.abs(A5 - 90) > 1e-9 && (180 - A5) !== A5) cands5.push(180 - A5);
+        /* mismo criterio que el caso 4: el control va sobre sA, no sobre el ángulo */
+        if(1 - sA >= 3e-12) cands5.push(180 - A5);
+        else { tangente = true; tangRel = "a·sen(B) = b"; cands5 = [90]; }
         cands5.forEach(function(Ac){
           var Cc = 180 - Ac - B;
           if(Cc > 1e-9) sols.push({ a:a, b:b, c: b * sind(Cc) / sind(B), A:Ac, B:B, C:Cc });
@@ -4140,6 +4152,9 @@ $("tri-calcular").addEventListener("click", function(){
   var hh = "";
   if(sols.length === 2){
     hh += "<div class='msg info'>Con dos lados y el ángulo opuesto a uno de ellos hay <b>dos triángulos posibles</b>. Se muestran los dos: elegí el que corresponda a tu terreno.</div>";
+  } else if(tangente){
+    hh += "<div class='msg info'>Caso límite de la ambigüedad: <b>" + tangRel + "</b>. El lado opuesto mide exactamente la altura, " +
+          "así que los dos triángulos posibles son el mismo. Hay una <b>sola solución</b> y es <b>rectángulo en " + ambigua + "</b>.</div>";
   }
   sols.forEach(function(S, k){
     var per = S.a + S.b + S.c;
@@ -5042,6 +5057,50 @@ function correrPruebas(){
   tri("4");
   ver(G, "caso 4 — ofrece las dos soluciones",
       document.querySelectorAll("#tri-res-body .big-result").length, 2);
+  /* ---------- G2 · Triángulos — el borde de la ambigüedad (SSA) ----------
+     En la tangencia b·sen(A) = a los dos triángulos son el mismo. La guarda vieja
+     miraba |B − 90| > 1e-9 y no servía: asin amplifica el ruido cerca de 1 y un ULP
+     en sB se vuelve 1,2e-6° en B, así que mostraba dos soluciones idénticas. */
+  var G2 = "G2 · Triángulos — borde de la ambigüedad";
+  function triSSA(caso, campos){
+    tab(/Tri/);
+    var s = document.getElementById("tri-caso");
+    s.value = caso; s.dispatchEvent(new Event("change"));
+    for(var k in campos) document.getElementById(k).value = campos[k];
+    document.getElementById("tri-calcular").click();
+    return document.getElementById("tri-res-body");
+  }
+  function angTri(fila){   /* g°m's" del ángulo de la fila pedida (1=A, 2=B, 3=C) */
+    var tr = document.querySelectorAll("#tri-res-body table tbody tr")[fila - 1];
+    return tr ? tr.cells[3].textContent.trim() : "(sin fila)";
+  }
+
+  /* tangencia exacta en el caso 4: a = 5, b = 10, A = 30° → sB = 1 */
+  triSSA("4", { "tri-a":"5", "tri-b":"10", "tri-Ag":"30", "tri-Am":"0", "tri-As":"0" });
+  ver(G2, "caso 4 tangente — una sola solución",
+      document.querySelectorAll("#tri-res-body .big-result").length, 1);
+  ver(G2, "caso 4 tangente — rectángulo en B",     angTri(2), "90°0'0\"");
+  ver(G2, "caso 4 tangente — C queda en 60°",      angTri(3), "60°0'0\"");
+  ver(G2, "caso 4 tangente — superficie",          sup("tri-res-body"), 21.65, 0.01);
+  ver(G2, "caso 4 tangente — avisa el caso límite",
+      /caso límite/i.test(document.getElementById("tri-res-body").textContent), true);
+
+  /* el espejo: tangencia en el caso 3, b = 5, a = 10, B = 30° → sA = 1 */
+  triSSA("3", { "tri-a":"10", "tri-b":"5", "tri-Bg":"30", "tri-Bm":"0", "tri-Bs":"0" });
+  ver(G2, "caso 3 tangente — una sola solución",
+      document.querySelectorAll("#tri-res-body .big-result").length, 1);
+  ver(G2, "caso 3 tangente — rectángulo en A",     angTri(1), "90°0'0\"");
+
+  /* y el control en el otro sentido: el arreglo no puede tapar ambigüedades reales */
+  triSSA("4", { "tri-a":"8", "tri-b":"10", "tri-Ag":"30", "tri-Am":"0", "tri-As":"0" });
+  ver(G2, "ambigüedad franca (sB = 0,625) — sigue dando dos",
+      document.querySelectorAll("#tri-res-body .big-result").length, 2);
+
+  /* cerca del borde pero todavía separables al segundo: 1 − sB = 1e-7 → B₂−B₁ ≈ 3'4" */
+  triSSA("4", { "tri-a":"5", "tri-b":"9.999999", "tri-Ag":"30", "tri-Am":"0", "tri-As":"0" });
+  ver(G2, "casi tangente pero distinguible — dos",
+      document.querySelectorAll("#tri-res-body .big-result").length, 2);
+
   /* el botón de ejemplo no puede cambiar el caso que eligió el usuario */
   tab(/Tri/);
   var selTri = document.getElementById("tri-caso");
