@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "14.6";
+var APP_VER = "14.7";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -2328,7 +2328,7 @@ function dibujaPlano(X, Y, lados, sup, letras){
 ===================================================================== */
 var MODULOS = [
   { id:"planilla", nombre:"Planilla (lados y ángulos)", chk:"mod-planilla" },
-  { id:"coords",   nombre:"Coordenadas",                chk:"mod-coords"   },
+  { id:"coords",   nombre:"Coordenadas (Gauss)",        chk:"mod-coords"   },
   { id:"cuadri",   nombre:"Cuadriláteros",              chk:"mod-cuadri"   },
   { id:"tri",      nombre:"Triángulos",                 chk:"mod-tri"      }
 ];
