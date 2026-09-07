@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "14.5";
+var APP_VER = "14.6";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -549,7 +549,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
     <p style="color:var(--ink-soft); font-size:.9rem; margin:4px 0 22px;">Elegí <b>tocando una opción</b> — en la PC también con las teclas <b>1</b>, <b>2</b>, <b>3</b> o <b>4</b></p>
     <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
       <button class="metodo-btn" id="ini-planilla"><span class="num">1</span>Por planilla de cálculo<small>lados y ángulos</small></button>
-      <button class="metodo-btn" id="ini-coords"><span class="num">2</span>Por coordenadas<small>X e Y de los vértices</small></button>
+      <button class="metodo-btn" id="ini-coords"><span class="num">2</span>Por coordenadas (Gauss)<small>X e Y de los vértices</small></button>
       <button class="metodo-btn" id="ini-cuadri"><span class="num">3</span>Cuadriláteros<small>dos lados, dos ángulos y la base</small></button>
       <button class="metodo-btn" id="ini-tri"><span class="num">4</span>Triángulos<small>seis casos según los datos</small></button>
     </div>
@@ -586,7 +586,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
         <label style="display:inline-flex; align-items:center; gap:6px; margin-top:2px; font-size:.92rem; color:var(--ink); cursor:pointer;"><input type="radio" name="pl-metcalc" id="pl-metcalc2" style="accent-color:var(--marca);"> 2 · Por coordenadas (Gauss)</label>
         <!-- ayuda para elegir: no se imprime. Qué método se usó ya queda asentado en los
              resultados, así que en la hoja terminada este párrafo sería explicación de más. -->
-        <p class="no-print" style="font-size:.8rem; color:var(--ink-soft); margin-top:4px;"><b>1 · Por planilla de cálculo</b> — dobles superficies, como la planilla del programa original: promedia las dos sumas, ΔX·(Y<sub>i</sub>+Y<sub>i+1</sub>) y ΔY·(X<sub>i</sub>+X<sub>i+1</sub>). <b>2 · Por coordenadas</b> — fórmula de Gauss sobre las coordenadas de los vértices. Con la poligonal cerrada dan idéntico. Sin cerrar difieren, y la diferencia crece con el error de cierre.</p>
+        <p class="no-print" style="font-size:.8rem; color:var(--ink-soft); margin-top:4px;"><b>1 · Por planilla de cálculo</b> — dobles superficies, como la planilla del programa original: promedia las dos sumas, ΔX·(Y<sub>i</sub>+Y<sub>i+1</sub>) y ΔY·(X<sub>i</sub>+X<sub>i+1</sub>). <b>2 · Por coordenadas (Gauss)</b> — fórmula de Gauss sobre las coordenadas de los vértices. Con la poligonal cerrada dan idéntico. Sin cerrar difieren, y la diferencia crece con el error de cierre.</p>
       </div>
     </div>
     <div class="row">
@@ -2973,7 +2973,7 @@ function plMostrar(){
   if(D.bx === undefined || !isFinite(D.bx)){ D.bx = 0; }
   if(D.by === undefined || !isFinite(D.by)){ D.by = 0; }
   var hCoord = "";
-  hCoord += "<p style='font-size:.85rem; color:var(--ink-soft); margin:12px 0 4px; text-transform:uppercase; letter-spacing:.04em;'><b>Cálculo por coordenadas — coordenadas totales de los vértices</b></p>";
+  hCoord += "<p style='font-size:.85rem; color:var(--ink-soft); margin:12px 0 4px; text-transform:uppercase; letter-spacing:.04em;'><b>Cálculo por coordenadas (Gauss) — coordenadas totales de los vértices</b></p>";
   hCoord += "<div class='row no-print'>" +
        "<div><label>X del vértice 1 (Norte) — ej. Gauss-Krüger</label><input type='text' inputmode='decimal' id='pl-x0' value='" + D.bx + "' style='width:160px;'></div>" +
        "<div><label>Y del vértice 1 (Este)</label><input type='text' inputmode='decimal' id='pl-y0' value='" + D.by + "' style='width:160px;'></div>" +
@@ -3026,7 +3026,7 @@ function plMostrar(){
        calcula siempre sobre los datos definitivos. */
     h += "<div class='row no-print'><button class='primary' id='pl-otro-metodo'>¿Este polígono " +
          (D.comp ? "compensado " : "") + "quiere calcularlo por el método de " +
-         (porCoord ? "Planilla de cálculo" : "Coordenadas") + "?</button></div>";
+         (porCoord ? "Planilla de cálculo" : "Coordenadas (Gauss)") + "?</button></div>";
   }
   /* Las coordenadas se calculaban y se mostraban, pero no había forma de sacarlas: para
      llevarlas al CAD había que copiarlas a mano de la tabla. El botón va acá y no dentro de
@@ -3151,7 +3151,7 @@ function plMostrar(){
   }
 
   h += "<p style='font-size:.9rem; margin:10px 0 0; color:var(--ink);'>Superficie calculada " +
-       (D.mcalc === 2 ? "<b>por coordenadas</b>" : "<b>por planilla de cálculo (dobles superficies)</b>") +
+       (D.mcalc === 2 ? "<b>por coordenadas (Gauss)</b>" : "<b>por planilla de cálculo (dobles superficies)</b>") +
        " &nbsp;·&nbsp; Cierre angular: <b>" + dtCierreAngular(D) + "</b>" +
        " &nbsp;·&nbsp; Compensación lineal de los lados: " +
        /* Con el polígono cerrado exacto, "la superficie incluye el error de cierre lineal"
@@ -3173,7 +3173,7 @@ function plMostrar(){
   var difMetodos = Math.abs(wPlan - wCoord);
   if(!D.verOtro && difMetodos >= 0.005){
     h += "<p style='font-size:.82rem; color:var(--ink-soft); margin:6px 0 0;'>Por el método de <b>" +
-         (porCoord ? "planilla de cálculo" : "coordenadas") + "</b> daría <b>" +
+         (porCoord ? "planilla de cálculo" : "coordenadas (Gauss)") + "</b> daría <b>" +
          fmt(porCoord ? wPlan : wCoord, 2) + " m²</b>: difieren en " + fmt(difMetodos, 2) +
          " m², porque queda un error de cierre de " + fmt(D.error, 2) +
          " m. Compensando la poligonal, los dos métodos coinciden.</p>";
