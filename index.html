@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "13.9";
+var APP_VER = "14.0";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -768,7 +768,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 13.9 · Última actualización: 07/09/2026 07:25 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 14.0 · Última actualización: 07/09/2026 07:54 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -3008,8 +3008,11 @@ function plMostrar(){
          "<tr class='total'><td class='lbl'>Diferencia</td><td>" + fmt(difMet, 2) + " m²</td></tr>" +
          "</tbody></table>";
     if(difMet < 0.005){
-      h += "<div class='msg good'>Los dos métodos dan el mismo resultado: el cálculo está controlado, " +
-           "las coordenadas son las <b>MISMAS</b> en ambos métodos.</div>";
+      /* El "porque" no es adorno: dice la razón de la coincidencia. Los dos métodos no son
+         de compensación sino de cálculo de superficie, y una vez compensada la poligonal
+         trabajan sobre las mismas coordenadas finales. Por eso tienen que dar igual. */
+      h += "<div class='msg good'>Los dos métodos dan el mismo resultado en el cálculo de " +
+           "superficies, porque las coordenadas son las <b>mismas</b> en ambos métodos.</div>";
     } else {
       h += "<p style='font-size:.85rem; color:var(--ink-soft); margin:2px 0 8px;'>Mientras el polígono no esté compensado " +
            "los dos métodos reparten el error de cierre de distinta manera, así que una diferencia es esperable. " +
