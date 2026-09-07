@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "13.8";
+var APP_VER = "13.9";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -768,7 +768,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 13.8 · Última actualización: 07/09/2026 07:15 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 13.9 · Última actualización: 07/09/2026 07:25 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -2892,6 +2892,31 @@ function plMostrar(){
        "<td class='lbl'>Cierre angular</td><td colspan='3'>" + dtCierreAngular(D) + "</td>" +
        "</tr></tbody></table>";
 
+  /* Qué es cada número del cuadro de control. Va acá y no en la ayuda porque es donde se
+     leen las cifras, y porque esta parte sale impresa: en el papel no hay ayuda a la que ir. */
+  h += "<p style='font-size:.8rem; color:var(--ink-soft); margin:4px 0 10px;'>" +
+       "<b>ex</b> y <b>ey</b> son las sumas de las proyecciones (Σ Δx y Σ Δy), y el " +
+       "<b>error de cierre lineal</b> es √(ex² + ey²). El <b>error angular</b> es la diferencia " +
+       "entre la suma de los ángulos interiores observados y la teórica 180°·(n−2) = <b>" +
+       gmsStr(180 * (n - 2)) + "</b>, y su tolerancia es <b>T = k·√n</b>.</p>";
+
+  /* Control de programación, no de la mensura: Crandall ajusta las longitudes manteniendo
+     fijas las direcciones. Que el azimut ajustado coincida con el observado es la firma del
+     método —si cambiara, habría una inconsistencia en el cálculo, no en la medición—. */
+  if(D.comp && D.met === 1 && D.Zaj){
+    var difAz = 0;
+    for(i = 0; i < n; i++) difAz = Math.max(difAz, Math.abs(D.Zaj[i] - D.Z[i]));
+    h += "<div class='msg " + (difAz < 1e-9 ? "good" : "bad grave") + "'>" +
+         (difAz < 1e-9
+           ? "<b>Control — azimuts conservados.</b> El Método de Crandall ajusta las longitudes " +
+             "manteniendo fijas las direcciones, así que los azimuts ajustados coinciden con los " +
+             "observados. La coincidencia verifica que la compensación hizo lo que debía."
+           : "<b>Atención:</b> después de compensar por Crandall los azimuts cambiaron (máximo " +
+             gmsStr(difAz) + "). Crandall tiene que conservar las direcciones: hay una " +
+             "inconsistencia en el cálculo que conviene investigar antes de usar este resultado.") +
+         "</div>";
+  }
+
   /* La insignia EXCEDE es chica y va dentro de una tabla que además se desplaza en
      horizontal: en pantalla angosta puede quedar fuera de la vista. El error lineal
      fuera de tolerancia se avisa entonces igual que el angular, a todo el ancho. */
@@ -2961,6 +2986,11 @@ function plMostrar(){
   hCoord += "</tbody></table>";
   hCoord += "<p style='font-size:.85rem; color:var(--ink-soft); margin:4px 0 8px;'>Superficie por coordenadas (Gauss) = <b>" +
        fmt(wCoord, 2) + "m²</b></p>";
+  /* Aclaración que evita una confusión repetida: Gauss no arregla nada, solo mide lo que
+     recibe. Si la poligonal no está compensada, la superficie es la de un polígono abierto. */
+  hCoord += "<p style='font-size:.8rem; color:var(--ink-soft); margin:0 0 8px;'>" +
+       "Gauss <b>no distribuye ni corrige</b> errores de medición: calcula la superficie de la " +
+       "geometría que recibe, a partir de las coordenadas de los vértices en el orden dado.</p>";
 
   /* primero el método elegido; el otro va debajo solo si se aceptó la pregunta */
   var porCoord = (D.mcalc === 2);
