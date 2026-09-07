@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "14.3";
+var APP_VER = "14.4";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -3012,7 +3012,9 @@ function plMostrar(){
          de compensación sino de cálculo de superficie, y una vez compensada la poligonal
          trabajan sobre las mismas coordenadas finales. Por eso tienen que dar igual. */
       h += "<div class='msg good'>Los dos métodos dan el mismo resultado en el cálculo de " +
-           "superficies, porque las coordenadas son las <b>mismas</b> en ambos métodos.</div>";
+           "superficies porque utilizan las mismas coordenadas para representar la misma " +
+           "geometría. La coincidencia confirma que, en este caso, ambos métodos son " +
+           "consistentes entre sí.</div>";
     } else {
       h += "<p style='font-size:.85rem; color:var(--ink-soft); margin:2px 0 8px;'>Mientras el polígono no esté compensado " +
            "los dos métodos reparten el error de cierre de distinta manera, así que una diferencia es esperable. " +
@@ -3491,8 +3493,10 @@ function plMostrar(){
          |G1·H1| + |F1²|, pero cuando los lados tienden a paralelos esos dos términos se
          anulan al MISMO ritmo (ambos ~sen²θ): el cociente tiende a 1/3 y nunca se dispara.
          Detectaba el paralelismo exacto y dejaba pasar el casi paralelo, donde la corrección
-         crece como 1/sen²θ — con dos lados a 0,05° y 2,5 cm de error de cierre daba 22,9 m,
+         crece como 1/sen θ — con dos lados a 0,05° y 2,5 cm de error de cierre daba 22,9 m,
          en silencio y reportando cierre perfecto (Crandall cierra por construcción).
+         (Ojo: 1/sen θ, no 1/sen²θ. El sen² es del determinante, no de la corrección; el
+         comentario decía sen² por confundir una cosa con la otra. Ver la ley medida abajo.)
          La medida correcta del condicionamiento de la matriz normal [[H1,F1],[F1,G1]] es
          det/traza², que sí tiende a cero con el paralelismo. Con 1e-4 se rechaza por debajo
          de ~1,15° entre las direcciones marcadas, donde la corrección ya pasa el metro. */
@@ -3525,15 +3529,31 @@ function plMostrar(){
          previene la causa conocida (lados casi paralelos); éste mide la consecuencia y
          atrapa cualquier otra. Hace falta porque Crandall cierra por construcción: después
          de compensar el error da ~0 y una corrección disparatada se ve igual que una buena.
-         El factor sale de medir: con la geometría bien condicionada la corrección queda
-         por debajo del error a repartir (0,8x a 90° entre los lados marcados, 1,4x a 45°,
-         2,8x a 20°, 4,4x a 12°). Pasando esa zona la compensación deja de repartir y
-         empieza a amplificar.
+         LA LEY, medida contra este mismo código (desvío relativo 4,6e-16 en 13 ángulos de
+         0,05° a 90°): en el PEOR caso la corrección vale exactamente
+
+             corrección_máx = error de cierre / sen θ
+
+         siendo θ el ángulo entre las direcciones marcadas. De ahí el corte de cualquier
+         multiplicador M sale en forma cerrada:  θ_corte = arcsen(1/M).
+
+             M:      2      3      4      5      6      8     10     15     20     ~50
+             θ:    30,0°  19,5°  14,5°  11,5°   9,6°   7,2°   5,7°   3,8°   2,9°   1,15°
+
+         No depende de la longitud de los lados: comprobado con cocientes de 1:1, 5:1, 20:1,
+         2000:1 y 1:2000 — R idéntico a seis decimales; solo cambia cuál de los dos lados se
+         lleva la corrección mayor. Tampoco del módulo del error. Sí de su DIRECCIÓN: el
+         mejor caso es ~0,5x a cualquier ángulo, así que el corte no es nítido. Con 8x, la
+         proporción de direcciones de error que bloquean es 92% a 1°, 83% a 2°, 54% a 5°,
+         2% a 7,2° y 0% a 10°. Dos trabajos con la misma geometría pueden comportarse
+         distinto según hacia dónde caiga el cierre. Si algún día se quiere un corte
+         determinista, hay que controlar 1/sen θ directamente: eso es cambiar el criterio,
+         no el número.
+         Arriba de ~50x este control es inerte: el control A corta a 1,15° de todos modos
+         (det/traza² = 1,007e-4 ahí). El espacio de decisión real va de 1x a 50x.
          Historial del umbral: 10x en v13.5, 5x en v13.6, 8x desde v13.7. El 5x rechazaba
-         por debajo de ~10° y resultó demasiado estricto para el trabajo real; con 8x el
-         corte queda en ~6° y vuelven a pasar las selecciones de 6° a 10°, donde la
-         corrección corre entre 5 y 8 veces el cierre. Es un aflojamiento deliberado: por
-         debajo de ~6° sigue bloqueando, y el control A cubre todo lo que baja de 1,15°. */
+         por debajo de 11,5° y resultó demasiado estricto para el trabajo real; con 8x el
+         corte queda en 7,2°. Es un aflojamiento deliberado. */
       var corrJ = [], corrS = [], corrMax = 0;
       for(j = 0; j < sel.length; j++){
         i = sel[j];
