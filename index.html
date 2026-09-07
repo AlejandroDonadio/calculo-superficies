@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "14.2";
+var APP_VER = "14.3";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -4020,6 +4020,31 @@ function cosd(d){ return Math.cos(rad(d)); }
 function acosd(x){ return Math.acos(Math.max(-1, Math.min(1, x))) * 180 / Math.PI; }
 function asind(x){ return Math.asin(Math.max(-1, Math.min(1, x))) * 180 / Math.PI; }
 
+/* ---------- El borde de la ambigüedad SSA ----------
+   En el caso de dos lados y el ángulo opuesto a uno de ellos (casos 3 y 4), el seno del
+   ángulo buscado queda determinado, pero el ángulo no: hay hasta dos triángulos. Esta
+   función decide cuántos, y es la única que toma esa decisión.
+
+   Devuelve  []      si no hay triángulo (s > 1),
+             [90]    en la tangencia: el triángulo es rectángulo y los dos son el mismo,
+             [α, 180−α]  si la ambigüedad es real.
+
+   El control va sobre el SENO y no sobre el ángulo. Cerca de la tangencia asin amplifica
+   el ruido —su derivada es 1/√(1−s²)— por un factor de ~5e9: con a=5, b=10, A=30° el
+   seno queda a un ULP de 1 (2,2e-16) pero el ángulo queda a 1,2e-6° de 90. La guarda
+   vieja miraba |α−90| > 1e-9 y por eso mostraba dos soluciones idénticas de 21,65 m².
+   Ningún umbral sobre el ángulo puede funcionar: ahí el piso de ruido ya es 1e-6°.
+
+   El umbral sale de la resolución con que el programa informa ángulos, el segundo entero:
+       1 − s ≥ 3e-12   ⇔   (180−α) − α ≥ 1″
+   Por debajo de eso los dos triángulos no se distinguen en el informe, así que son uno. */
+function ssaCandidatos(s){
+  if(s > 1 + 1e-12) return [];
+  if(1 - s < 3e-12) return [90];
+  var a1 = asind(s);
+  return [a1, 180 - a1];
+}
+
 function triCampos(){
   var vis = {
     "1": { a:1, b:1, c:1, A:0, B:0, C:0 },
@@ -4092,19 +4117,11 @@ $("tri-calcular").addEventListener("click", function(){
     else {
       ambigua = "B";
       var sB = b * sind(A) / a;
-      if(sB > 1 + 1e-12){
+      var cands = ssaCandidatos(sB);
+      if(cands.length === 0){
         err = "No existe triángulo con esos datos: b·sen(A)/a = " + fmt(sB, 4) + " es mayor que 1.";
       } else {
-        var B1c = asind(sB), cands = [B1c];
-        /* Hay dos triángulos sólo si los dos valores de B se distinguen al segundo, que
-           es la resolución con que el programa informa los ángulos.
-           El control va sobre sB y NO sobre el ángulo: cerca de la tangencia asin
-           amplifica el ruido —su derivada es 1/√(1−sB²)— y un ULP en sB (2,2e-16) se
-           vuelve 1,2e-6° en B. Con a=5, b=10, A=30° eso hacía pasar la guarda vieja
-           (|B−90| > 1e-9) y se mostraban dos soluciones idénticas de 21,65 m².
-           1 − sB ≥ 3e-12  ⇔  B₂ − B₁ ≥ 1″. */
-        if(1 - sB >= 3e-12) cands.push(180 - B1c);
-        else { tangente = true; tangRel = "b·sen(A) = a"; cands = [90]; }
+        if(cands.length === 1){ tangente = true; tangRel = "b·sen(A) = a"; }
         cands.forEach(function(Bc){
           var Cc = 180 - A - Bc;
           if(Cc > 1e-9) sols.push({ a:a, b:b, c: a * sind(Cc) / sind(A), A:A, B:Bc, C:Cc });
@@ -4118,13 +4135,11 @@ $("tri-calcular").addEventListener("click", function(){
     else {
       ambigua = "A";
       var sA = a * sind(B) / b;
-      if(sA > 1 + 1e-12){
+      var cands5 = ssaCandidatos(sA);
+      if(cands5.length === 0){
         err = "No existe triángulo con esos datos: a·sen(B)/b = " + fmt(sA, 4) + " es mayor que 1.";
       } else {
-        var A5 = asind(sA), cands5 = [A5];
-        /* mismo criterio que el caso 4: el control va sobre sA, no sobre el ángulo */
-        if(1 - sA >= 3e-12) cands5.push(180 - A5);
-        else { tangente = true; tangRel = "a·sen(B) = b"; cands5 = [90]; }
+        if(cands5.length === 1){ tangente = true; tangRel = "a·sen(B) = b"; }
         cands5.forEach(function(Ac){
           var Cc = 180 - Ac - B;
           if(Cc > 1e-9) sols.push({ a:a, b:b, c: b * sind(Cc) / sind(B), A:Ac, B:B, C:Cc });
@@ -5070,36 +5085,69 @@ function correrPruebas(){
     document.getElementById("tri-calcular").click();
     return document.getElementById("tri-res-body");
   }
-  function angTri(fila){   /* g°m's" del ángulo de la fila pedida (1=A, 2=B, 3=C) */
-    var tr = document.querySelectorAll("#tri-res-body table tbody tr")[fila - 1];
-    return tr ? tr.cells[3].textContent.trim() : "(sin fila)";
-  }
-
   /* tangencia exacta en el caso 4: a = 5, b = 10, A = 30° → sB = 1 */
   triSSA("4", { "tri-a":"5", "tri-b":"10", "tri-Ag":"30", "tri-Am":"0", "tri-As":"0" });
   ver(G2, "caso 4 tangente — una sola solución",
       document.querySelectorAll("#tri-res-body .big-result").length, 1);
-  ver(G2, "caso 4 tangente — rectángulo en B",     angTri(2), "90°0'0\"");
-  ver(G2, "caso 4 tangente — C queda en 60°",      angTri(3), "60°0'0\"");
-  ver(G2, "caso 4 tangente — superficie",          sup("tri-res-body"), 21.65, 0.01);
   ver(G2, "caso 4 tangente — avisa el caso límite",
       /caso límite/i.test(document.getElementById("tri-res-body").textContent), true);
+
+  /* Las de arriba miran lo renderizado, que está redondeado al segundo. Contra ESTE bug
+     eso no alcanza: las dos soluciones falsas diferían en 1,2e-6° y las dos se dibujaban
+     "90°0'0\"", "60°0'0\"" y 21,65. Por eso el resto prueba `ssaCandidatos` directamente,
+     sin pasar por el redondeo, que es donde el error es visible. */
+  var sTang = 10 * sind(30) / 5;      /* la tangencia, tal como la calcula el programa */
+  ver(G2, "tangencia — sB queda a un ULP de 1", Math.abs(1 - sTang) < 3e-16, true);
+  ver(G2, "tangencia — un solo candidato",      ssaCandidatos(sTang).length, 1);
+  ver(G2, "tangencia — el ángulo es 90 EXACTO", ssaCandidatos(sTang)[0], 90);
+  /* sin el arreglo, asind(sTang) da 89.999998792581735: a 1,2e-6 de 90 */
+  ver(G2, "tangencia — asin solo no da 90",     asind(sTang) === 90, false);
+
+  /* el umbral queda fijado por prueba: mover 3e-12 rompe una de las dos */
+  ver(G2, "umbral — justo por debajo colapsa",  ssaCandidatos(1 - 2e-12).length, 1);
+  ver(G2, "umbral — justo por encima no",       ssaCandidatos(1 - 4e-12).length, 2);
+  /* y los dos ángulos que devuelve en el borde se separan al menos 1 segundo */
+  var par = ssaCandidatos(1 - 4e-12);
+  ver(G2, "umbral — en el borde se separan ≥ 1″", (par[1] - par[0]) * 3600 >= 1, true);
+
+  /* sin triángulo: el seno no puede pasar de 1 */
+  ver(G2, "sin solución — s > 1 no da candidatos", ssaCandidatos(1.5).length, 0);
+
+  /* ambigüedad franca, con los dos ángulos verificados contra la ley de senos */
+  var sAmb = 10 * sind(30) / 8, amb = ssaCandidatos(sAmb);
+  ver(G2, "ambigua — dos candidatos",           amb.length, 2);
+  ver(G2, "ambigua — son suplementarios",       Math.abs(amb[0] + amb[1] - 180) < 1e-12, true);
+  ver(G2, "ambigua — los dos cumplen sen(α)=s", Math.abs(sind(amb[0]) - sAmb) < 1e-12 &&
+                                                Math.abs(sind(amb[1]) - sAmb) < 1e-12, true);
 
   /* el espejo: tangencia en el caso 3, b = 5, a = 10, B = 30° → sA = 1 */
   triSSA("3", { "tri-a":"10", "tri-b":"5", "tri-Bg":"30", "tri-Bm":"0", "tri-Bs":"0" });
   ver(G2, "caso 3 tangente — una sola solución",
       document.querySelectorAll("#tri-res-body .big-result").length, 1);
-  ver(G2, "caso 3 tangente — rectángulo en A",     angTri(1), "90°0'0\"");
+  /* el espejo, también a precisión completa */
+  ver(G2, "caso 3 tangente — el ángulo es 90 EXACTO",
+      ssaCandidatos(10 * sind(30) / 5)[0], 90);
+
+  /* Cuando el programa ofrece DOS opciones, tienen que ser dos opciones distintas: ese
+     era el sintoma del bug, dos filas identicas. Comparar los renders lo detecta donde
+     contarlos no puede. */
+  function solucionesRenderizadas(){
+    return Array.prototype.map.call(
+      document.querySelectorAll("#tri-res-body table"),
+      function(t){ return t.textContent.replace(/\s+/g, " ").trim(); });
+  }
 
   /* y el control en el otro sentido: el arreglo no puede tapar ambigüedades reales */
   triSSA("4", { "tri-a":"8", "tri-b":"10", "tri-Ag":"30", "tri-Am":"0", "tri-As":"0" });
-  ver(G2, "ambigüedad franca (sB = 0,625) — sigue dando dos",
-      document.querySelectorAll("#tri-res-body .big-result").length, 2);
+  var dosAmb = solucionesRenderizadas();
+  ver(G2, "ambigüedad franca (sB = 0,625) — sigue dando dos", dosAmb.length, 2);
+  ver(G2, "ambigüedad franca — las dos son distintas", dosAmb[0] !== dosAmb[1], true);
 
   /* cerca del borde pero todavía separables al segundo: 1 − sB = 1e-7 → B₂−B₁ ≈ 3'4" */
   triSSA("4", { "tri-a":"5", "tri-b":"9.999999", "tri-Ag":"30", "tri-Am":"0", "tri-As":"0" });
-  ver(G2, "casi tangente pero distinguible — dos",
-      document.querySelectorAll("#tri-res-body .big-result").length, 2);
+  var dosBorde = solucionesRenderizadas();
+  ver(G2, "casi tangente pero distinguible — dos", dosBorde.length, 2);
+  ver(G2, "casi tangente — y se distinguen en pantalla", dosBorde[0] !== dosBorde[1], true);
 
   /* el botón de ejemplo no puede cambiar el caso que eligió el usuario */
   tab(/Tri/);
