@@ -15,7 +15,7 @@
    IMPORTANTE: este número tiene que coincidir con el contenido de version.txt. De esa
    comparación depende la actualización automática. El pie de página ya no hay que tocarlo:
    desde la v15.0 lo lee de acá. */
-var APP_VER = "15.0";
+var APP_VER = "15.1";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -4030,7 +4030,13 @@ function triEsquema(){
   s += esqTexto(210, 226, "b" + esqTag(v.b), v.b, 'text-anchor="middle"', 14);
   s += esqTexto(307, 108, "a" + esqTag(v.a), v.a, 'text-anchor="middle" transform="rotate(47 307 108)"', 14);
   s += esqTexto(114, 108, "c" + esqTag(v.c), v.c, 'text-anchor="middle" transform="rotate(-47 114 108)"', 14);
-  s += esqTexto(210, 90, "áng. B" + esqTag(v.B), v.B, 'text-anchor="middle"');
+  /* La etiqueta del ángulo B va más abajo que las otras dos, y no es un descuido: en el
+     vértice de arriba el triángulo se angosta, y a la altura de la de A y C —y=90— mide
+     96,5 px de ancho. "áng. B (calc.)" ocupa 100,1 px con Consolas 13, así que se salía
+     1,8 px por cada lado y pisaba los lados. A y=110 el triángulo mide 133,7 px y quedan
+     16,8 px de holgura de cada lado, sin chocar con ninguna otra etiqueta. Medido, no
+     estimado. Bajarla más la alejaría del arco del vértice, que termina en y≈64. */
+  s += esqTexto(210, 110, "áng. B" + esqTag(v.B), v.B, 'text-anchor="middle"');
   s += esqTexto(97, 183, "áng. A" + esqTag(v.A), v.A, "");
   s += esqTexto(325, 183, "áng. C" + esqTag(v.C), v.C, 'text-anchor="end"');
   $("tri-esquema").innerHTML = s + "</svg>";
