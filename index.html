@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "14.8";
+var APP_VER = "14.9";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -498,6 +498,42 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
   .plano-box svg text{ font-size:14px; }
   table{page-break-inside:auto; break-inside:auto;}
   tr{page-break-inside:avoid; break-inside:avoid;}
+
+  /* ---------- Apretado de la planilla, para que entre en dos hojas ----------
+     Después de la v13.8 se fueron sumando avisos que también se imprimen, y la hoja
+     volvió a irse de largo: medida sobre el ejemplo compensado en A4, daba 2,09 páginas
+     —o sea TRES hojas, con la tercera casi vacía—, pasándose 103 px de la segunda.
+
+     Acá no se saca nada ni se achica ninguna letra: solo se recupera espacio muerto de
+     márgenes y padding, que sumaban 216 px entre todos los bloques impresos. Medido paso
+     a paso sobre el propio programa:
+
+         como estaba                         2,09  ->  3 hojas   (se pasaba 103 px)
+         + celdas y tablas apretadas         2,02  ->  3
+         + avisos, párrafos e interlineado   1,99  ->  2         (holgura de 8 px: muy justo)
+         + márgenes de bloque más ceñidos    1,96  ->  2         (holgura de 48 px)
+
+     Los ángulos del croquis siguen en 8,3 pt y el cuerpo de las tablas en 10,2 pt: no se
+     tocó ningún tamaño de letra. Por eso tampoco se achica el croquis — al reducirlo, el
+     SVG escala su propio texto y los ángulos volverían a caer por debajo de 8,3, que fue
+     exactamente el defecto que arregló la v13.8.
+
+     El padding de celda se deja en 3px y no en 2: bajarlo daba 1,93 pero apretaba de más
+     los renglones de la planilla, que es lo que se lee. Con 1,96 hay más holgura que los
+     1,95 con los que la v13.8 salió en dos hojas en papel.
+
+     Si algún trabajo más largo se pasa igual, el recurso siguiente es fijar @page{margin}
+     para ganar hoja: depende de la impresora y no se puede medir desde acá. */
+  /* El !important no es adorno: buena parte de estos párrafos se arman con style= en línea,
+     que le gana a cualquier selector. Sin él, el apretado se pierde y la hoja queda en 1,98
+     en vez de 1,96 — que es justo la diferencia entre 26 y 48 px de holgura. */
+  #pl-res-body{ line-height:1.42 !important; }
+  #pl-res-body td, #pl-res-body th{ padding-top:3px !important; padding-bottom:3px !important; }
+  #pl-res-body table{ margin-top:3px !important; margin-bottom:3px !important; }
+  #pl-res-body .msg{ padding-top:5px !important; padding-bottom:5px !important; margin-top:4px !important; margin-bottom:4px !important; }
+  #pl-res-body p{ margin-top:2px !important; margin-bottom:4px !important; }
+  #pl-res-body .big-result{ padding-top:5px !important; padding-bottom:1px !important; }
+  #pl-res-body .plano-box{ margin-top:3px !important; padding-top:3px !important; padding-bottom:3px !important; }
 }
 </style>
 </head>
