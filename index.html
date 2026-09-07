@@ -14,7 +14,7 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el del pie de página y con el
    contenido de version.txt. De esa comparación depende la actualización automática. */
-var APP_VER = "14.0";
+var APP_VER = "14.1";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -768,7 +768,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
   Compensación lineal por mínimos cuadrados (Método de Crandall). Funciona sin conexión: guardá este archivo y abrilo con doble clic. El trabajo se guarda solo en este navegador y reaparece tal cual al volver a abrir; "Nuevo cálculo (limpiar)" borra el módulo.
-<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 14.0 · Última actualización: 07/09/2026 07:54 hs</span></footer>
+<br><span style="display:inline-block; margin-top:8px; font-weight:700; color:var(--ink);">Versión 14.1 · Última actualización: 07/09/2026 08:38 hs</span></footer>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
@@ -4856,6 +4856,123 @@ function correrPruebas(){
       resumenLineal().indexOf("regla de la brújula") >= 0, true);
   ver(H, "compensado: el resumen no lo llama 'cierra exacto'",
       resumenLineal().indexOf("cierra exacto") >= 0, false);
+
+  /* ---------- D2 · Crandall, verificación matemática ----------
+     Las pruebas del grupo D comprueban que Crandall cierra. Eso lo cumple también un
+     reparto arbitrario del error. Estas comprueban que las correcciones sean LAS de
+     mínimos cuadrados y que se apliquen al lado que corresponde.
+
+     El patrón de oro se resuelve acá dentro, por multiplicadores de Lagrange, sin usar
+     nada del código de compensación: minimizar Σ δL²/L sujeto a Σ δL·(x/L) = −ex y
+     Σ δL·(y/L) = −ey da, con P=Σx²/L, Q=Σxy/L, R=Σy²/L:
+
+         δLᵢ = [ xᵢ(ey·Q − ex·R) + yᵢ(ex·Q − ey·P) ] / (P·R − Q²)
+
+     Si alguien cambia la fórmula, el índice o el signo, estas pruebas fallan. */
+  var D2 = "D2 · Crandall — verificación matemática";
+
+  function oroLagrange(x0, y0, L0, ex, ey){
+    var P = 0, Q = 0, R = 0, k;
+    for(k = 0; k < L0.length; k++){
+      P += x0[k]*x0[k]/L0[k]; Q += x0[k]*y0[k]/L0[k]; R += y0[k]*y0[k]/L0[k];
+    }
+    var det = P*R - Q*Q, out = [];
+    for(k = 0; k < L0.length; k++){
+      out.push((x0[k]*(ey*Q - ex*R) + y0[k]*(ex*Q - ey*P)) / det);
+    }
+    return out;
+  }
+
+  /* estado del ejemplo antes de compensar, para tener x, y, L y el cierre originales */
+  tab(/Planilla/);
+  document.getElementById("pl-ejemplo").click();
+  document.getElementById("pl-az-g").value = 45;
+  document.getElementById("pl-az-m").value = 0;
+  document.getElementById("pl-az-s").value = 0;
+  document.getElementById("pl-calcular").click();
+  var q0 = PL.datos;
+  var x0 = q0.x.slice(), y0 = q0.y.slice(), L0 = q0.L.slice(),
+      Z0 = q0.Z.slice(), ex0 = q0.ex, ey0 = q0.ey;
+  var oro = oroLagrange(x0, y0, L0, ex0, ey0);
+
+  document.getElementById("pl-met1").click();
+  document.getElementById("pl-compensar").click();
+  var q1 = PL.datos, difOro = 0, w2;
+  for(w2 = 0; w2 < L0.length; w2++){
+    difOro = Math.max(difOro, Math.abs((q1.L[w2] - L0[w2]) - oro[w2]));
+  }
+  ver(D2, "las correcciones son las de mínimos cuadrados (Lagrange)", difOro, 0, 1e-9);
+
+  /* Firma del método: ajusta longitudes sin tocar direcciones. Si algún día un azimut
+     cambiara, no sería Crandall aunque cerrara igual. */
+  var difAzC = 0;
+  for(w2 = 0; w2 < Z0.length; w2++) difAzC = Math.max(difAzC, Math.abs(q1.Zaj[w2] - Z0[w2]));
+  ver(D2, "Crandall no cambia los azimuts", difAzC, 0, 1e-9);
+
+  /* Las correcciones tienen que cancelar el cierre exactamente. Con el índice corrido
+     —x[i+1] en vez de x[i]— estas dos sumas dejarían de dar −ex y −ey. */
+  var sx = 0, sy = 0;
+  for(w2 = 0; w2 < L0.length; w2++){
+    sx += oro[w2] * x0[w2] / L0[w2];
+    sy += oro[w2] * y0[w2] / L0[w2];
+  }
+  ver(D2, "Σ correcciones en x cancela el error de cierre", sx, -ex0, 1e-9);
+  ver(D2, "Σ correcciones en y cancela el error de cierre", sy, -ey0, 1e-9);
+
+  /* Control del índice: aplicar la corrección del lado i al lado i+1 tiene que romper
+     el cierre. Si esta prueba pasa con las dos variantes, el índice no está probado. */
+  var exCorrido = 0, eyCorrido = 0, nL = L0.length;
+  for(w2 = 0; w2 < nL; w2++){
+    var j2 = (w2 + 1) % nL;
+    exCorrido += x0[j2] + oro[w2] * x0[j2] / L0[j2];
+    eyCorrido += y0[j2] + oro[w2] * y0[j2] / L0[j2];
+  }
+  ver(D2, "con el índice corrido (i+1) el cierre NO se cancela",
+      Math.hypot(exCorrido, eyCorrido) > 1e-6, true);
+
+  /* Cierre exacto: no hay nada que repartir y no debe ofrecerse compensación.
+     Hace falta un rectángulo construido a propósito: el "Ejemplo sin error de cierre"
+     se llama así porque entra holgado en la tolerancia, no porque cierre exacto —
+     tiene unos 4,7 cm— y ahí la compensación sí corresponde ofrecerla. */
+  tab(/Planilla/);
+  document.getElementById("pl-n").value = 4;
+  document.getElementById("pl-generar").click();
+  [120, 80, 120, 80].forEach(function(Lr, k3){
+    document.getElementById("pl-l" + (k3+1)).value = Lr;
+    document.getElementById("pl-g" + (k3+1)).value = 90;
+    document.getElementById("pl-m" + (k3+1)).value = 0;
+    document.getElementById("pl-s" + (k3+1)).value = 0;
+  });
+  document.getElementById("pl-az-g").value = 0;
+  document.getElementById("pl-az-m").value = 0;
+  document.getElementById("pl-az-s").value = 0;
+  document.getElementById("pl-calcular").click();
+  ver(D2, "rectángulo exacto: el cierre es cero numérico",
+      Math.hypot(PL.datos.ex, PL.datos.ey), 0, 1e-9);
+  ver(D2, "cierre exacto: no ofrece compensar",
+      !document.getElementById("pl-alc-t"), true);
+  ver(D2, "rectángulo 120×80: superficie exacta", sup("pl-res-body"), 9600, 1e-6);
+
+  /* Lados casi paralelos: el sistema queda mal condicionado y hay que rechazarlo.
+     Se prueba el guard directamente, con dos lados a 0,05° — el caso que en v13.4
+     aplicaba 22,9 m de corrección sobre 2,5 cm de cierre, en silencio. */
+  function guardCrandall(gradosEntreLados){
+    var lados = [ {dx:60*cosd(90), dy:60*sind(90)},
+                  {dx:60*cosd(270 + gradosEntreLados), dy:60*sind(270 + gradosEntreLados)} ];
+    var F1 = 0, G1 = 0, H1 = 0, k2;
+    for(k2 = 0; k2 < 2; k2++){
+      var Lk = Math.sqrt(lados[k2].dx*lados[k2].dx + lados[k2].dy*lados[k2].dy);
+      F1 += (lados[k2].dx * lados[k2].dy) / (100 * Lk);
+      G1 += (lados[k2].dy * lados[k2].dy) / (100 * Lk);
+      H1 += (lados[k2].dx * lados[k2].dx) / (100 * Lk);
+    }
+    var den = G1*H1 - F1*F1, traza = G1 + H1;
+    return !(traza > 0) || Math.abs(den) < traza * traza * 1e-4;   /* true = rechaza */
+  }
+  ver(D2, "rechaza dos lados a 0,05° (casi paralelos)", guardCrandall(0.05), true);
+  ver(D2, "rechaza dos lados a 1° (casi paralelos)",    guardCrandall(1),    true);
+  ver(D2, "acepta dos lados a 45°",                     guardCrandall(45),   false);
+  ver(D2, "acepta dos lados a 90°",                     guardCrandall(90),   false);
 
   /* ---------- E · Coordenadas ---------- */
   var E = "E · Coordenadas";
