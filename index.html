@@ -15,7 +15,7 @@
    IMPORTANTE: este número tiene que coincidir con el contenido de version.txt. De esa
    comparación depende la actualización automática. El pie de página ya no hay que tocarlo:
    desde la v15.0 lo lee de acá. */
-var APP_VER = "15.2";
+var APP_VER = "15.3";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -3124,10 +3124,12 @@ function plMostrar(){
       /* Este recuadro se lee ANTES de elegir: dice qué es cada opción y nada más. La
          consecuencia de dejar lados fijos vive en el recuadro de la parcial, que aparece
          recién cuando esa opción se eligió. Antes estaba en los dos y se leía dos veces. */
+      /* Sin la enumeración "vegetación, quebrado, medido indirectamente": está textual en el
+         método 3, cuatro renglones más arriba, y en el mismo recuadro. "Peor medidos"
+         resume los tres; "remedidos" es el único caso que el método 3 no nombra. */
       "<li><b>Alcance: total o parcial</b> — la <b>total</b> reparte el error entre todos los " +
-      "lados, y corresponde cuando la poligonal se midió pareja. La <b>parcial</b> es para " +
-      "cuando el error viene de lados determinados: un tramo con vegetación, quebrado, medido " +
-      "indirectamente o remedido. " +
+      "lados, y corresponde cuando la poligonal se midió pareja. La <b>parcial</b>, cuando el " +
+      "error viene de lados determinados: peor medidos o remedidos. " +
       /* La regla es del alcance, no de los métodos: en una compensación total participan
          todos los lados y no viene al caso. Puesta acá se lee al decidir el alcance, no
          después de marcar Parcial. El paréntesis con ex y ey queda porque en este recuadro
@@ -3153,13 +3155,12 @@ function plMostrar(){
          a ese lado le cambian la longitud Y el azimut, y se queda con toda la corrección.
 
          Unidades: el error de cierre es LINEAL, en metros. Los m² son la superficie. */
-      "<b>Conviene marcar al menos dos lados no paralelos</b>, para poder cancelar las dos " +
-      "componentes del error (<b>ex</b> y <b>ey</b>). En <b>Crandall es obligatorio</b>, " +
-      "porque corrige solo las longitudes: con un solo lado, o con lados paralelos entre sí, " +
-      "queda una componente sin cancelar y el cálculo se rechaza. En los <b>proporcionales " +
-      "alcanza con uno</b> —corrigen Δx y Δy por separado, así que ese lado absorbe todo el " +
-      "error y el cierre da 0,00 m—, pero le cambian la longitud y el azimut, y toda la " +
-      "corrección queda concentrada en él.</li>" +
+      "<b>Conviene marcar al menos dos lados no paralelos</b>, para cancelar las dos " +
+      "componentes del error (<b>ex</b> y <b>ey</b>). En <b>Crandall es obligatorio</b>: " +
+      "corrige solo longitudes, y con uno solo —o con paralelos— queda una componente sin " +
+      "cancelar y el cálculo se rechaza. En los <b>proporcionales alcanza con uno</b> y el " +
+      "cierre da cero igual, pero ese lado se lleva toda la corrección: le cambia la " +
+      "longitud y el azimut.</li>" +
       "</ul></div>" +
       "<div class='row'>" +
       "<div><label>Método de compensación lineal — teclas <b>1</b> / <b>2</b> / <b>3</b></label>" +
