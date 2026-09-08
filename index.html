@@ -14,8 +14,14 @@
 /* ====== Versión de la app ======
    IMPORTANTE: este número tiene que coincidir con el contenido de version.txt. De esa
    comparación depende la actualización automática. El pie de página ya no hay que tocarlo:
-   desde la v15.0 lo lee de acá. */
-var APP_VER = "15.8";
+   desde la v15.0 lo lee de acá.
+   APP_FECHA acompaña al número en el pie. Las dos las escribe subir-version.ps1, así que
+   no hay que tocarlas a mano: la fecha estuvo escrita a mano hasta la v15.0 y se quedó
+   clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
+   problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
+   correspondía era generarla, no eliminarla. */
+var APP_VER   = "15.9";
+var APP_FECHA = "08/09/2026 15:35";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -823,7 +829,14 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
      desde esa versión hasta la 14.9, justo donde uno mira para saber qué versión tiene
      cargada en el celular. La fecha y hora que lo acompañaba se saca por lo mismo: nadie
      la mantenía. -->
-<script>(function(){ var e = document.getElementById("pie-version"); if(e) e.textContent = "Versión " + APP_VER; })();</script>
+<script>(function(){
+  var e = document.getElementById("pie-version");
+  if(!e) return;
+  /* La fecha solo se agrega si está: si algún día falta, el pie muestra la versión sola en
+     vez de quedar con un "·" colgando o con la palabra "undefined". */
+  e.textContent = "Versión " + APP_VER +
+    (typeof APP_FECHA === "string" && APP_FECHA ? " · Última actualización: " + APP_FECHA + " hs" : "");
+})();</script>
 
 
 <aside id="trab-drawer" aria-label="Trabajos guardados">
