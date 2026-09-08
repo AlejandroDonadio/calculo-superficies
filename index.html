@@ -15,7 +15,7 @@
    IMPORTANTE: este número tiene que coincidir con el contenido de version.txt. De esa
    comparación depende la actualización automática. El pie de página ya no hay que tocarlo:
    desde la v15.0 lo lee de acá. */
-var APP_VER = "15.3";
+var APP_VER = "15.4";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -3156,10 +3156,15 @@ function plMostrar(){
 
          Unidades: el error de cierre es LINEAL, en metros. Los m² son la superficie. */
       "<b>Conviene marcar al menos dos lados no paralelos</b>, para cancelar las dos " +
-      "componentes del error (<b>ex</b> y <b>ey</b>). En <b>Crandall es obligatorio</b>: " +
+      /* Los números y no los nombres: "los proporcionales" solo se entiende si ya se leyeron
+         los ítems de arriba, pero ponerle "(Método de Bowditch o Regla de la Brújula)" sería
+         falso, porque son DOS métodos y ese nombre es solo el del 2. El 3 es el de pesos por
+         lado, y compensa igual con un lado —su factor fs/Fs también vale 1—. Con (1) y (2 y 3)
+         cada frase se mapea al botón que el usuario tiene delante. */
+      "componentes del error (<b>ex</b> y <b>ey</b>). En <b>Crandall (1) es obligatorio</b>: " +
       "corrige solo longitudes, y con uno solo —o con paralelos— queda una componente sin " +
-      "cancelar y el cálculo se rechaza. En los <b>proporcionales alcanza con uno</b> y el " +
-      "cierre da cero igual, pero ese lado se lleva toda la corrección: le cambia la " +
+      "cancelar y el cálculo se rechaza. En los <b>proporcionales (2 y 3) alcanza con uno</b> " +
+      "y el cierre da cero igual, pero ese lado se lleva toda la corrección: le cambia la " +
       "longitud y el azimut.</li>" +
       "</ul></div>" +
       "<div class='row'>" +
