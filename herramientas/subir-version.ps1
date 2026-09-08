@@ -51,16 +51,18 @@ function Grabar($p, $txt) { [System.IO.File]::WriteAllText($p, $txt, $utf8) }
 function Estado {
     $html = Leer $indice
     [pscustomobject]@{
-        AppVer     = if ($html -match 'var APP_VER = "([^"]+)"')          { $Matches[1] } else { $null }
+        AppVer     = if ($html -match 'var APP_VER\s*=\s*"([^"]+)"')      { $Matches[1] } else { $null }
+        Fecha      = if ($html -match 'var APP_FECHA\s*=\s*"([^"]*)"')    { $Matches[1] } else { $null }
         VersionTxt = (Leer $vtxt).Trim()
         Cache      = if ((Leer $sw) -match 'calc-superficies-v([0-9]+)')  { $Matches[1] } else { $null }
-        # El pie ya no se lee: desde la v15.0 lo arma el propio programa con APP_VER.
+        # El pie no se lee: desde la v15.0 lo arma el propio programa con APP_VER y APP_FECHA.
         PieAuto    = $html -match 'id="pie-version"'
     }
 }
 
 function Informar ($e) {
     "  APP_VER (index.html) : $($e.AppVer)"
+    "  APP_FECHA            : $($e.Fecha)"
     "  version.txt          : $($e.VersionTxt)"
     "  caché del sw.js      : v$($e.Cache)"
     "  pie de página        : " + $(if ($e.PieAuto) { "lo lee de APP_VER (no hay que tocarlo)" }
@@ -88,9 +90,11 @@ if ($previo.AppVer -eq $Version) { throw "La versión $Version ya es la que est�
 
 $html   = Leer $indice
 $cache  = [int]$previo.Cache + 1
+$sello  = (Get-Date).ToString('dd/MM/yyyy HH:mm')
 
-# Solo APP_VER: el pie lo deriva el propio programa desde la v15.0.
-$html = $html -replace 'var APP_VER = "[^"]+"', ('var APP_VER = "' + $Version + '"')
+# APP_VER y APP_FECHA. El pie las junta solo; no hay ningún texto de versión escrito a mano.
+$html = $html -replace 'var APP_VER\s*=\s*"[^"]*"',   ('var APP_VER   = "' + $Version + '"')
+$html = $html -replace 'var APP_FECHA\s*=\s*"[^"]*"', ('var APP_FECHA = "' + $sello + '"')
 Grabar $indice $html
 
 Grabar $vtxt $Version
@@ -99,7 +103,7 @@ Grabar $sw ((Leer $sw) -replace 'calc-superficies-v[0-9]+', ('calc-superficies-v
 $e = Estado
 Informar $e
 
-if ($e.AppVer -ne $Version -or $e.VersionTxt -ne $Version -or [int]$e.Cache -ne $cache) {
+if ($e.AppVer -ne $Version -or $e.VersionTxt -ne $Version -or [int]$e.Cache -ne $cache -or $e.Fecha -ne $sello) {
     throw "Algo no quedó en $Version. Revisá los valores de arriba antes de publicar."
 }
 
