@@ -15,7 +15,7 @@
    IMPORTANTE: este número tiene que coincidir con el contenido de version.txt. De esa
    comparación depende la actualización automática. El pie de página ya no hay que tocarlo:
    desde la v15.0 lo lee de acá. */
-var APP_VER = "15.1";
+var APP_VER = "15.2";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -3129,24 +3129,37 @@ function plMostrar(){
       "cuando el error viene de lados determinados: un tramo con vegetación, quebrado, medido " +
       "indirectamente o remedido. " +
       /* La regla es del alcance, no de los métodos: en una compensación total participan
-         todos los lados y no viene al caso. Y "se sugiere" es el verbo que sirve para los
-         tres: en Crandall el mínimo es obligatorio —por debajo el sistema no tiene
-         solución— y en los proporcionales es criterio. Puesta acá se lee al decidir el
-         alcance, no después de marcar Parcial. */
-      /* "no paralelos" es el requisito que Crandall rechaza cuando no se cumple: con lados
-         todos paralelos aportan una sola dirección y el determinante se anula. Dicho acá se
-         lee al elegir el alcance, en vez de descubrirlo con el cálculo rechazado. */
-      /* Sin "los demás quedan fijos" al final: eso ya está dicho más arriba, y ahí además
-         viene con la consecuencia —que los marcados reciben correcciones mayores—. El
-         cierre queda como regla, a secas. */
-      /* "Se sugiere en todos los casos" y no "se exige": exigir sería falso en los dos
-         proporcionales, que compensan igual con un solo lado. La regla dura vive donde es
-         cierta —el rechazo de Crandall, que nombra los lados que fallan— y acá queda el
-         consejo, que vale para los tres. */
-      /* el paréntesis: en este recuadro es la primera vez que se nombran, así que sin él
-         hay que haber visto antes la tabla de resultados para saber cuáles son */
-      "<b>Se sugiere en todos los casos al menos dos lados no paralelos para compensar " +
-      "ambos errores (ex y ey).</b></li>" +
+         todos los lados y no viene al caso. Puesta acá se lee al decidir el alcance, no
+         después de marcar Parcial. El paréntesis con ex y ey queda porque en este recuadro
+         es la primera vez que se los nombra.
+
+         Antes decía "se sugiere en todos los casos al menos dos lados no paralelos". Era
+         cierto como consejo, pero metía en una sola frase dos situaciones que no son la
+         misma, y por eso no ayudaba a decidir:
+
+           · En CRANDALL dos direcciones son obligatorias. Corrige solo las longitudes, así
+             que la corrección de cada lado va forzosamente en la dirección de ese lado. Para
+             cancelar el vector (ex, ey) las direcciones marcadas tienen que generar el
+             plano: con un solo lado —o con varios paralelos entre sí— queda la componente
+             perpendicular sin cancelar. No es que salga mal: no tiene solución, y el control
+             A lo rechaza nombrando los lados que fallan.
+
+           · En los PROPORCIONALES (2 y 3) no hace falta ninguno. Corrigen Δx y Δy por
+             separado, así que la corrección es un vector libre. Con un solo lado el factor
+             L/ΣL vale 1 y ese lado absorbe el error entero: el cierre da cero exacto.
+             Medido sobre el ejemplo, marcando solo el lado 1–2: 0,58 m -> 0,00.
+
+         El costo va junto al caso donde ocurre, que es el único lugar donde sirve saberlo:
+         a ese lado le cambian la longitud Y el azimut, y se queda con toda la corrección.
+
+         Unidades: el error de cierre es LINEAL, en metros. Los m² son la superficie. */
+      "<b>Conviene marcar al menos dos lados no paralelos</b>, para poder cancelar las dos " +
+      "componentes del error (<b>ex</b> y <b>ey</b>). En <b>Crandall es obligatorio</b>, " +
+      "porque corrige solo las longitudes: con un solo lado, o con lados paralelos entre sí, " +
+      "queda una componente sin cancelar y el cálculo se rechaza. En los <b>proporcionales " +
+      "alcanza con uno</b> —corrigen Δx y Δy por separado, así que ese lado absorbe todo el " +
+      "error y el cierre da 0,00 m—, pero le cambian la longitud y el azimut, y toda la " +
+      "corrección queda concentrada en él.</li>" +
       "</ul></div>" +
       "<div class='row'>" +
       "<div><label>Método de compensación lineal — teclas <b>1</b> / <b>2</b> / <b>3</b></label>" +
