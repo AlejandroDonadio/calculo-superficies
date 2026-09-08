@@ -15,7 +15,7 @@
    IMPORTANTE: este número tiene que coincidir con el contenido de version.txt. De esa
    comparación depende la actualización automática. El pie de página ya no hay que tocarlo:
    desde la v15.0 lo lee de acá. */
-var APP_VER = "15.5";
+var APP_VER = "15.6";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -4921,6 +4921,38 @@ function correrPruebas(){
     maxDesvio = Math.max(maxDesvio, Math.abs(dd.Zaj[w] - real) * 3600);
   }
   ver(D, "azimut ajustado coherente (segundos)", maxDesvio, 0, 0.001);
+
+  /* Los tres radios del método se rehacen con cada innerHTML de plMostrar, así que la
+     elección se perdía en cada redibujado (v15.5). Nada fallaba: el control exige elegir y
+     no deja compensar sin método, así que el defecto vivía en el hueco entre "molesto" y
+     "roto". Se volvería peligroso el día que alguno venga marcado por defecto —el
+     redibujado cambiaría el método en silencio y se compensaría con otro—, y por eso estas
+     pruebas cuidan las dos mitades: que la elección persista, y que al arrancar no haya
+     ninguna. La primera es la que se arregló; la segunda es la decisión de Alejandro, que
+     el método lo elige el agrimensor y no el programa. */
+  function metMarcado(){
+    var r = ["pl-met1","pl-met2","pl-met3"].filter(function(id){
+      var e = document.getElementById(id); return e && e.checked; });
+    return r.length ? +r[0].slice(-1) : 0;      /* 0 = ninguno */
+  }
+  function redibujar(tipoMensura){
+    var s = document.getElementById("pl-mensura-res");
+    s.value = tipoMensura; s.dispatchEvent(new Event("change"));
+  }
+  tab(/Planilla/);
+  document.getElementById("pl-ejemplo").click();
+  document.getElementById("pl-calcular").click();
+  ver(D, "método: al arrancar no viene ninguno marcado", metMarcado(), 0);
+  document.getElementById("pl-met1").click();
+  ver(D, "método: queda marcado el elegido (Crandall)", metMarcado(), 1);
+  redibujar("3");
+  ver(D, "método: sobrevive al redibujado", metMarcado(), 1);
+  redibujar("1");
+  ver(D, "método: sobrevive a un segundo redibujado", metMarcado(), 1);
+  document.getElementById("pl-met2").click();
+  redibujar("4");
+  ver(D, "método: al cambiarlo persiste el nuevo, no el viejo", metMarcado(), 2);
+  redibujar("1");                                /* dejar el tipo de mensura como estaba */
 
   /* ---------- H · Lo que dicen los resultados ----------
      Las demás áreas verifican magnitudes: superficies, tolerancias, ángulos. Ninguna mira
