@@ -15,7 +15,7 @@
    IMPORTANTE: este número tiene que coincidir con el contenido de version.txt. De esa
    comparación depende la actualización automática. El pie de página ya no hay que tocarlo:
    desde la v15.0 lo lee de acá. */
-var APP_VER = "15.4";
+var APP_VER = "15.5";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -2769,19 +2769,10 @@ function plTolPrevia(){
 /* el tipo de mensura ahora reacciona: la tolerancia se rehace al elegir */
 if($("pl-mensura")) $("pl-mensura").addEventListener("change", function(){ plTolPrevia(); sTick(); });
 
-/* El método de cálculo se leía solo al tocar "Calcular superficie": marcabas la otra
-   opción y la pantalla no cambiaba, así que parecía que daban lo mismo. Con la
-   poligonal sin cerrar pueden diferir en varios metros cuadrados. */
-["pl-metcalc1","pl-metcalc2"].forEach(function(id){
-  var r = $(id);
-  if(!r) return;
-  r.addEventListener("change", function(){
-    if(!PL.datos) return;
-    PL.datos.mcalc = (id === "pl-metcalc2") ? 2 : 1;
-    sTick();
-    plMostrar();
-  });
-});
+/* Acá había una segunda copia textual del bloque de arriba: los mismos dos listeners
+   registrados dos veces sobre los mismos radios, así que cada cambio de método de cálculo
+   disparaba plMostrar() dos veces. No rompía nada —la función es idempotente— pero hacía
+   el doble de trabajo y duplicaba el comentario. */
 
 $("pl-calcular").addEventListener("click", function(){
 
@@ -3243,6 +3234,17 @@ function plMostrar(){
   $("pl-resultados").style.display = "block";
   $("pl-res-body").innerHTML = h;
 
+  /* Los tres radios del método de compensación se rehacen con este innerHTML, así que la
+     elección se perdía en cada redibujado: elegías Crandall, cambiabas el tipo de mensura
+     —o cualquier cosa que llame a plMostrar— y los tres volvían a quedar sin marcar.
+     Medido antes de arreglarlo: 1=SÍ → cambio de mensura → 1=no, 2=no, 3=no.
+     Molestaba, pero no era peligroso: el control de más abajo exige elegir y no deja
+     compensar con ninguno marcado. Se vuelve peligroso apenas alguno venga por defecto,
+     porque entonces el redibujado te cambia el método en silencio y compensás con otro.
+     Por eso esto se arregla ANTES de discutir cuál viene marcado.
+     Se restaura igual que el método de cálculo de superficie, que ya lo hacía con mcalc. */
+  if(D.metSel && $("pl-met" + D.metSel)) $("pl-met" + D.metSel).checked = true;
+
   ["pl-x0","pl-y0"].forEach(function(id){
     var el = $(id);
     if(el) el.addEventListener("change", function(){
@@ -3392,9 +3394,13 @@ function plMostrar(){
   if(alcP){
     alcP.addEventListener("change", pintaLados);
     alcT.addEventListener("change", pintaLados);
-    ["pl-met1","pl-met2","pl-met3"].forEach(function(id){
+    /* Además de repintar los lados, deja anotado cuál se eligió: es lo que permite volver a
+       marcarlo después del próximo innerHTML. Ninguno viene marcado de fábrica —el método
+       lo elige el agrimensor, no el programa— y esto NO introduce uno: solo conserva el que
+       la persona ya eligió. */
+    ["pl-met1","pl-met2","pl-met3"].forEach(function(id, k){
       var r = $(id);
-      if(r) r.addEventListener("change", pintaLados);
+      if(r) r.addEventListener("change", function(){ D.metSel = k + 1; pintaLados(); });
     });
   }
 
@@ -3490,7 +3496,7 @@ function plMostrar(){
     /* ningún método viene marcado: hay que elegirlo a conciencia */
     if(!$("pl-met1").checked && !$("pl-met2").checked && !($("pl-met3") && $("pl-met3").checked)){
       sError();
-      alert("Elegí primero el método de compensación (1, 2, 3 o 4). Arriba de las opciones está la ayuda para decidir cuál corresponde.");
+      alert("Elegí primero el método de compensación (1, 2 o 3). Arriba de las opciones está la ayuda para decidir cuál corresponde.");
       return;
     }
     /* Con un solo lado, los métodos proporcionales cierran igual —ese lado absorbe todo ex
