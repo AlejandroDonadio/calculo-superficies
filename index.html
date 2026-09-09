@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "15.9";
-var APP_FECHA = "08/09/2026 15:35";
+var APP_VER   = "16.0";
+var APP_FECHA = "09/09/2026 13:09";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -623,7 +623,17 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
       <button class="ghost" id="pl-ejemplo">Ejemplo con error para compensar</button>
       <button class="ghost" id="pl-nuevo">Nuevo cálculo (limpiar)</button>
     </div>
-    <div class="msg info no-print" style="margin:8px 0 4px;">Los <b>ángulos</b> que se cargan deben ser los <b>internos del polígono</b>, y el recorrido de los vértices debe hacerse en <b>sentido horario</b>.</div>
+    <!-- La ultima frase no es un requisito mas: es una consecuencia de las dos primeras, y
+         por eso va dicha como equivalencia y no como tercera condicion. Recorriendo en
+         sentido horario, el angulo interior de cada vertice ES el angulo a la izquierda.
+         Comprobado en el codigo -la propagacion del azimut es Z[i] + 180 - ang, que es la
+         formula de angulos a la izquierda; con angulos a la derecha seria Z[i] - 180 + ang-
+         y con numeros sobre el ejemplo: los tres vertices dan el azimut del programa con la
+         formula de izquierda y ninguno con la de derecha.
+         Vale la pena decirlo porque "interno" es geometria y "a la izquierda" es como se
+         mide con el instrumento: en el campo hay que elegir uno de los dos, y antes habia
+         que deducirlo. -->
+    <div class="msg info no-print" style="margin:8px 0 4px;"><b>Para comenzar a cargar la planilla:</b> los <b>ángulos</b> deben ser los <b>internos del polígono</b>, y el recorrido de los vértices debe hacerse en <b>sentido horario</b>. Recorriendo en ese sentido, los internos son los <b>ángulos a la izquierda</b>.</div>
 <div id="pl-tabla-box"></div>
     <div id="pl-cierre-ang"></div>
   </div>
