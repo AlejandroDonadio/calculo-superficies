@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "16.1";
-var APP_FECHA = "09/09/2026 14:28";
+var APP_VER   = "16.2";
+var APP_FECHA = "09/09/2026 14:38";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -634,21 +634,26 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
              var ang = d.A[i + 1];              // angulo en el vertice i+2
              Z.push(norm360(Z[i] + 180 - ang));
 
-         O sea que el angulo de cada fila es el interior del vertice donde ESE lado empieza:
-         la fila del lado 2-3 lleva el angulo del vertice 2. Verificado con numeros sobre el
-         ejemplo: los tres angulos reproducen exactamente los azimuts que calcula el programa
-         con esa correspondencia.
+         O sea que el angulo de cada fila es el INTERIOR DEL POLIGONO en el vertice donde ESE
+         lado empieza: la fila del lado 2-3 lleva el angulo del vertice 2. Verificado con
+         numeros sobre el ejemplo: los tres angulos reproducen exactamente los azimuts que
+         calcula el programa con esa correspondencia.
+
+         Se dice "interior del poligono" y no "interior del vertice", que fue como quedo
+         redactado en la v16.1: un vertice no tiene interior. El interior es el del poligono,
+         y el vertice solo dice DONDE se mide.
 
          NO se dice "el angulo de la izquierda", que fue lo primero que se probo (v16.0).
          Depende de como se mire el dibujo -si se gira la hoja cambia- y ademas induce a
          error: recorriendo en sentido horario el interior del poligono queda a la DERECHA
          del avance, asi que quien lea "izquierda" pensando en su recorrido elige el angulo
-         equivocado. "El interior del vertice donde el lado empieza" no depende de la
-         orientacion ni de donde este parado el que lee, y se comprueba mirando el dibujo.
+         equivocado. "El interior del poligono en el vertice donde el lado empieza" no
+         depende de la orientacion ni de donde este parado el que lee, y se comprueba
+         mirando el dibujo.
          La palabra "izquierda" queda usada una sola vez y con un solo sentido: el vertice
          por donde se empieza, que es la convencion que el programa ya usa en los croquis
          ("letras de los vertices desde la izquierda y en sentido horario"). -->
-    <div class="msg info no-print" style="margin:8px 0 4px;"><b>Para comenzar a cargar la planilla:</b> empezá por el <b>vértice de más a la izquierda</b> y recorré en <b>sentido horario</b>. En cada fila, el <b>ángulo</b> es el <b>interior del vértice donde ese lado empieza</b>.</div>
+    <div class="msg info no-print" style="margin:8px 0 4px;"><b>Para comenzar a cargar la planilla:</b> empezá por el <b>vértice de más a la izquierda</b> y recorré en <b>sentido horario</b>. En cada fila, el <b>ángulo</b> es el <b>interior del polígono</b> en el vértice donde ese lado empieza.</div>
 <div id="pl-tabla-box"></div>
     <div id="pl-cierre-ang"></div>
   </div>
