@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "16.2";
-var APP_FECHA = "09/09/2026 14:38";
+var APP_VER   = "16.3";
+var APP_FECHA = "09/09/2026 14:45";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -652,8 +652,23 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
          mirando el dibujo.
          La palabra "izquierda" queda usada una sola vez y con un solo sentido: el vertice
          por donde se empieza, que es la convencion que el programa ya usa en los croquis
-         ("letras de los vertices desde la izquierda y en sentido horario"). -->
-    <div class="msg info no-print" style="margin:8px 0 4px;"><b>Para comenzar a cargar la planilla:</b> empezá por el <b>vértice de más a la izquierda</b> y recorré en <b>sentido horario</b>. En cada fila, el <b>ángulo</b> es el <b>interior del polígono</b> en el vértice donde ese lado empieza.</div>
+         ("letras de los vertices desde la izquierda y en sentido horario").
+
+         SALVEDAD sobre "del lado elegido", redaccion de Alejandro y decision suya: en los
+         lados que corren hacia el oeste, el extremo de mas a la izquierda es el de LLEGADA
+         y no el de salida, asi que salir desde ahi va contra el sentido horario. Medido
+         sobre el ejemplo -azimuts 45, 135, 225 y 315-: coincide en los lados 1-2 y 2-3, y
+         se contradice en 3-4 y 4-1. En la practica no molesta, porque quien elige el lado
+         de arranque lo ve en el dibujo y toma el otro extremo; pero si alguna vez alguien
+         reporta que las dos indicaciones se contradicen, el motivo es este y no un error.
+
+         Y lo que el programa REALMENTE necesita es solo el sentido horario: el vertice de
+         arranque es libre. Medido: el mismo poligono compensado, arrancando en el vertice 1
+         y en el 2, da 9662,24 m2 en los dos casos. Sin compensar si cambia -9631,58 contra
+         9654,42- porque la figura no cierra y la superficie de un poligono abierto depende
+         de donde se arranque. Empezar por la izquierda es convencion para que las letras
+         del croquis coincidan con las del dibujo, no un requisito de calculo. -->
+    <div class="msg info no-print" style="margin:8px 0 4px;"><b>Comenzás a cargar la planilla</b> por el <b>vértice de más a la izquierda del lado elegido</b> y en <b>sentido horario</b>. En cada fila, el <b>ángulo</b> es el <b>interior del polígono</b> en el vértice donde ese lado empieza.</div>
 <div id="pl-tabla-box"></div>
     <div id="pl-cierre-ang"></div>
   </div>
