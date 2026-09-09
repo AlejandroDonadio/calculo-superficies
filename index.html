@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "16.4";
-var APP_FECHA = "09/09/2026 15:20";
+var APP_VER   = "16.5";
+var APP_FECHA = "09/09/2026 15:47";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -555,6 +555,15 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
   #pl-res-body .big-result{ padding-top:5px !important; padding-bottom:1px !important; }
   #pl-res-body .plano-box{ margin-top:3px !important; padding-top:3px !important; padding-bottom:3px !important; }
 }
+
+/* Oculta a la vista pero NO al lector de pantalla. Ni display:none ni visibility:hidden
+   sirven acá: las dos sacan el elemento del árbol de accesibilidad y entonces la región
+   aria-live no anuncia nada. El recorte a 1px con clip es el modo que sí lo conserva. */
+.solo-lector{
+  position:absolute; width:1px; height:1px; margin:-1px; padding:0; border:0;
+  overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap;
+}
+@media print{ .solo-lector{ display:none !important; } }
 </style>
 </head>
 <body>
@@ -670,7 +679,11 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
          del croquis coincidan con las del dibujo, no un requisito de calculo. -->
     <div class="msg info no-print" style="margin:8px 0 4px;"><b>Comenzás a cargar la planilla</b> por el <b>vértice de más a la izquierda del lado elegido</b> y en <b>sentido horario</b>. En cada fila, el <b>ángulo</b> es el <b>interior del polígono</b> en el vértice donde ese lado empieza.</div>
 <div id="pl-tabla-box"></div>
-    <div id="pl-cierre-ang"></div>
+    <!-- role="alert" y no aria-live="polite": acá caen los datos mal cargados y el cierre
+         angular fuera de tolerancia, que son cosas que hay que corregir antes de seguir.
+         "alert" interrumpe; "polite" espera a que el lector termine lo que estaba diciendo,
+         y para un aviso que detiene el calculo eso llega tarde. -->
+    <div id="pl-cierre-ang" role="alert"></div>
   </div>
 
   <div class="card" id="pl-paso2" style="display:none;">
@@ -865,6 +878,16 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
   </div>
 </section>
 </main>
+
+<!-- Región anunciadora para lectores de pantalla.
+     No se le pone aria-live a los paneles de resultados: un lector leería la planilla
+     entera —cuatro tablas, el croquis y los avisos— en cada cálculo, y eso no se puede
+     escuchar. Acá va el titular en una línea: la superficie y el veredicto del cierre.
+     Tiene que existir en el HTML desde el arranque y solo cambiarle el texto: una región
+     aria-live insertada al mismo tiempo que su contenido no se anuncia de forma confiable.
+     Va fuera de <main> y oculta a la vista, pero NO con display:none ni visibility:hidden,
+     que la sacarían también del árbol de accesibilidad. -->
+<div id="anuncio" aria-live="polite" aria-atomic="true" class="solo-lector"></div>
 
 <footer>
   Versión 2026 para Windows del programa original en BASIC Sinclair (ZX Spectrum, 1988–89).
@@ -2014,6 +2037,32 @@ function confirmarPerder(idPanel, queVaAPasar){
 }
 function rad(deg){ return deg * Math.PI / 180; }
 function norm360(a){ a = a % 360; if(a < 0) a += 360; return a; }
+
+/* ---------- Anuncio para lectores de pantalla ----------
+   Le pasa una línea al elemento #anuncio, que es aria-live. Se llama después de escribir
+   cada panel de resultados, con el titular y no con la tabla entera.
+   El vaciado previo con setTimeout no es adorno: si el texto nuevo es idéntico al anterior
+   —calcular dos veces lo mismo— el lector no lo repite, porque para él la región no cambió.
+   Vaciarla y volver a llenarla en el siguiente tick fuerza el anuncio. */
+function anunciar(texto){
+  var e = document.getElementById("anuncio");
+  if(!e || !texto) return;
+  e.textContent = "";
+  setTimeout(function(){ e.textContent = texto; }, 60);
+}
+/* Titular de un panel ya escrito: la superficie y, si está, el veredicto del cierre. */
+function tituloDe(idPanel){
+  var p = document.getElementById(idPanel);
+  if(!p) return "";
+  var malo = p.querySelector(".msg.bad");
+  if(malo) return malo.textContent.replace(/\s+/g, " ").trim();
+  var t = p.textContent.replace(/\s+/g, " ");
+  var sup = t.match(/SUPERFICIE=\s*([\d.,]+)\s*m²/);
+  var cie = t.match(/Error de cierre lineal\s*([\d.,]+)\s*m/);
+  if(!sup) return "";
+  return "Superficie " + sup[1] + " metros cuadrados." +
+         (cie ? " Error de cierre " + cie[1] + " metros." : "");
+}
 function gmsToDec(g, m, s){ return g + m/60 + s/3600; }
 function decToGms(d){
   var neg = d < 0; d = Math.abs(d);
@@ -3316,6 +3365,7 @@ function plMostrar(){
   h += dibujaPlano(X, Y, D.L, w);
   $("pl-resultados").style.display = "block";
   $("pl-res-body").innerHTML = h;
+  anunciar(tituloDe("pl-res-body"));
 
   /* Los tres radios del método de compensación se rehacen con este innerHTML, así que la
      elección se perdía en cada redibujado: elegías Crandall, cambiabas el tipo de mensura
@@ -3841,6 +3891,7 @@ $("co-calcular").addEventListener("click", function(){
   h += dibujaPlano(X, Y, L, w);
   $("co-resultados").style.display = "block";
   $("co-res-body").innerHTML = h;
+  anunciar(tituloDe("co-res-body"));
   sMelodia();
 });
 
@@ -3894,7 +3945,7 @@ $("cu-calcular").addEventListener("click", function(){
   var A = cuAng("a"), B = cuAng("b"), C = cuAng("c");
   var out = $("cu-res-body");
   $("cu-resultados").style.display = "block";
-  function fallo(msg){ out.innerHTML = "<div class='msg bad'>" + msg + "</div>"; sError(); }
+  function fallo(msg){ out.innerHTML = "<div class='msg bad'>" + msg + "</div>"; anunciar(msg); sError(); }
 
   var R = null, esDato = {}, notas = [];
 
@@ -3993,6 +4044,7 @@ $("cu-calcular").addEventListener("click", function(){
   hh += "<p style='font-size:.8rem; color:var(--ink-soft); margin-top:4px;'>Croquis: letras de los vértices desde la izquierda y en sentido horario (A, B, C, D), con el ángulo interior anotado en cada uno.</p>";
 
   out.innerHTML = hh;
+  anunciar(tituloDe("cu-res-body"));
   sMelodia();
 });
 
@@ -4337,6 +4389,7 @@ $("tri-calcular").addEventListener("click", function(){
   $("tri-resultados").style.display = "block";
   if(err){
     out.innerHTML = "<div class='msg bad'>" + err + "</div>";
+    anunciar(err);
     sError();
     return;
   }
@@ -4368,6 +4421,9 @@ $("tri-calcular").addEventListener("click", function(){
     hh += "<p style='font-size:.8rem; color:var(--ink-soft); margin-top:4px;'>Croquis: letras de los vértices desde la izquierda y en sentido horario, con el ángulo interior anotado en cada uno.</p>";
   });
   out.innerHTML = hh;
+  anunciar(sols.length === 2
+    ? "Dos triángulos posibles. " + tituloDe("tri-res-body")
+    : tituloDe("tri-res-body"));
   sMelodia();
 });
 
