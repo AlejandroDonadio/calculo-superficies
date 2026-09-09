@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "16.0";
-var APP_FECHA = "09/09/2026 13:09";
+var APP_VER   = "16.1";
+var APP_FECHA = "09/09/2026 14:28";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -623,17 +623,32 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
       <button class="ghost" id="pl-ejemplo">Ejemplo con error para compensar</button>
       <button class="ghost" id="pl-nuevo">Nuevo cálculo (limpiar)</button>
     </div>
-    <!-- La ultima frase no es un requisito mas: es una consecuencia de las dos primeras, y
-         por eso va dicha como equivalencia y no como tercera condicion. Recorriendo en
-         sentido horario, el angulo interior de cada vertice ES el angulo a la izquierda.
-         Comprobado en el codigo -la propagacion del azimut es Z[i] + 180 - ang, que es la
-         formula de angulos a la izquierda; con angulos a la derecha seria Z[i] - 180 + ang-
-         y con numeros sobre el ejemplo: los tres vertices dan el azimut del programa con la
-         formula de izquierda y ninguno con la de derecha.
-         Vale la pena decirlo porque "interno" es geometria y "a la izquierda" es como se
-         mide con el instrumento: en el campo hay que elegir uno de los dos, y antes habia
-         que deducirlo. -->
-    <div class="msg info no-print" style="margin:8px 0 4px;"><b>Para comenzar a cargar la planilla:</b> los <b>ángulos</b> deben ser los <b>internos del polígono</b>, y el recorrido de los vértices debe hacerse en <b>sentido horario</b>. Recorriendo en ese sentido, los internos son los <b>ángulos a la izquierda</b>.</div>
+    <!-- Este aviso contesta las tres dudas que aparecen al cargar, en el orden en que
+         aparecen: por donde arranco, hacia donde sigo, y cual de los angulos va en esta fila.
+         La tercera es la que faltaba. El que carga tiene el dibujo del poligono delante, pone
+         el lado, y al llegar a la columna del angulo duda entre los dos que se juntan en ese
+         vertice.
+
+         La respuesta esta en la propagacion del azimut, unas lineas mas abajo:
+
+             var ang = d.A[i + 1];              // angulo en el vertice i+2
+             Z.push(norm360(Z[i] + 180 - ang));
+
+         O sea que el angulo de cada fila es el interior del vertice donde ESE lado empieza:
+         la fila del lado 2-3 lleva el angulo del vertice 2. Verificado con numeros sobre el
+         ejemplo: los tres angulos reproducen exactamente los azimuts que calcula el programa
+         con esa correspondencia.
+
+         NO se dice "el angulo de la izquierda", que fue lo primero que se probo (v16.0).
+         Depende de como se mire el dibujo -si se gira la hoja cambia- y ademas induce a
+         error: recorriendo en sentido horario el interior del poligono queda a la DERECHA
+         del avance, asi que quien lea "izquierda" pensando en su recorrido elige el angulo
+         equivocado. "El interior del vertice donde el lado empieza" no depende de la
+         orientacion ni de donde este parado el que lee, y se comprueba mirando el dibujo.
+         La palabra "izquierda" queda usada una sola vez y con un solo sentido: el vertice
+         por donde se empieza, que es la convencion que el programa ya usa en los croquis
+         ("letras de los vertices desde la izquierda y en sentido horario"). -->
+    <div class="msg info no-print" style="margin:8px 0 4px;"><b>Para comenzar a cargar la planilla:</b> empezá por el <b>vértice de más a la izquierda</b> y recorré en <b>sentido horario</b>. En cada fila, el <b>ángulo</b> es el <b>interior del vértice donde ese lado empieza</b>.</div>
 <div id="pl-tabla-box"></div>
     <div id="pl-cierre-ang"></div>
   </div>
