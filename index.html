@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "16.7";
-var APP_FECHA = "09/09/2026 17:07";
+var APP_VER   = "16.8";
+var APP_FECHA = "09/09/2026 19:54";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -752,7 +752,13 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 
 <!-- ==================== CUADRILÁTERO ==================== -->
 <section class="panel" id="panel-cuadri">
-  <div class="card">
+  <!-- La tarjeta de datos no se imprime, igual que los controles de la planilla. Es el
+       formulario de carga: casilleros, selector de caso y el esquema que marca en rojo qué
+       es dato y qué incógnita. Todo eso sirve mientras se carga; en la hoja terminada los
+       datos ya están en la tabla de resultados, y el croquis a escala también.
+       Medido: son 756 px de los 1664 que ocupaba el cuadrilátero. Sin esto la hoja daba
+       1,48 páginas —o sea DOS hojas, con la segunda casi vacía—. -->
+  <div class="card no-print">
     <h2>1 · Datos del cuadrilátero</h2>
     <p style="font-size:.85rem; color:var(--ink-soft); margin-bottom:8px;">
       Seleccioná el caso que corresponda a los datos disponibles. El esquema muestra en <b style="color:var(--marca);">rojo</b> los datos que debés ingresar y en negro punteado las incógnitas que calcula el programa. Al cambiar de caso, el dibujo se actualiza.
@@ -807,7 +813,9 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 
 <!-- ==================== TRIÁNGULOS ==================== -->
 <section class="panel" id="panel-tri">
-  <div class="card">
+  <!-- Misma razón que en cuadriláteros: es el formulario de carga, no el documento.
+       Son 664 px de los 1401 que ocupaba el caso de una solución. -->
+  <div class="card no-print">
     <h2>1 · Datos del triángulo</h2>
     <p style="font-size:.85rem; color:var(--ink-soft); margin-bottom:8px;">
       Convención: cada lado lleva la letra minúscula del vértice <b>opuesto</b> (el lado <b>a</b> se opone al ángulo <b>A</b>).
