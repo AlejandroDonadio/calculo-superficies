@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "16.3";
-var APP_FECHA = "09/09/2026 14:45";
+var APP_VER   = "16.4";
+var APP_FECHA = "09/09/2026 15:20";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -2581,13 +2581,25 @@ function plLeer(){
     var s = num($("pl-s" + i).value) || 0;
     ["pl-l","pl-g","pl-m","pl-s"].forEach(function(p){ $(p + i).className = $(p + i).className.replace(" err",""); });
     if(!isFinite(l) || l <= 0){ malos.push($("pl-l" + i)); }
-    if(!validGms(g, m, s)){ malos.push($("pl-g" + i)); malos.push($("pl-m" + i)); malos.push($("pl-s" + i)); }
-    L.push(l); A.push(gmsToDec(g, m, s));
+    /* validGms es deliberadamente permisiva con g = 360 porque la comparten los AZIMUTS,
+       donde 360° es legítimo: equivale a 0°. Pero acá son ángulos INTERIORES de un
+       polígono, y ahí 0° y 360° no existen: son vértices degenerados. El rango válido es
+       0 < ángulo < 360, que admite los reflejos de un polígono cóncavo (> 180°).
+       Sin este control el 360 entraba al cálculo. No producía un resultado malo —el cierre
+       angular lo atrapa: con 360° en un cuadrilátero la suma da 630° contra 360° teóricos,
+       y el programa bloquea con «excede la tolerancia»— pero el aviso hablaba del cierre y
+       no del dato, así que mandaba a revisar la suma en vez del ángulo que estaba mal.
+       Esto lo detiene en el campo donde se escribió, que es donde se corrige. */
+    var angDec = gmsToDec(g, m, s);
+    if(!validGms(g, m, s) || angDec <= 0 || angDec >= 360){
+      malos.push($("pl-g" + i)); malos.push($("pl-m" + i)); malos.push($("pl-s" + i));
+    }
+    L.push(l); A.push(angDec);
   }
   if(malos.length){
     malos.forEach(function(el){ el.className += " err"; });
     sError();
-    $("pl-cierre-ang").innerHTML = "<div class='msg bad'>Hay datos que no corresponden: revisá los campos marcados (lados &gt; 0; ángulos con g ≤ 360, m &lt; 60, s &lt; 60).</div>";
+    $("pl-cierre-ang").innerHTML = "<div class='msg bad'>Hay datos que no corresponden: revisá los campos marcados (lados &gt; 0; ángulos interiores mayores que 0° y menores que 360°, con m &lt; 60 y s &lt; 60).</div>";
     return null;
   }
   return { L:L, A:A };
@@ -4950,6 +4962,34 @@ function correrPruebas(){
   var s200= planilla([100,50,100,50],[90,90,90,90],200,1);
   ver(C, "azimut 0° y 45° dan la misma superficie", s45, s0, 0.01);
   ver(C, "azimut 0° y 200° dan la misma superficie", s200, s0, 0.01);
+
+  /* Los angulos interiores viven en (0, 360): 0 y 360 son vertices degenerados. validGms
+     no puede exigirlo porque la comparten los azimuts, donde 360 = 0 es legitimo, asi que
+     el control esta en plLeer. Estas pruebas cuidan las dos mitades: que rechace los
+     extremos, y que NO rechace un angulo reflejo -mayor de 180- que es valido en un
+     poligono concavo. */
+  function cargaAngulo(g, m, s){
+    tab(/Planilla/);
+    document.getElementById("pl-nuevo").click();
+    document.getElementById("pl-n").value = "4";
+    document.getElementById("pl-generar").click();
+    for(var i = 1; i <= 4; i++){
+      document.getElementById("pl-l" + i).value = 100;
+      document.getElementById("pl-g" + i).value = 90;
+      document.getElementById("pl-m" + i).value = 0;
+      document.getElementById("pl-s" + i).value = 0;
+    }
+    document.getElementById("pl-g2").value = g;
+    document.getElementById("pl-m2").value = m;
+    document.getElementById("pl-s2").value = s;
+    return plLeer();                       /* null = rechazado */
+  }
+  ver(C, "ángulo interior: rechaza 360°",        cargaAngulo(360, 0, 0), null);
+  ver(C, "ángulo interior: rechaza 0°",          cargaAngulo(0, 0, 0),   null);
+  ver(C, "ángulo interior: acepta 359°59'59\"",  cargaAngulo(359, 59, 59) !== null, true);
+  ver(C, "ángulo interior: acepta un reflejo de 270° (cóncavo)",
+      cargaAngulo(270, 0, 0) !== null, true);
+  ver(C, "el azimut sigue aceptando 360°, que es 0°", validGms(360, 0, 0), true);
 
   /* los dos ejemplos tienen que comportarse como anuncia su nombre */
   tab(/Planilla/);
