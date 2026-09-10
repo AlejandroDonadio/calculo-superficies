@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "18.1";
-var APP_FECHA = "10/09/2026 19:31";
+var APP_VER   = "18.2";
+var APP_FECHA = "10/09/2026 20:08";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -937,14 +937,33 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
     <div class="row">
       <div><label style="font-size:1rem; font-weight:700; text-decoration:underline; color:var(--ink); margin-bottom:5px;">CASOS  —  Según la información o datos disponibles</label>
         <select id="tri-caso" style="font-family:inherit; font-size:.95rem; padding:7px; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink);">
-          <option value="1">1 – Tres lados (a, b, c) según Fórmula de Herón</option>
-          <option value="2">2 – Dos lados (a, b) y el ángulo comprendido entre ellos (áng. C)</option>
-          <option value="3">3 – Dos lados (a, b) y el ángulo opuesto al lado b (áng. B)</option>
-          <option value="4">4 – Dos lados (a, b) y el ángulo opuesto al lado a (áng. A)</option>
-          <option value="5">5 – Dos ángulos (A, B) y el lado comprendido entre ellos (lado c)</option>
-          <option value="6">6 – Dos ángulos (A, B) y el lado opuesto al ángulo B (lado b)</option>
-          <option value="7">7 – Dos ángulos (A, B) y el lado opuesto al ángulo A (lado a)</option>
+          <!-- Los títulos de grupo no son adorno: dicen que hay TRES familias y cuántas
+               variantes tiene cada una, así que el que abre la lista entiende la estructura
+               antes de leer un solo cartel. Y permiten que cada opción nombre solo su
+               variante, sin repetir "Dos lados (a, b)" tres veces seguidas.
+               La numeración no se tocó: las familias ya caían contiguas -1 sola, 2 a 4 y
+               5 a 7-, así que agrupar no obligó a renumerar ni a traducir trabajos
+               guardados. -->
+          <optgroup label="Con tres lados">
+            <option value="1">1 – Los tres lados (a, b, c) — Fórmula de Herón</option>
+          </optgroup>
+          <optgroup label="Con dos lados (a, b) y un ángulo">
+            <option value="2">2 – El ángulo comprendido entre ellos (áng. C)</option>
+            <option value="3">3 – El ángulo opuesto al lado b (áng. B)</option>
+            <option value="4">4 – El ángulo opuesto al lado a (áng. A)</option>
+          </optgroup>
+          <optgroup label="Con dos ángulos (A, B) y un lado">
+            <option value="5">5 – El lado comprendido entre ellos (lado c)</option>
+            <option value="6">6 – El lado opuesto al ángulo B (lado b)</option>
+            <option value="7">7 – El lado opuesto al ángulo A (lado a)</option>
+          </optgroup>
         </select>
+        <p style="font-size:.8rem; color:var(--ink-soft); margin:6px 0 0;">Son <b>siete</b>:
+        con tres datos hay siete combinaciones que definen un triángulo. Cuando el dato suelto
+        va <b>entre</b> los otros dos hay una sola manera de acomodarlo; cuando va
+        <b>enfrentado</b>, puede enfrentar a uno o al otro, y por eso esas familias tienen dos
+        variantes. Los <b>tres ángulos</b> solos no son un caso que falte: dan la forma del
+        triángulo pero no su tamaño, y sin una medida lineal no hay superficie que calcular.</p>
       </div>
     </div>
     <div id="tri-aviso"></div>
@@ -5905,6 +5924,25 @@ function correrPruebas(){
   ver(G, "el caso 4 nombra el lado a",  /opuesto al lado a/i.test(carteles[3]), true);
   ver(G, "el caso 6 nombra el ángulo B", /opuesto al ángulo B/i.test(carteles[5]), true);
   ver(G, "el caso 7 nombra el ángulo A", /opuesto al ángulo A/i.test(carteles[6]), true);
+
+  /* Los títulos de grupo cargan la mitad del sentido: cada opción ya no dice con qué datos
+     se trabaja, lo dice el grupo. Si alguien saca los grupos, los carteles quedan sueltos
+     —"El ángulo opuesto al lado b" sin decir opuesto a qué—, y nada avisaría. */
+  var grupos = document.querySelectorAll("#tri-caso optgroup");
+  ver(G, "los casos están agrupados en tres familias", grupos.length, 3);
+  ver(G, "la familia de un dato: un caso",      grupos[0].children.length, 1);
+  ver(G, "la de dos lados y un ángulo: tres",   grupos[1].children.length, 3);
+  ver(G, "la de dos ángulos y un lado: tres",   grupos[2].children.length, 3);
+  ver(G, "cada familia dice con qué se trabaja",
+      /tres lados/i.test(grupos[0].label) && /dos lados/i.test(grupos[1].label) &&
+      /dos ángulos/i.test(grupos[2].label), true);
+  /* y la nota que explica por qué son siete y por qué tres ángulos no alcanzan */
+  /* el texto viene cortado en varias líneas del HTML: sin aplanar los espacios, una frase
+     que existe no aparece porque tiene un salto de línea en el medio */
+  var notaCasos = document.getElementById("panel-tri").textContent.replace(/\s+/g, " ");
+  ver(G, "explica por qué son siete", /Son siete/i.test(notaCasos), true);
+  ver(G, "y por qué los tres ángulos no son un caso",
+      /forma del triángulo pero no su tamaño/i.test(notaCasos), true);
   /* el caso 4 es ambiguo: con estos datos tiene que ofrecer los dos triángulos */
   tri("4");
   ver(G, "caso 4 — ofrece las dos soluciones",
