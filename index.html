@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "17.9";
-var APP_FECHA = "10/09/2026 11:13";
+var APP_VER   = "18.0";
+var APP_FECHA = "10/09/2026 11:25";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -2341,24 +2341,43 @@ function plAvisoPapel(){
    estilo: la regla que lo muestra es '#dt-impreso.tiene-datos', un id más una clase, y le
    gana por especificidad a '.no-print', que es una clase sola. Con no-print el encabezado
    se habría impreso igual, en silencio. */
+var ENC_DECIDIDO = false;   /* ya se preguntó en esta sesión */
+var ENC_INCLUIR  = true;    /* y esto contestó */
+
 function consultarEncabezado(){
   var dtImp = document.getElementById("dt-impreso");
-  if(!dtImp || dtImp.className.indexOf("tiene-datos") < 0) return false;
-  var res = document.getElementById("pl-resultados");
-  if(!res || res.style.display === "none") return false;
-  if(!(PL_NVERT > TOPE_A4_CON && PL_NVERT <= TOPE_A4_SIN)) return false;
+  if(!dtImp) return true;
+  devolverEncabezado();          /* toda impresión arranca sin marcas de la anterior */
 
-  var incluir = window.confirm(
-    "Este trabajo tiene " + PL_NVERT + " vértices.\n\n" +
-    "En hoja A4:\n" +
-    "  · con los datos del trabajo → 3 hojas\n" +
-    "  · sin ellos → 2 hojas\n\n" +
-    "En hoja oficio entra en 2 de las dos maneras.\n\n" +
-    "Los datos del trabajo (partida, nomenclatura, titular) son lo que identifica " +
-    "de qué parcela son estas hojas.\n\n" +
-    "¿Los incluyo en la impresión?");
-  if(incluir) return false;
-  dtImp.classList.add("sin-encabezado");
+  /* Si no hay datos cargados no hay nada que confirmar, y preguntar sería justamente
+     hacer perder tiempo: no se pregunta. */
+  if(dtImp.className.indexOf("tiene-datos") < 0) return true;
+
+  /* Se pregunta UNA VEZ por sesión, no en cada impresión. La observación es de Alejandro:
+     un cartel en cada impresión es tiempo perdido, y el que lo ve siempre termina
+     contestando lo mismo. La respuesta se recuerda y se vuelve a aplicar sola; para
+     cambiarla alcanza con recargar el programa. */
+  if(!ENC_DECIDIDO){
+    var texto = "¿Los datos de la parcela van en la impresión?\n\n" +
+      "Son la partida, la nomenclatura catastral y el titular: lo que identifica de qué " +
+      "inmueble son estas hojas.\n\n";
+    /* El costo en hojas se informa solo cuando existe, que es el tramo entre los dos topes
+       de A4. Decirlo fuera de ahí sería sugerir un ahorro que no ocurre. */
+    var res = document.getElementById("pl-resultados");
+    var enPlanilla = !!(res && res.style.display !== "none");
+    if(enPlanilla && PL_NVERT > TOPE_A4_CON && PL_NVERT <= TOPE_A4_SIN){
+      texto += "En este trabajo, de " + PL_NVERT + " vértices:\n" +
+               "  · con los datos, en A4 son 3 hojas\n" +
+               "  · sin ellos, 2 hojas\n" +
+               "  · en hoja oficio, 2 de las dos maneras\n\n";
+    }
+    texto += "Aceptar: van incluidos.\n" +
+             "Cancelar: se imprime sin ellos.\n\n" +
+             "No se vuelve a preguntar en esta sesión.";
+    ENC_INCLUIR  = window.confirm(texto);
+    ENC_DECIDIDO = true;
+  }
+  if(!ENC_INCLUIR) dtImp.classList.add("sin-encabezado");
   return true;
 }
 function devolverEncabezado(){
@@ -5157,19 +5176,19 @@ function confirmarImprimir(verbo){
 $("btn-guardar").addEventListener("click", function(){
   if(!confirmarImprimir("Guardar el PDF")) return;
   sConfirm();
-  var saco = consultarEncabezado();
+  if(!consultarEncabezado()) return;   /* prefirió volver a cargar los datos primero */
   document.title = pdfNombre();   /* el navegador lo propone como nombre del PDF */
   window.print();                 /* en el diálogo: destino "Guardar como PDF" */
   setTimeout(restaurarTitulo, 2000);   /* red de seguridad si no llega afterprint */
-  if(saco) setTimeout(devolverEncabezado, 2000);
+  setTimeout(devolverEncabezado, 2000);
 });
 
 $("btn-imprimir").addEventListener("click", function(){
   if(!confirmarImprimir("Imprimir")) return;
   sConfirm();
-  var saco = consultarEncabezado();
+  consultarEncabezado();
   window.print();   /* en el diálogo: elegir la impresora */
-  if(saco) setTimeout(devolverEncabezado, 2000);
+  setTimeout(devolverEncabezado, 2000);
 });
 
 
@@ -5556,18 +5575,33 @@ function correrPruebas(){
   }
   var dtImp = document.getElementById("dt-impreso");
 
-  /* con encabezado y 5 vértices: acá sí cuesta una hoja, así que pregunta */
+  /* cuántas veces se llamó al cartel: lo que se controla es que pregunte UNA sola vez */
+  var preguntas = 0;
+  function responder(r){
+    window.confirm = function(){ preguntas++; return r; };
+  }
+
   encabezado(true);
   planillaDe(5, [60,60,80,120,80], [90,180,90,90,90]);
-  window.confirm = function(){ return true; };      /* "sí, incluilos" */
-  ver(J, "5 vértices — si dice que sí, el encabezado se queda", consultarEncabezado(), false);
-  ver(J, "y no queda marcado para sacarlo",
-      dtImp.classList.contains("sin-encabezado"), false);
 
-  window.confirm = function(){ return false; };     /* "no, sacalos" */
-  ver(J, "5 vértices — si dice que no, lo saca", consultarEncabezado(), true);
+  ENC_DECIDIDO = false; preguntas = 0; responder(true);      /* "sí, que vayan" */
+  consultarEncabezado();
+  ver(J, "con datos cargados — pregunta una vez", preguntas, 1);
+  ver(J, "si dice que sí, el encabezado se queda",
+      dtImp.classList.contains("sin-encabezado"), false);
+  consultarEncabezado(); consultarEncabezado();
+  ver(J, "y NO vuelve a preguntar en las impresiones siguientes", preguntas, 1);
+
+  ENC_DECIDIDO = false; preguntas = 0; responder(false);     /* "no, que no vayan" */
+  consultarEncabezado();
+  ver(J, "si dice que no, lo saca", dtImp.classList.contains("sin-encabezado"), true);
   ver(J, "el encabezado NO se imprime cuando se lo saca",
       displayAlImprimir(dtImp), "none");
+  devolverEncabezado();
+  consultarEncabezado();
+  ver(J, "la decisión se recuerda y se vuelve a aplicar sola",
+      dtImp.classList.contains("sin-encabezado"), true);
+  ver(J, "sin volver a preguntar", preguntas, 1);
   /* El navegador dispara 'beforeprint' JUSTO ANTES de imprimir, y ahí se rehace el
      encabezado asignando className entero. Sin cuidado, eso borraba la marca y el
      encabezado salía igual: decir que no no servía de nada y nada lo avisaba. */
@@ -5579,19 +5613,16 @@ function correrPruebas(){
   devolverEncabezado();
   ver(J, "y vuelve solo después de imprimir",
       dtImp.classList.contains("sin-encabezado"), false);
+  ENC_DECIDIDO = true; ENC_INCLUIR = true;
   ver(J, "devuelto, el encabezado SÍ se imprime",
       displayAlImprimir(dtImp) !== "none", true);
 
-  /* fuera del tramo no pregunta, aunque la respuesta fuera que no */
-  planillaDe(4, [120,80,120,80], [90,90,90,90]);
-  ver(J, "4 vértices — no pregunta: entra igual", consultarEncabezado(), false);
-  planillaDe(8, [60,60,40,40,60,60,40,40], [90,180,90,180,90,180,90,180]);
-  ver(J, "8 vértices — no pregunta: sacarlo no salva la hoja", consultarEncabezado(), false);
-
-  /* y sin encabezado cargado no hay nada que preguntar */
+  /* sin datos cargados no hay nada que confirmar: preguntar sería hacer perder tiempo */
   encabezado(false);
-  planillaDe(5, [60,60,80,120,80], [90,180,90,90,90]);
-  ver(J, "sin encabezado cargado — no pregunta", consultarEncabezado(), false);
+  ENC_DECIDIDO = false; preguntas = 0; responder(false);
+  ver(J, "sin datos cargados — sigue adelante", consultarEncabezado(), true);
+  ver(J, "sin datos cargados — no pregunta nada", preguntas, 0);
+  ver(J, "y no deja marcas", dtImp.classList.contains("sin-encabezado"), false);
   /* se devuelve el confirm de la corrida —el que contesta que sí—, NO el del navegador:
      restaurar el original acá dejaría diálogos de verdad esperando en las pruebas que siguen */
   window.confirm = function(){ return true; };
