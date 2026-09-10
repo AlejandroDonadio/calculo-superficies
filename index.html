@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "18.2";
-var APP_FECHA = "10/09/2026 20:08";
+var APP_VER   = "18.3";
+var APP_FECHA = "10/09/2026 20:20";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -340,6 +340,10 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
 .sol-print label{display:inline-flex; align-items:center; gap:6px; margin-right:16px;
                  font-size:.9rem; cursor:pointer;}
 .sol-print-nota{margin:6px 0 0; font-size:.78rem; color:var(--ink-soft);}
+/* La solución que el agrimensor descartó se va de la pantalla Y del papel: la elección es
+   una sola y manda sobre las dos cosas. Antes esto era 'no-print' y solo sacaba del papel,
+   dejando en pantalla dos superficies con el mismo peso visual. */
+.sol-descartada{display:none !important;}
 
 /* ============ Panel de módulos ============ */
 #modulos-panel{
@@ -2323,6 +2327,12 @@ function sellarCalculo(){
                   " " + dd(d.getHours()) + ":" + dd(d.getMinutes()) + " hs";
   if(typeof dtArmarEncabezado === "function") dtArmarEncabezado();
 }
+
+/* Cuál de los dos triángulos posibles eligió el agrimensor en el caso ambiguo: "0" = sin
+   elegir. Se guarda con el trabajo porque define el resultado, no solo la impresión: si no
+   se guardara, reabrir un trabajo devolvería las dos soluciones y la superficie que quedó
+   en el plano dejaría de ser la que muestra la pantalla. */
+var TRI_SOL_ELEGIDA = "0";
 
 var PL_NVERT = 0;
 var TOPE_A4_CON = 4;    /* vértices que entran en dos hojas A4 CON el encabezado */
@@ -4690,12 +4700,13 @@ $("tri-calcular").addEventListener("click", function(){
     hh += "<div class='msg info'>Con dos lados y el ángulo opuesto a uno de ellos hay <b>dos triángulos posibles</b>. Se muestran los dos: elegí el que corresponda a tu terreno.</div>";
     /* Las dos soluciones no entran en una hoja: son dos croquis. Acá se elige cuál va al
        papel, sin sacar nada de la pantalla. Por omisión van las dos, como siempre. */
-    hh += "<fieldset class='sol-print no-print'><legend>Al imprimir</legend>" +
-          "<label><input type='radio' name='tri-sol-print' value='0' checked> Las dos soluciones</label>" +
-          "<label><input type='radio' name='tri-sol-print' value='1'> Solo la solución 1</label>" +
-          "<label><input type='radio' name='tri-sol-print' value='2'> Solo la solución 2</label>" +
-          "<p class='sol-print-nota'>En pantalla se siguen viendo las dos. Con las dos son " +
-          "dos hojas; con una sola entra en una.</p></fieldset>";
+    hh += "<fieldset class='sol-print no-print'><legend>Cuál corresponde a tu terreno</legend>" +
+          "<label><input type='radio' name='tri-sol-print' value='0' checked> Todavía no elijo</label>" +
+          "<label><input type='radio' name='tri-sol-print' value='1'> La solución 1</label>" +
+          "<label><input type='radio' name='tri-sol-print' value='2'> La solución 2</label>" +
+          "<p class='sol-print-nota'>Al elegir una, <b>la otra deja de mostrarse</b> y el " +
+          "resultado queda con la elegida — en pantalla y en el papel, una sola hoja. " +
+          "Podés volver a ver las dos cuando quieras.</p></fieldset>";
   } else if(tangente){
     hh += "<div class='msg info'>Caso límite de la ambigüedad: <b>" + tangRel + "</b>. El lado opuesto mide exactamente la altura, " +
           "así que los dos triángulos posibles son el mismo. Hay una <b>sola solución</b> y es <b>rectángulo en " + ambigua + "</b>.</div>";
@@ -4725,21 +4736,39 @@ $("tri-calcular").addEventListener("click", function(){
   });
   out.innerHTML = hh;
   if(sols.length === 2){
-    /* "0" = las dos, el valor por omisión. Marcar una le pone no-print a la otra, que en
-       @media print es display:none: desaparece del papel y sigue en pantalla. */
+    /* La elección es UNA sola y manda sobre las dos cosas: lo que se ve y lo que se
+       imprime. Hasta la v18.2 decidía nada más que el papel, y en pantalla quedaban dos
+       resultados completos con el mismo peso, cada uno con su superficie: eso presenta
+       como "resultado" lo que en realidad son dos candidatos, e invita a copiar el número
+       equivocado. Una mensura documenta un terreno, no dos.
+
+       Por eso ahora la clase oculta el bloque en pantalla y en papel. Y por eso el valor
+       por omisión es "todavía no elijo" y no una de las dos: el programa no sabe cuál es
+       el terreno y no puede elegir por el agrimensor. Sin elegir se siguen viendo las dos,
+       que es el estado honesto — y son dos hojas, como corresponde a dos resultados. */
     var bloques = out.querySelectorAll(".sol-bloque");
     Array.prototype.forEach.call(out.querySelectorAll("input[name='tri-sol-print']"), function(r){
       r.addEventListener("change", function(){
         var v = this.value;
+        TRI_SOL_ELEGIDA = v;
         Array.prototype.forEach.call(bloques, function(b){
-          var vaAlPapel = (v === "0" || b.getAttribute("data-sol") === v);
-          if(vaAlPapel){ b.classList.remove("no-print"); } else { b.classList.add("no-print"); }
+          var esLaElegida = (v === "0" || b.getAttribute("data-sol") === v);
+          if(esLaElegida){ b.classList.remove("sol-descartada"); }
+          else           { b.classList.add("sol-descartada"); }
         });
-        anunciar(v === "0" ? "Al imprimir van las dos soluciones, en dos hojas."
-                           : "Al imprimir va solo la solución " + v + ", en una hoja.");
+        anunciar(v === "0"
+          ? "Sin elegir: se muestran los dos triángulos posibles."
+          : "Elegida la solución " + v + ". El resultado queda con esa, en una hoja.");
         sConfirm();
       });
     });
+    /* Si el trabajo venía con una elección hecha, se vuelve a aplicar. */
+    if(TRI_SOL_ELEGIDA && TRI_SOL_ELEGIDA !== "0"){
+      var rr = out.querySelector("input[name='tri-sol-print'][value='" + TRI_SOL_ELEGIDA + "']");
+      if(rr){ rr.checked = true; rr.dispatchEvent(new Event("change", { bubbles:true })); }
+    }
+  } else {
+    TRI_SOL_ELEGIDA = "0";   /* sin ambigüedad no hay nada elegido que arrastrar */
   }
   sellarCalculo();
   anunciar(sols.length === 2
@@ -4794,6 +4823,7 @@ function recogerEstado(){
       tricaso: $("tri-caso").value,
       cucaso: $("cu-caso").value,
       tries: $("tri-resultados").style.display !== "none",
+      trisol: TRI_SOL_ELEGIDA,
       pln: PL.n, pldatos: PL.datos || null,
       plpaso2: $("pl-paso2").style.display !== "none",
       con: CO.n,
@@ -4907,6 +4937,8 @@ function aplicarEstado(st){
     plTolPrevia();   /* al reabrir un trabajo, la tolerancia previa vuelve con él */
     if(st.cores && st.con >= 3) $("co-calcular").click();
     if(st.cures && $("cu-a").value !== "") $("cu-calcular").click();
+    /* La elección se repone ANTES de recalcular: el propio cálculo la vuelve a aplicar. */
+    TRI_SOL_ELEGIDA = st.trisol || "0";
     if(st.tries) $("tri-calcular").click();
     renderTabs();
     if(typeof dtPorOmision === "function"){ dtPorOmision(); dtArmarEncabezado(); }
@@ -6024,61 +6056,79 @@ function correrPruebas(){
   ver(G2, "casi tangente pero distinguible — dos", dosBorde.length, 2);
   ver(G2, "casi tangente — y se distinguen en pantalla", dosBorde[0] !== dosBorde[1], true);
 
-  /* ---------- G3 · Triángulos — qué solución va al papel ----------
-     El caso 4 es el único de los diez casos de triángulo y cuadrilátero que no entra en
-     una hoja, y no por apretado: devuelve DOS terrenos posibles y dibuja los dos, con dos
-     croquis. Medido con el motor de impresión real, pide entre 1451 y 1640 px de alto útil
-     contra los 1062 de una A4.
-     El selector no toca el cálculo: solo le pone no-print —display:none en @media print— a
-     la solución que no se eligió. Por eso lo que hay que fijar por prueba es que la clase
-     caiga en el bloque correcto, que el valor por omisión siga siendo "las dos" (nadie
-     pierde nada por no tocarlo), que el propio selector no se imprima, y que no aparezca
-     donde no hay ambigüedad. */
-  var G3 = "G3 · Triángulos — qué solución se imprime";
-  function elegirImpresion(v){
+  /* ---------- G3 · Triángulos — cuál de los dos es el terreno ----------
+     Con dos lados y el ángulo enfrentado a uno hay DOS triángulos posibles, y el programa
+     no puede saber cuál es el terreno: lo sabe el agrimensor. Hasta la v18.2 la elección
+     decidía nada más que el papel, y en pantalla quedaban dos resultados completos con el
+     mismo peso, cada uno con su superficie — eso presenta como "resultado" lo que son dos
+     candidatos, e invita a copiar el número equivocado.
+     Desde la v18.3 la elección es UNA y manda sobre las dos cosas: la descartada se va de
+     la pantalla y del papel. Por eso lo que se fija acá es que la clase caiga en el bloque
+     correcto, que por omisión NO haya nada elegido —el programa no elige por él—, que se
+     pueda volver atrás, y que la elección sobreviva a guardar y reabrir el trabajo, que es
+     lo que la vuelve parte del resultado y no un detalle de impresión. */
+  var G3 = "G3 · Triángulos — cuál de los dos es el terreno";
+  function elegirSolucion(v){
     var r = document.querySelector("#tri-res-body input[name='tri-sol-print'][value='" + v + "']");
     if(!r) return false;
     r.checked = true; r.dispatchEvent(new Event("change", { bubbles:true }));
     return true;
   }
-  function fueraDelPapel(n){
+  function descartada(n){
     var b = document.querySelector("#tri-res-body .sol-bloque[data-sol='" + n + "']");
-    return b ? b.classList.contains("no-print") : "no existe el bloque " + n;
+    return b ? b.classList.contains("sol-descartada") : "no existe el bloque " + n;
   }
   /* sin guarda, si no hubiera ninguna marcada esto tiraría abajo la batería entera */
-  function marcadaParaImprimir(){
+  function marcada(){
     var r = document.querySelector("#tri-res-body input[name='tri-sol-print']:checked");
     return r ? r.value : "ninguna";
   }
 
   triSSA("4", { "tri-a":"8", "tri-b":"10", "tri-Ag":"30", "tri-Am":"0", "tri-As":"0" });
-  ver(G3, "ambigua — aparece la elección de impresión",
+  ver(G3, "ambigua — aparece la elección",
       document.querySelectorAll("#tri-res-body input[name='tri-sol-print']").length, 3);
   ver(G3, "la elección misma no se imprime",
       document.querySelector("#tri-res-body .sol-print").classList.contains("no-print"), true);
-  ver(G3, "por omisión van las dos al papel",
-      fueraDelPapel(1) === false && fueraDelPapel(2) === false, true);
-  /* y tiene que VERSE que van las dos: sin esta, sacarle el checked a la opción por
-     omisión no rompe ninguna prueba —el papel sale igual— pero deja la elección en
-     blanco, mostrando como indefinido algo que sí está definido. */
-  ver(G3, "por omisión la opción marcada es 'las dos'", marcadaParaImprimir(), "0");
+  ver(G3, "por omisión se muestran las dos",
+      descartada(1) === false && descartada(2) === false, true);
+  /* el programa NO elige por el agrimensor: por omisión está en "todavía no elijo" */
+  ver(G3, "por omisión no hay ninguna elegida", marcada(), "0");
 
-  elegirImpresion("2");
-  ver(G3, "elegida la 2 — la 1 sale del papel", fueraDelPapel(1), true);
-  ver(G3, "elegida la 2 — la 2 se queda",       fueraDelPapel(2), false);
+  elegirSolucion("2");
+  ver(G3, "elegida la 2 — la 1 se descarta", descartada(1), true);
+  ver(G3, "elegida la 2 — la 2 queda",       descartada(2), false);
+  /* y se va de la PANTALLA, no solo del papel: es lo que cambió en la v18.3 */
+  ver(G3, "la descartada no se ve en pantalla",
+      getComputedStyle(document.querySelector("#tri-res-body .sol-bloque[data-sol='1']")).display,
+      "none");
+  ver(G3, "y la elegida sí se ve",
+      getComputedStyle(document.querySelector("#tri-res-body .sol-bloque[data-sol='2']")).display !== "none",
+      true);
 
-  elegirImpresion("1");
+  elegirSolucion("1");
   ver(G3, "elegida la 1 — se invierte",
-      fueraDelPapel(1) === false && fueraDelPapel(2) === true, true);
+      descartada(1) === false && descartada(2) === true, true);
 
-  elegirImpresion("0");
-  ver(G3, "volver a las dos las devuelve al papel",
-      fueraDelPapel(1) === false && fueraDelPapel(2) === false, true);
+  elegirSolucion("0");
+  ver(G3, "se puede volver a ver las dos",
+      descartada(1) === false && descartada(2) === false, true);
+
+  /* La elección define el resultado, así que tiene que sobrevivir a guardar y reabrir.
+     Si no, un trabajo reabierto devolvería las dos soluciones y la superficie que quedó en
+     el plano dejaría de ser la que muestra la pantalla. */
+  elegirSolucion("2");
+  var guardado = recogerEstado();
+  ver(G3, "la elección se guarda con el trabajo", guardado.trisol, "2");
+  TRI_SOL_ELEGIDA = "0";
+  aplicarEstado(guardado);
+  ver(G3, "y se repone al reabrirlo", marcada(), "2");
+  ver(G3, "reabierto, la descartada sigue descartada", descartada(1), true);
 
   /* y donde hay una sola solución la elección no significa nada: no puede aparecer */
   tri("1");
   ver(G3, "una sola solución — no hay nada que elegir",
       document.querySelectorAll("#tri-res-body input[name='tri-sol-print']").length, 0);
+  ver(G3, "y no queda arrastrada una elección vieja", TRI_SOL_ELEGIDA, "0");
 
   /* el botón de ejemplo no puede cambiar el caso que eligió el usuario */
   tab(/Tri/);
