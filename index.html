@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "17.4";
-var APP_FECHA = "10/09/2026 09:06";
+var APP_VER   = "17.5";
+var APP_FECHA = "10/09/2026 09:17";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -779,7 +779,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
          9654,42- porque la figura no cierra y la superficie de un poligono abierto depende
          de donde se arranque. Empezar por la izquierda es convencion para que las letras
          del croquis coincidan con las del dibujo, no un requisito de calculo. -->
-    <div class="msg info no-print" style="margin:8px 0 4px;">La carga debe iniciarse en el <b>vértice más a la izquierda del lado seleccionado</b> y continuar recorriendo el <b>polígono interior</b> en <b>sentido horario</b>. En cada fila, el ángulo consignado corresponde al <b>ángulo interior del polígono</b> en el <b>vértice inicial del lado</b> indicado en esa fila.</div>
+    <div class="msg info no-print" style="margin:8px 0 4px;">La carga debe iniciarse en el <b>vértice más a la izquierda del lado seleccionado</b> y continuar recorriendo el <b>polígono interior</b> en <b>sentido horario</b>.</div>
 <div id="pl-tabla-box"></div>
     <!-- role="alert" y no aria-live="polite": acá caen los datos mal cargados y el cierre
          angular fuera de tolerancia, que son cosas que hay que corregir antes de seguir.
