@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "16.9";
-var APP_FECHA = "09/09/2026 20:22";
+var APP_VER   = "17.1";
+var APP_FECHA = "09/09/2026 22:27";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -505,10 +505,32 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
   header .header-actions, nav, .hint-bar, #modulos-panel, button, footer, .no-print{display:none !important;}
   body{background:#fff; padding:0;}
   header, main{border:none; border-radius:0; box-shadow:none; max-width:100%;}
-  /* si la tarjeta entra en una hoja, va entera (se empuja a la siguiente si hace falta);
-     si es más larga que una hoja, los cortes internos quedan controlados por las reglas de abajo */
-  .card{page-break-inside:avoid; break-inside:avoid;}
-  /* la SUPERFICIE queda pegada al gráfico que la sigue; el gráfico nunca se parte */
+
+  /* main traía 24px de padding arriba y abajo y 26 a los costados: es marco de pantalla y
+     en el papel no hace falta —el margen de hoja ya lo pone @page—. Los costados importan
+     doble: cada píxel que se le saca ensancha el área imprimible, el contenido reflowea
+     menos angosto y baja el alto. Lo mismo con el padding lateral de las tarjetas. */
+  main{ padding:0 !important; }
+  .card{ padding-left:0 !important; padding-right:0 !important; margin-bottom:8px !important; }
+  #dt-impreso.tiene-datos{ margin-bottom:8px !important; }
+
+  /* Hasta la v16.9 el programa no fijaba margen: usaba el del navegador, que cambia de
+     equipo en equipo y no se puede saber desde el código. Fijarlo hace dos cosas a la vez:
+     da más alto útil por hoja, y —al ensanchar el área imprimible— el contenido reflowea
+     menos angosto y por lo tanto más bajo. 8 mm arriba y abajo, 10 a los costados: entra en
+     cualquier impresora hogareña y deja lugar para archivar. */
+  @page{ margin: 8mm 10mm; }
+
+  /* .card ya NO lleva break-inside:avoid.
+     Esa regla decía "si la tarjeta entra en una hoja, va entera", y es la que producía el
+     defecto que Alejandro describió como "espacio en blanco entre estrofas": cuando la
+     tarjeta no entraba en lo que quedaba de la hoja, saltaba COMPLETA a la siguiente y
+     dejaba el resto en blanco. Con dos o tres tarjetas encadenadas, eso convierte una hoja
+     de contenido en tres con huecos.
+     El corte controlado sigue donde importa y ahí sí es correcto: el croquis no se parte
+     (.plano-box), las filas de tabla no se parten (tr), y la SUPERFICIE queda pegada al
+     gráfico que la sigue (.big-result). Lo que se suelta es solo la tarjeta contenedora,
+     que no es una unidad de lectura. */
   .msg{page-break-after:avoid; break-after:avoid;}
   .big-result{page-break-after:avoid; break-after:avoid;}
   .plano-box{page-break-inside:avoid; break-inside:avoid; max-width:520px; margin-left:auto; margin-right:auto;}
