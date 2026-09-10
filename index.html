@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "17.5";
-var APP_FECHA = "10/09/2026 09:17";
+var APP_VER   = "17.6";
+var APP_FECHA = "10/09/2026 10:18";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -277,6 +277,14 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
    siendo el menos visible de los dos. */
 /* "grave" pinta el fondo lleno; "titila" solo anima. Separadas, un aviso puede
    quedar bien visible sin moverse, que es lo que se quiere para el cierre angular. */
+/* Aviso de papel. Tiene que saltar a la vista ANTES de mandar a imprimir, así que se
+   llena el fondo, como en .msg.bad.grave. Va en ámbar y no en rojo porque no es un error:
+   el cálculo está bien, lo que no entra es la hoja. */
+.msg.papel{background:var(--warn); border-color:var(--warn); color:#FFFFFF;}
+.msg.papel b{color:#FFFFFF;}
+[data-theme="dark"] .msg.papel{background:#8A6410; border-color:#F0B429; color:#FFF6E5;}
+[data-theme="dark"] .msg.papel b{color:#FFF6E5;}
+
 .msg.bad.grave{background:#B3261E; border-color:#7F1D17; color:#FFFFFF;}
 .msg.bad.grave b{color:#FFFFFF;}
 .badge.no.grave{background:#B3261E; border-color:#7F1D17; color:#FFFFFF;}
@@ -3473,6 +3481,35 @@ function plMostrar(){
          " m. Compensando la poligonal, los dos métodos coinciden.</p>";
   }
   h += dibujaPlano(X, Y, D.L, w);
+
+  /* ---------- Aviso de papel ----------
+     Este es el único módulo que crece con el trabajo: cada vértice agrega renglones. Medido
+     con el motor de impresión real, contando páginas del PDF, y el umbral NO depende de la
+     forma de la parcela —se probó alargada (120×80) y compacta (100×100 y polígonos
+     regulares), con el mismo resultado—:
+
+         hasta 4 vértices ....... 2 hojas A4      ·  2 hojas oficio
+         de 5 a 7 vértices ...... 3 hojas A4      ·  2 hojas oficio
+         8 o más ................ 3 o más hojas en los dos papeles
+
+     Cada vértice cuesta unos 105 px de alto, no un renglón de 25: el mismo vértice aparece
+     en cuatro tablas del resultado. Como en A4 la holgura es de 38 a 52 px, UN SOLO vértice
+     de más ya la desborda. Por eso el salto de 4 a 5 es tan brusco.
+
+     El aviso no se imprime: es una instrucción para quien manda a imprimir, no parte del
+     documento que va a firma. */
+  var nVert = D.L.length, avisoPapel = "";
+  if(nVert >= 8){
+    avisoPapel = "<div class='msg papel no-print'><b>Este trabajo no entra en dos hojas.</b> " +
+      "Con " + nVert + " vértices sale en <b>tres o más</b>, en cualquier papel. Conviene " +
+      "imprimirlo en <b>hoja oficio</b>, que ocupa menos.</div>";
+  } else if(nVert >= 5){
+    avisoPapel = "<div class='msg papel no-print'><b>Imprimí este trabajo en hoja oficio.</b> " +
+      "Con " + nVert + " vértices, en A4 sale en <b>tres hojas</b>; en <b>oficio entra en dos</b>. " +
+      "El tamaño de papel se elige en el cuadro de impresión del navegador.</div>";
+  }
+  h = avisoPapel + h;
+
   $("pl-resultados").style.display = "block";
   $("pl-res-body").innerHTML = h;
   anunciar(tituloDe("pl-res-body"));
@@ -5316,6 +5353,48 @@ function correrPruebas(){
       resumenLineal().indexOf("regla de la brújula") >= 0, true);
   ver(H, "compensado: el resumen no lo llama 'cierra exacto'",
       resumenLineal().indexOf("cierra exacto") >= 0, false);
+
+  /* ---------- I · El aviso de papel ----------
+     La planilla es el único módulo que crece con el trabajo. Medido imprimiendo de verdad:
+     hasta 4 vértices entra en dos hojas A4; de 5 a 7 necesita oficio; de 8 en adelante son
+     tres o más en cualquier papel. El aviso traduce eso, así que lo que hay que fijar por
+     prueba son los dos bordes —que no moleste cuando entra y que aparezca cuando no— y que
+     el texto no prometa de más: decirle "en oficio entra en dos" a un trabajo de 8 vértices
+     sería mandarlo a gastar una hoja oficio para el mismo resultado. */
+  var I = "I · El aviso de papel";
+  function planillaDe(n, L, A){
+    tab(/Planilla/);
+    document.getElementById("pl-n").value = String(n);
+    document.getElementById("pl-generar").click();
+    for(var q = 1; q <= n; q++){
+      document.getElementById("pl-l" + q).value = String(L[q-1]);
+      document.getElementById("pl-g" + q).value = String(A[q-1]);
+      document.getElementById("pl-m" + q).value = "0";
+      document.getElementById("pl-s" + q).value = "0";
+    }
+    document.getElementById("pl-verificar").click();
+    document.getElementById("pl-az-g").value = 0;
+    document.getElementById("pl-az-m").value = 0;
+    document.getElementById("pl-az-s").value = 0;
+    document.getElementById("pl-calcular").click();
+    return document.querySelector("#pl-res-body .msg.papel");
+  }
+  function texto(e){ return e ? e.textContent : ""; }
+
+  ver(I, "4 vértices — entra en A4, no avisa nada",
+      planillaDe(4, [120,80,120,80], [90,90,90,90]), null);
+
+  var av5 = planillaDe(5, [60,60,80,120,80], [90,180,90,90,90]);
+  ver(I, "5 vértices — avisa",                av5 !== null, true);
+  ver(I, "5 vértices — manda a oficio",       /oficio/i.test(texto(av5)), true);
+  ver(I, "5 vértices — dice cuántos son",     texto(av5).indexOf("5 vértices") >= 0, true);
+  ver(I, "el aviso no se imprime",            av5 ? av5.classList.contains("no-print") : false, true);
+
+  var av8 = planillaDe(8, [60,60,40,40,60,60,40,40], [90,180,90,180,90,180,90,180]);
+  ver(I, "8 vértices — avisa que no entra en dos",
+      /no entra en dos hojas/i.test(texto(av8)), true);
+  ver(I, "8 vértices — no promete que el oficio lo arregla",
+      /oficio entra en dos/i.test(texto(av8)), false);
 
   /* ---------- D2 · Crandall, verificación matemática ----------
      Las pruebas del grupo D comprueban que Crandall cierra. Eso lo cumple también un
