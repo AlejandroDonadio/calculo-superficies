@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "17.3";
-var APP_FECHA = "10/09/2026 08:50";
+var APP_VER   = "17.4";
+var APP_FECHA = "10/09/2026 09:06";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -529,8 +529,33 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
      doble: cada píxel que se le saca ensancha el área imprimible, el contenido reflowea
      menos angosto y baja el alto. Lo mismo con el padding lateral de las tarjetas. */
   main{ padding:0 !important; }
-  .card{ padding-left:0 !important; padding-right:0 !important; margin-bottom:8px !important; }
-  #dt-impreso.tiene-datos{ margin-bottom:8px !important; }
+  .card{ padding-left:0 !important; padding-right:0 !important; margin-bottom:5px !important; }
+  #dt-impreso.tiene-datos{ margin-bottom:5px !important; }
+
+  /* ---------- La planilla, en dos hojas A4 (v17.4) ----------
+     Hasta acá la planilla entraba en dos hojas OFICIO, que es en lo que imprime Alejandro.
+     En A4 salía en tres. Medido con el motor de impresión real, achicando la hoja hasta
+     encontrar dónde deja de partirse:
+
+         210 × 297 mm (A4)  → 1062 px útiles por hoja → 3 hojas
+         210 × 305 mm       → 1092                    → 3
+         210 × 312 mm       → 1119                    → 2
+
+     O sea que le sobraban entre 60 y 115 px de alto TOTAL. Poco, y todo espacio muerto:
+     no hizo falta sacar contenido ni achicar una sola letra, que son las dos cosas que en
+     este documento no se tocan.
+
+         encabezado: 18+16 px de padding vertical, y 26 a los costados ....... ~34 px
+         relleno interior de cada tarjeta, de 16 a 8 px arriba y abajo ....... ~48 px
+         separación entre tarjetas, de 8 a 5 px .............................. ~12 px
+         marco del croquis, de 6 a 3 px ...................................... ~6 px
+
+     El margen de hoja se deja en 8 mm y no se baja a 6: por debajo de eso hay impresoras
+     hogareñas que recortan, y este documento va a firma. */
+  header{ padding-top:6px !important; padding-bottom:6px !important;
+          padding-left:0 !important; padding-right:0 !important; }
+  .card{ padding-top:8px !important; padding-bottom:8px !important; }
+  .plano-box{ padding:3px !important; }
 
   /* Hasta la v16.9 el programa no fijaba margen: usaba el del navegador, que cambia de
      equipo en equipo y no se puede saber desde el código. Fijarlo hace dos cosas a la vez:
