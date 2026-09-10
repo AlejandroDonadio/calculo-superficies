@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "17.7";
-var APP_FECHA = "10/09/2026 10:55";
+var APP_VER   = "17.9";
+var APP_FECHA = "10/09/2026 11:13";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -539,6 +539,8 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
   main{ padding:0 !important; }
   .card{ padding-left:0 !important; padding-right:0 !important; margin-bottom:5px !important; }
   #dt-impreso.tiene-datos{ margin-bottom:5px !important; }
+  /* id + dos clases: le tiene que ganar a '#dt-impreso.tiene-datos', que es id + una. */
+  #dt-impreso.tiene-datos.sin-encabezado{ display:none !important; }
 
   /* ---------- La planilla, en dos hojas A4 (v17.4) ----------
      Hasta acá la planilla entraba en dos hojas OFICIO, que es en lo que imprime Alejandro.
@@ -2292,14 +2294,18 @@ var TOL = { /* tolerancias lineales del programa original */
    documento que va a firma; y si se imprimiera, en oficio empujaría el trabajo de 5
    vértices a una tercera hoja, que es justo lo que viene a evitar. */
 var PL_NVERT = 0;
+var TOPE_A4_CON = 4;    /* vértices que entran en dos hojas A4 CON el encabezado */
+var TOPE_A4_SIN = 5;    /* y SIN él: son los 103 px del recuadro de datos */
+var TOPE_OFICIO = 7;    /* en oficio el encabezado no mueve el tope */
+
 function plAvisoPapel(){
   var caja = document.getElementById("pl-aviso-papel");
   if(!caja) return;
   var n = PL_NVERT;
   var dtImp = document.getElementById("dt-impreso");
   var conEncabezado = !!(dtImp && dtImp.className.indexOf("tiene-datos") >= 0);
-  var topeA4 = conEncabezado ? 4 : 5;
-  var topeOficio = 7;
+  var topeA4 = conEncabezado ? TOPE_A4_CON : TOPE_A4_SIN;
+  var topeOficio = TOPE_OFICIO;
 
   if(n > topeOficio){
     caja.className = "msg papel no-print";
@@ -2317,6 +2323,49 @@ function plAvisoPapel(){
     caja.innerHTML = "";
   }
 }
+
+/* ---------- Preguntar por el encabezado, cuando cuesta una hoja ----------
+   Propuesta de Alejandro: que el encabezado del trabajo —partida, nomenclatura, titular—
+   vaya al papel solo si él lo pide, para gastar menos hojas.
+
+   Se pregunta SOLO cuando sacarlo cambia el número de hojas, que es exactamente el tramo
+   entre los dos topes de A4: con encabezado entran 4 vértices, sin él 5. Con 4 o menos
+   entra igual, y con 6 o más no alcanza con sacarlo — en los dos casos preguntar sería
+   hacerle perder tiempo y tentarlo a quitar la identificación del inmueble a cambio de
+   nada. En oficio tampoco se pregunta: ahí entra en dos de las dos maneras.
+
+   Por omisión el encabezado VA. Es lo que identifica de qué parcela son esas hojas, y un
+   juego sin él no lo dice; que se saque tiene que ser una decisión tomada, no un descuido.
+
+   La clase que lo oculta es 'sin-encabezado' y no 'no-print' por una razón de peso, no de
+   estilo: la regla que lo muestra es '#dt-impreso.tiene-datos', un id más una clase, y le
+   gana por especificidad a '.no-print', que es una clase sola. Con no-print el encabezado
+   se habría impreso igual, en silencio. */
+function consultarEncabezado(){
+  var dtImp = document.getElementById("dt-impreso");
+  if(!dtImp || dtImp.className.indexOf("tiene-datos") < 0) return false;
+  var res = document.getElementById("pl-resultados");
+  if(!res || res.style.display === "none") return false;
+  if(!(PL_NVERT > TOPE_A4_CON && PL_NVERT <= TOPE_A4_SIN)) return false;
+
+  var incluir = window.confirm(
+    "Este trabajo tiene " + PL_NVERT + " vértices.\n\n" +
+    "En hoja A4:\n" +
+    "  · con los datos del trabajo → 3 hojas\n" +
+    "  · sin ellos → 2 hojas\n\n" +
+    "En hoja oficio entra en 2 de las dos maneras.\n\n" +
+    "Los datos del trabajo (partida, nomenclatura, titular) son lo que identifica " +
+    "de qué parcela son estas hojas.\n\n" +
+    "¿Los incluyo en la impresión?");
+  if(incluir) return false;
+  dtImp.classList.add("sin-encabezado");
+  return true;
+}
+function devolverEncabezado(){
+  var dtImp = document.getElementById("dt-impreso");
+  if(dtImp) dtImp.classList.remove("sin-encabezado");
+}
+window.addEventListener("afterprint", devolverEncabezado);
 
 /* ---------- Ángulos internos del polígono (de las coordenadas, compensadas o no) ---------- */
 function angulosInternos(X, Y){
@@ -5067,8 +5116,13 @@ function dtArmarEncabezado(){
   var mat  = dtValor("dt-matricula");
   agrega("Profesional", prof + (prof && mat ? " — Mat. " + mat : (mat ? "Mat. " + mat : "")));
   agrega("Fecha", dtValor("dt-fecha"));
+  /* Esta función se vuelve a correr en 'beforeprint', es decir JUSTO ANTES de imprimir, y
+     asigna className entero. Sin esta línea, la marca de "sacá el encabezado de esta
+     impresión" se borraba en ese momento y el encabezado salía igual: elegir que no fuera
+     no tenía ningún efecto, y nada lo avisaba. */
+  var sacado = caja.className.indexOf("sin-encabezado") >= 0;
   if(!identifica){ caja.className = ""; caja.innerHTML = ""; plAvisoPapel(); return; }
-  caja.className = "tiene-datos";
+  caja.className = "tiene-datos" + (sacado ? " sin-encabezado" : "");
   caja.innerHTML = "<div class='dt-t'>Cálculo de superficies</div>" +
                    "<div class='dt-g'>" + partes.join("") + "</div>";
   /* El encabezado son 103 px que solo salen en papel, y mueven el umbral de A4 de 5
@@ -5103,15 +5157,19 @@ function confirmarImprimir(verbo){
 $("btn-guardar").addEventListener("click", function(){
   if(!confirmarImprimir("Guardar el PDF")) return;
   sConfirm();
+  var saco = consultarEncabezado();
   document.title = pdfNombre();   /* el navegador lo propone como nombre del PDF */
   window.print();                 /* en el diálogo: destino "Guardar como PDF" */
   setTimeout(restaurarTitulo, 2000);   /* red de seguridad si no llega afterprint */
+  if(saco) setTimeout(devolverEncabezado, 2000);
 });
 
 $("btn-imprimir").addEventListener("click", function(){
   if(!confirmarImprimir("Imprimir")) return;
   sConfirm();
+  var saco = consultarEncabezado();
   window.print();   /* en el diálogo: elegir la impresora */
+  if(saco) setTimeout(devolverEncabezado, 2000);
 });
 
 
@@ -5473,6 +5531,70 @@ function correrPruebas(){
   encabezado(false);
   ver(I, "8 vértices sin encabezado — sigue sin entrar en dos",
       /no entra en dos hojas/i.test(texto(avisoPapel())), true);
+
+  /* ---------- J · Sacar el encabezado para ahorrar una hoja ----------
+     Se pregunta SOLO en el tramo donde sacarlo cambia el número de hojas: con 4 o menos
+     entra igual y con 6 o más no alcanza. Preguntar fuera de ahí sería tentar a quitar la
+     identificación del inmueble a cambio de nada.
+     La última prueba es la que importa de verdad: comprueba que la regla que lo oculta le
+     GANE por especificidad a la que lo muestra. Con la clase equivocada el encabezado se
+     imprimiría igual, sin que nada avisara. */
+  var J = "J · Sacar el encabezado para ahorrar una hoja";
+  function displayAlImprimir(el){
+    var cambiadas = [], i, j, rs;
+    for(i = 0; i < document.styleSheets.length; i++){
+      try{ rs = document.styleSheets[i].cssRules; }catch(e){ continue; }
+      for(j = 0; j < rs.length; j++){
+        if(rs[j].media && String(rs[j].media.mediaText).indexOf("print") >= 0){
+          rs[j].media.mediaText = "all"; cambiadas.push(rs[j]);
+        }
+      }
+    }
+    var d = getComputedStyle(el).display;
+    for(i = 0; i < cambiadas.length; i++){ cambiadas[i].media.mediaText = "print"; }
+    return d;
+  }
+  var dtImp = document.getElementById("dt-impreso");
+
+  /* con encabezado y 5 vértices: acá sí cuesta una hoja, así que pregunta */
+  encabezado(true);
+  planillaDe(5, [60,60,80,120,80], [90,180,90,90,90]);
+  window.confirm = function(){ return true; };      /* "sí, incluilos" */
+  ver(J, "5 vértices — si dice que sí, el encabezado se queda", consultarEncabezado(), false);
+  ver(J, "y no queda marcado para sacarlo",
+      dtImp.classList.contains("sin-encabezado"), false);
+
+  window.confirm = function(){ return false; };     /* "no, sacalos" */
+  ver(J, "5 vértices — si dice que no, lo saca", consultarEncabezado(), true);
+  ver(J, "el encabezado NO se imprime cuando se lo saca",
+      displayAlImprimir(dtImp), "none");
+  /* El navegador dispara 'beforeprint' JUSTO ANTES de imprimir, y ahí se rehace el
+     encabezado asignando className entero. Sin cuidado, eso borraba la marca y el
+     encabezado salía igual: decir que no no servía de nada y nada lo avisaba. */
+  dtArmarEncabezado();
+  ver(J, "la marca sobrevive al 'beforeprint'",
+      dtImp.classList.contains("sin-encabezado"), true);
+  ver(J, "y después del 'beforeprint' sigue sin imprimirse",
+      displayAlImprimir(dtImp), "none");
+  devolverEncabezado();
+  ver(J, "y vuelve solo después de imprimir",
+      dtImp.classList.contains("sin-encabezado"), false);
+  ver(J, "devuelto, el encabezado SÍ se imprime",
+      displayAlImprimir(dtImp) !== "none", true);
+
+  /* fuera del tramo no pregunta, aunque la respuesta fuera que no */
+  planillaDe(4, [120,80,120,80], [90,90,90,90]);
+  ver(J, "4 vértices — no pregunta: entra igual", consultarEncabezado(), false);
+  planillaDe(8, [60,60,40,40,60,60,40,40], [90,180,90,180,90,180,90,180]);
+  ver(J, "8 vértices — no pregunta: sacarlo no salva la hoja", consultarEncabezado(), false);
+
+  /* y sin encabezado cargado no hay nada que preguntar */
+  encabezado(false);
+  planillaDe(5, [60,60,80,120,80], [90,180,90,90,90]);
+  ver(J, "sin encabezado cargado — no pregunta", consultarEncabezado(), false);
+  /* se devuelve el confirm de la corrida —el que contesta que sí—, NO el del navegador:
+     restaurar el original acá dejaría diálogos de verdad esperando en las pruebas que siguen */
+  window.confirm = function(){ return true; };
 
   /* ---------- D2 · Crandall, verificación matemática ----------
      Las pruebas del grupo D comprueban que Crandall cierra. Eso lo cumple también un
