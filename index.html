@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "17.1";
-var APP_FECHA = "09/09/2026 22:27";
+var APP_VER   = "17.2";
+var APP_FECHA = "09/09/2026 23:42";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -314,6 +314,24 @@ tr.total td{border-top:2px solid var(--ink); border-bottom:none; font-weight:700
 /* ============ Plano SVG ============ */
 .plano-box{border:1px solid var(--ink); border-radius:16px; overflow:hidden; background:#fff; margin-top:10px; padding:6px;}
 .plano-box svg{display:block; width:100%; height:auto;}
+
+/* ============ Elegir qué solución va al papel ============
+   Solo aparece en el caso ambiguo de triángulos (dos lados y el ángulo opuesto a uno),
+   que es el único de los diez casos de triángulo y cuadrilátero que no entra en una hoja:
+   devuelve DOS terrenos posibles y dibuja los dos completos, con dos croquis. Medido con
+   el motor de impresión real, pide entre 1451 y 1640 px de alto útil contra los 1062 que
+   da una A4 — no le faltan milímetros, le falta medio croquis.
+   Apretarlo no es opción: achicar los croquis para que entren los dos vuelve ilegibles los
+   ángulos, que es justo el defecto que arregló la v13.8. Así que no decide el programa:
+   en pantalla se siguen viendo las dos soluciones y acá se elige cuál se imprime.
+   El valor por omisión es "las dos", el comportamiento de siempre: quien no toque esto
+   no pierde nada, solo sigue sacando dos hojas. */
+.sol-print{border:1px dashed var(--line); border-radius:12px; padding:8px 14px 10px; margin:12px 0;}
+.sol-print legend{font-size:.72rem; font-weight:600; color:var(--ink-soft); padding:0 6px;
+                  text-transform:uppercase; letter-spacing:.06em;}
+.sol-print label{display:inline-flex; align-items:center; gap:6px; margin-right:16px;
+                 font-size:.9rem; cursor:pointer;}
+.sol-print-nota{margin:6px 0 0; font-size:.78rem; color:var(--ink-soft);}
 
 /* ============ Panel de módulos ============ */
 #modulos-panel{
@@ -4463,6 +4481,14 @@ $("tri-calcular").addEventListener("click", function(){
   var hh = "";
   if(sols.length === 2){
     hh += "<div class='msg info'>Con dos lados y el ángulo opuesto a uno de ellos hay <b>dos triángulos posibles</b>. Se muestran los dos: elegí el que corresponda a tu terreno.</div>";
+    /* Las dos soluciones no entran en una hoja: son dos croquis. Acá se elige cuál va al
+       papel, sin sacar nada de la pantalla. Por omisión van las dos, como siempre. */
+    hh += "<fieldset class='sol-print no-print'><legend>Al imprimir</legend>" +
+          "<label><input type='radio' name='tri-sol-print' value='0' checked> Las dos soluciones</label>" +
+          "<label><input type='radio' name='tri-sol-print' value='1'> Solo la solución 1</label>" +
+          "<label><input type='radio' name='tri-sol-print' value='2'> Solo la solución 2</label>" +
+          "<p class='sol-print-nota'>En pantalla se siguen viendo las dos. Con las dos son " +
+          "dos hojas; con una sola entra en una.</p></fieldset>";
   } else if(tangente){
     hh += "<div class='msg info'>Caso límite de la ambigüedad: <b>" + tangRel + "</b>. El lado opuesto mide exactamente la altura, " +
           "así que los dos triángulos posibles son el mismo. Hay una <b>sola solución</b> y es <b>rectángulo en " + ambigua + "</b>.</div>";
@@ -4471,6 +4497,8 @@ $("tri-calcular").addEventListener("click", function(){
     var per = S.a + S.b + S.c;
     var w = 0.5 * S.a * S.b * sind(S.C);
     if(sols.length === 2){
+      /* Cada solución va envuelta para poder sacarla del papel sin sacarla de la pantalla. */
+      hh += "<div class='sol-bloque' data-sol='" + (k+1) + "'>";
       hh += "<h3 style='font-family:Poppins,sans-serif; color:var(--marca); margin:14px 0 6px;'>Solución " + (k+1) + " (ángulo " + ambigua + (k === 0 ? " agudo)" : " obtuso)") + "</h3>";
     }
     hh += "<table><thead><tr><th>Lados</th><th></th><th>Ángulos</th><th></th></tr></thead><tbody>" +
@@ -4486,8 +4514,26 @@ $("tri-calcular").addEventListener("click", function(){
     var Xs = [0, 0, Bn], Ys = [0, S.b, Be];
     hh += dibujaPlano(Xs, Ys, [S.b, S.a, S.c], w, ["A", "C", "B"]);
     hh += "<p style='font-size:.8rem; color:var(--ink-soft); margin-top:4px;'>Croquis: letras de los vértices desde la izquierda y en sentido horario, con el ángulo interior anotado en cada uno.</p>";
+    if(sols.length === 2){ hh += "</div>"; }
   });
   out.innerHTML = hh;
+  if(sols.length === 2){
+    /* "0" = las dos, el valor por omisión. Marcar una le pone no-print a la otra, que en
+       @media print es display:none: desaparece del papel y sigue en pantalla. */
+    var bloques = out.querySelectorAll(".sol-bloque");
+    Array.prototype.forEach.call(out.querySelectorAll("input[name='tri-sol-print']"), function(r){
+      r.addEventListener("change", function(){
+        var v = this.value;
+        Array.prototype.forEach.call(bloques, function(b){
+          var vaAlPapel = (v === "0" || b.getAttribute("data-sol") === v);
+          if(vaAlPapel){ b.classList.remove("no-print"); } else { b.classList.add("no-print"); }
+        });
+        anunciar(v === "0" ? "Al imprimir van las dos soluciones, en dos hojas."
+                           : "Al imprimir va solo la solución " + v + ", en una hoja.");
+        sConfirm();
+      });
+    });
+  }
   anunciar(sols.length === 2
     ? "Dos triángulos posibles. " + tituloDe("tri-res-body")
     : tituloDe("tri-res-body"));
@@ -5507,6 +5553,62 @@ function correrPruebas(){
   var dosBorde = solucionesRenderizadas();
   ver(G2, "casi tangente pero distinguible — dos", dosBorde.length, 2);
   ver(G2, "casi tangente — y se distinguen en pantalla", dosBorde[0] !== dosBorde[1], true);
+
+  /* ---------- G3 · Triángulos — qué solución va al papel ----------
+     El caso 4 es el único de los diez casos de triángulo y cuadrilátero que no entra en
+     una hoja, y no por apretado: devuelve DOS terrenos posibles y dibuja los dos, con dos
+     croquis. Medido con el motor de impresión real, pide entre 1451 y 1640 px de alto útil
+     contra los 1062 de una A4.
+     El selector no toca el cálculo: solo le pone no-print —display:none en @media print— a
+     la solución que no se eligió. Por eso lo que hay que fijar por prueba es que la clase
+     caiga en el bloque correcto, que el valor por omisión siga siendo "las dos" (nadie
+     pierde nada por no tocarlo), que el propio selector no se imprima, y que no aparezca
+     donde no hay ambigüedad. */
+  var G3 = "G3 · Triángulos — qué solución se imprime";
+  function elegirImpresion(v){
+    var r = document.querySelector("#tri-res-body input[name='tri-sol-print'][value='" + v + "']");
+    if(!r) return false;
+    r.checked = true; r.dispatchEvent(new Event("change", { bubbles:true }));
+    return true;
+  }
+  function fueraDelPapel(n){
+    var b = document.querySelector("#tri-res-body .sol-bloque[data-sol='" + n + "']");
+    return b ? b.classList.contains("no-print") : "no existe el bloque " + n;
+  }
+  /* sin guarda, si no hubiera ninguna marcada esto tiraría abajo la batería entera */
+  function marcadaParaImprimir(){
+    var r = document.querySelector("#tri-res-body input[name='tri-sol-print']:checked");
+    return r ? r.value : "ninguna";
+  }
+
+  triSSA("4", { "tri-a":"8", "tri-b":"10", "tri-Ag":"30", "tri-Am":"0", "tri-As":"0" });
+  ver(G3, "ambigua — aparece la elección de impresión",
+      document.querySelectorAll("#tri-res-body input[name='tri-sol-print']").length, 3);
+  ver(G3, "la elección misma no se imprime",
+      document.querySelector("#tri-res-body .sol-print").classList.contains("no-print"), true);
+  ver(G3, "por omisión van las dos al papel",
+      fueraDelPapel(1) === false && fueraDelPapel(2) === false, true);
+  /* y tiene que VERSE que van las dos: sin esta, sacarle el checked a la opción por
+     omisión no rompe ninguna prueba —el papel sale igual— pero deja la elección en
+     blanco, mostrando como indefinido algo que sí está definido. */
+  ver(G3, "por omisión la opción marcada es 'las dos'", marcadaParaImprimir(), "0");
+
+  elegirImpresion("2");
+  ver(G3, "elegida la 2 — la 1 sale del papel", fueraDelPapel(1), true);
+  ver(G3, "elegida la 2 — la 2 se queda",       fueraDelPapel(2), false);
+
+  elegirImpresion("1");
+  ver(G3, "elegida la 1 — se invierte",
+      fueraDelPapel(1) === false && fueraDelPapel(2) === true, true);
+
+  elegirImpresion("0");
+  ver(G3, "volver a las dos las devuelve al papel",
+      fueraDelPapel(1) === false && fueraDelPapel(2) === false, true);
+
+  /* y donde hay una sola solución la elección no significa nada: no puede aparecer */
+  tri("1");
+  ver(G3, "una sola solución — no hay nada que elegir",
+      document.querySelectorAll("#tri-res-body input[name='tri-sol-print']").length, 0);
 
   /* el botón de ejemplo no puede cambiar el caso que eligió el usuario */
   tab(/Tri/);
