@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "17.6";
-var APP_FECHA = "10/09/2026 10:18";
+var APP_VER   = "17.7";
+var APP_FECHA = "10/09/2026 10:55";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -2261,6 +2261,63 @@ var TOL = { /* tolerancias lineales del programa original */
   6: function(lt){ return Math.sqrt(lt*lt*0.0005 + lt*0.3) * 0.030; }
 };
 
+/* =====================================================================
+   AVISO DE PAPEL — cuántas hojas va a ocupar este trabajo
+
+   La planilla es el único módulo que crece con el trabajo: cada vértice agrega renglones.
+   Y no es un renglón de 25 px sino unos 105, porque el mismo vértice aparece en CUATRO
+   tablas del resultado. Como la holgura en A4 es de 38 a 52 px, un solo vértice de más ya
+   la desborda: de ahí que el salto sea tan brusco.
+
+   Umbrales medidos con el motor de impresión real, contando páginas del PDF:
+
+                                        A4        OFICIO
+       con encabezado del trabajo    hasta 4     hasta 7
+       sin encabezado                hasta 5     hasta 7
+
+   NO dependen de la forma de la parcela: se probó alargada (120×80), cuadrada (100×100) y
+   polígonos regulares, con el mismo resultado en los tres.
+
+   Sí dependen del ENCABEZADO DEL TRABAJO, y por eso este aviso no se congela al calcular.
+   El recuadro de datos (#dt-impreso) solo aparece al imprimir y pesa unos 103 px: con él,
+   A4 aguanta 4 vértices; sin él, 5. Alejandro probó una planilla de 5 vértices sin cargar
+   el encabezado y le entró en dos hojas A4; yo la medí con el encabezado cargado y me dio
+   tres. Los dos estábamos bien. Si el aviso mirara solo el número de vértices, mandaría a
+   buscar hoja oficio a quien no la necesita.
+
+   Por eso se vuelve a calcular cada vez que cambia el encabezado, y no solo al calcular:
+   el encabezado se puede cargar DESPUÉS del cálculo.
+
+   El aviso no se imprime. Es una instrucción para quien manda a imprimir, no parte del
+   documento que va a firma; y si se imprimiera, en oficio empujaría el trabajo de 5
+   vértices a una tercera hoja, que es justo lo que viene a evitar. */
+var PL_NVERT = 0;
+function plAvisoPapel(){
+  var caja = document.getElementById("pl-aviso-papel");
+  if(!caja) return;
+  var n = PL_NVERT;
+  var dtImp = document.getElementById("dt-impreso");
+  var conEncabezado = !!(dtImp && dtImp.className.indexOf("tiene-datos") >= 0);
+  var topeA4 = conEncabezado ? 4 : 5;
+  var topeOficio = 7;
+
+  if(n > topeOficio){
+    caja.className = "msg papel no-print";
+    caja.innerHTML = "<b>Este trabajo no entra en dos hojas.</b> Con " + n +
+      " vértices sale en <b>tres o más</b>, en cualquier papel. Conviene imprimirlo en " +
+      "<b>hoja oficio</b>, que ocupa menos.";
+  } else if(n > topeA4){
+    caja.className = "msg papel no-print";
+    caja.innerHTML = "<b>Imprimí este trabajo en hoja oficio.</b> Con " + n + " vértices" +
+      (conEncabezado ? " y el encabezado del trabajo cargado" : "") +
+      ", en A4 sale en <b>tres hojas</b>; en <b>oficio entra en dos</b>. " +
+      "El tamaño de papel se elige en el cuadro de impresión del navegador.";
+  } else {
+    caja.className = "";
+    caja.innerHTML = "";
+  }
+}
+
 /* ---------- Ángulos internos del polígono (de las coordenadas, compensadas o no) ---------- */
 function angulosInternos(X, Y){
   var n = X.length, res = [], area2 = 0, i, j;
@@ -3482,36 +3539,13 @@ function plMostrar(){
   }
   h += dibujaPlano(X, Y, D.L, w);
 
-  /* ---------- Aviso de papel ----------
-     Este es el único módulo que crece con el trabajo: cada vértice agrega renglones. Medido
-     con el motor de impresión real, contando páginas del PDF, y el umbral NO depende de la
-     forma de la parcela —se probó alargada (120×80) y compacta (100×100 y polígonos
-     regulares), con el mismo resultado—:
-
-         hasta 4 vértices ....... 2 hojas A4      ·  2 hojas oficio
-         de 5 a 7 vértices ...... 3 hojas A4      ·  2 hojas oficio
-         8 o más ................ 3 o más hojas en los dos papeles
-
-     Cada vértice cuesta unos 105 px de alto, no un renglón de 25: el mismo vértice aparece
-     en cuatro tablas del resultado. Como en A4 la holgura es de 38 a 52 px, UN SOLO vértice
-     de más ya la desborda. Por eso el salto de 4 a 5 es tan brusco.
-
-     El aviso no se imprime: es una instrucción para quien manda a imprimir, no parte del
-     documento que va a firma. */
-  var nVert = D.L.length, avisoPapel = "";
-  if(nVert >= 8){
-    avisoPapel = "<div class='msg papel no-print'><b>Este trabajo no entra en dos hojas.</b> " +
-      "Con " + nVert + " vértices sale en <b>tres o más</b>, en cualquier papel. Conviene " +
-      "imprimirlo en <b>hoja oficio</b>, que ocupa menos.</div>";
-  } else if(nVert >= 5){
-    avisoPapel = "<div class='msg papel no-print'><b>Imprimí este trabajo en hoja oficio.</b> " +
-      "Con " + nVert + " vértices, en A4 sale en <b>tres hojas</b>; en <b>oficio entra en dos</b>. " +
-      "El tamaño de papel se elige en el cuadro de impresión del navegador.</div>";
-  }
-  h = avisoPapel + h;
+  /* El aviso de papel va en un recuadro propio porque se RECALCULA: ver plAvisoPapel(). */
+  PL_NVERT = D.L.length;
+  h = "<div id='pl-aviso-papel'></div>" + h;
 
   $("pl-resultados").style.display = "block";
   $("pl-res-body").innerHTML = h;
+  plAvisoPapel();
   anunciar(tituloDe("pl-res-body"));
 
   /* Los tres radios del método de compensación se rehacen con este innerHTML, así que la
@@ -5033,10 +5067,13 @@ function dtArmarEncabezado(){
   var mat  = dtValor("dt-matricula");
   agrega("Profesional", prof + (prof && mat ? " — Mat. " + mat : (mat ? "Mat. " + mat : "")));
   agrega("Fecha", dtValor("dt-fecha"));
-  if(!identifica){ caja.className = ""; caja.innerHTML = ""; return; }
+  if(!identifica){ caja.className = ""; caja.innerHTML = ""; plAvisoPapel(); return; }
   caja.className = "tiene-datos";
   caja.innerHTML = "<div class='dt-t'>Cálculo de superficies</div>" +
                    "<div class='dt-g'>" + partes.join("") + "</div>";
+  /* El encabezado son 103 px que solo salen en papel, y mueven el umbral de A4 de 5
+     vértices a 4. Como se puede cargar DESPUÉS de calcular, el aviso se rehace acá. */
+  plAvisoPapel();
 }
 dtPorOmision();
 dtArmarEncabezado();
@@ -5362,6 +5399,21 @@ function correrPruebas(){
      el texto no prometa de más: decirle "en oficio entra en dos" a un trabajo de 8 vértices
      sería mandarlo a gastar una hoja oficio para el mismo resultado. */
   var I = "I · El aviso de papel";
+  /* El encabezado del trabajo mueve el umbral de A4 de 5 vértices a 4, así que las pruebas
+     tienen que manejarlo explícitamente: si se dieran por sentado los campos que hubiera
+     cargados, el resultado dependería del trabajo abierto en el navegador. */
+  function encabezado(cargado){
+    ["dt-partida","dt-partido","dt-localidad","dt-titular"].forEach(function(id){
+      var e = document.getElementById(id);
+      if(!e) return;
+      e.value = cargado ? "X" : "";
+      e.dispatchEvent(new Event("input", { bubbles:true }));
+    });
+  }
+  function avisoPapel(){
+    var e = document.getElementById("pl-aviso-papel");
+    return (e && e.className.indexOf("papel") >= 0) ? e : null;
+  }
   function planillaDe(n, L, A){
     tab(/Planilla/);
     document.getElementById("pl-n").value = String(n);
@@ -5377,24 +5429,50 @@ function correrPruebas(){
     document.getElementById("pl-az-m").value = 0;
     document.getElementById("pl-az-s").value = 0;
     document.getElementById("pl-calcular").click();
-    return document.querySelector("#pl-res-body .msg.papel");
+    return avisoPapel();
   }
   function texto(e){ return e ? e.textContent : ""; }
 
-  ver(I, "4 vértices — entra en A4, no avisa nada",
+  /* ---- Sin encabezado del trabajo: A4 aguanta hasta 5 ---- */
+  encabezado(false);
+  ver(I, "sin encabezado, 4 vértices — no avisa",
       planillaDe(4, [120,80,120,80], [90,90,90,90]), null);
+  ver(I, "sin encabezado, 5 vértices — entra en A4, no avisa",
+      planillaDe(5, [60,60,80,120,80], [90,180,90,90,90]), null);
+  ver(I, "sin encabezado, 6 vértices — avisa",
+      planillaDe(6, [60,60,80,60,60,80], [90,180,90,90,180,90]) !== null, true);
 
+  /* ---- El encabezado son 103 px y mueve el umbral: el MISMO cálculo cambia de veredicto.
+          Esta es la prueba del caso que separó mi medición de la de Alejandro. ---- */
+  encabezado(false);
+  planillaDe(5, [60,60,80,120,80], [90,180,90,90,90]);
+  ver(I, "5 vértices sin encabezado — no avisa", avisoPapel(), null);
+  encabezado(true);
+  ver(I, "al cargar el encabezado, el mismo cálculo pasa a avisar", avisoPapel() !== null, true);
+  encabezado(false);
+  ver(I, "y al borrarlo, el aviso se va", avisoPapel(), null);
+
+  /* ---- Con encabezado: A4 aguanta hasta 4 ---- */
+  encabezado(true);
   var av5 = planillaDe(5, [60,60,80,120,80], [90,180,90,90,90]);
-  ver(I, "5 vértices — avisa",                av5 !== null, true);
-  ver(I, "5 vértices — manda a oficio",       /oficio/i.test(texto(av5)), true);
-  ver(I, "5 vértices — dice cuántos son",     texto(av5).indexOf("5 vértices") >= 0, true);
-  ver(I, "el aviso no se imprime",            av5 ? av5.classList.contains("no-print") : false, true);
+  ver(I, "con encabezado, 5 vértices — avisa",   av5 !== null, true);
+  ver(I, "con encabezado, 5 vértices — manda a oficio", /oficio/i.test(texto(av5)), true);
+  ver(I, "con encabezado, 5 vértices — dice cuántos son",
+      texto(av5).indexOf("5 vértices") >= 0, true);
+  ver(I, "con encabezado, 5 vértices — nombra el encabezado como la causa",
+      /encabezado del trabajo/i.test(texto(av5)), true);
+  ver(I, "el aviso no se imprime", av5 ? av5.classList.contains("no-print") : false, true);
 
+  /* ---- Más de 7: no entra en dos hojas en ningún papel ---- */
   var av8 = planillaDe(8, [60,60,40,40,60,60,40,40], [90,180,90,180,90,180,90,180]);
   ver(I, "8 vértices — avisa que no entra en dos",
       /no entra en dos hojas/i.test(texto(av8)), true);
   ver(I, "8 vértices — no promete que el oficio lo arregla",
       /oficio entra en dos/i.test(texto(av8)), false);
+  /* el tope de oficio no se mueve con el encabezado: 7 con él y 7 sin él */
+  encabezado(false);
+  ver(I, "8 vértices sin encabezado — sigue sin entrar en dos",
+      /no entra en dos hojas/i.test(texto(avisoPapel())), true);
 
   /* ---------- D2 · Crandall, verificación matemática ----------
      Las pruebas del grupo D comprueban que Crandall cierra. Eso lo cumple también un
