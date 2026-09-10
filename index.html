@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "18.0";
-var APP_FECHA = "10/09/2026 11:25";
+var APP_VER   = "18.1";
+var APP_FECHA = "10/09/2026 19:31";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -938,11 +938,12 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
       <div><label style="font-size:1rem; font-weight:700; text-decoration:underline; color:var(--ink); margin-bottom:5px;">CASOS  —  Según la información o datos disponibles</label>
         <select id="tri-caso" style="font-family:inherit; font-size:.95rem; padding:7px; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink);">
           <option value="1">1 – Tres lados (a, b, c) según Fórmula de Herón</option>
-          <option value="2">2 – Dos lados y el ángulo comprendido (a, b y áng. C)</option>
-          <option value="3">3 – Dos lados y el ángulo opuesto al otro (a, b y áng. B)</option>
-          <option value="4">4 – Dos lados y el ángulo opuesto a uno (a, b y áng. A)</option>
-          <option value="5">5 – Dos ángulos y el lado adyacente a ellos (áng. A, áng. B y lado c)</option>
-          <option value="6">6 – Dos ángulos y el lado opuesto a uno de ellos (áng. A, áng. B y lado b)</option>
+          <option value="2">2 – Dos lados (a, b) y el ángulo comprendido entre ellos (áng. C)</option>
+          <option value="3">3 – Dos lados (a, b) y el ángulo opuesto al lado b (áng. B)</option>
+          <option value="4">4 – Dos lados (a, b) y el ángulo opuesto al lado a (áng. A)</option>
+          <option value="5">5 – Dos ángulos (A, B) y el lado comprendido entre ellos (lado c)</option>
+          <option value="6">6 – Dos ángulos (A, B) y el lado opuesto al ángulo B (lado b)</option>
+          <option value="7">7 – Dos ángulos (A, B) y el lado opuesto al ángulo A (lado a)</option>
         </select>
       </div>
     </div>
@@ -2293,6 +2294,17 @@ var TOL = { /* tolerancias lineales del programa original */
    El aviso no se imprime. Es una instrucción para quien manda a imprimir, no parte del
    documento que va a firma; y si se imprimiera, en oficio empujaría el trabajo de 5
    vértices a una tercera hoja, que es justo lo que viene a evitar. */
+/* Momento del último cálculo, para el encabezado impreso. Lo sella el programa cada vez
+   que un módulo muestra resultados; no es la fecha del trabajo ni la de la versión. */
+var SELLO_CALCULO = "";
+function sellarCalculo(){
+  var d = new Date();
+  function dd(n){ return (n < 10 ? "0" : "") + n; }
+  SELLO_CALCULO = dd(d.getDate()) + "/" + dd(d.getMonth() + 1) + "/" + d.getFullYear() +
+                  " " + dd(d.getHours()) + ":" + dd(d.getMinutes()) + " hs";
+  if(typeof dtArmarEncabezado === "function") dtArmarEncabezado();
+}
+
 var PL_NVERT = 0;
 var TOPE_A4_CON = 4;    /* vértices que entran en dos hojas A4 CON el encabezado */
 var TOPE_A4_SIN = 5;    /* y SIN él: son los 103 px del recuadro de datos */
@@ -2341,43 +2353,37 @@ function plAvisoPapel(){
    estilo: la regla que lo muestra es '#dt-impreso.tiene-datos', un id más una clase, y le
    gana por especificidad a '.no-print', que es una clase sola. Con no-print el encabezado
    se habría impreso igual, en silencio. */
-var ENC_DECIDIDO = false;   /* ya se preguntó en esta sesión */
-var ENC_INCLUIR  = true;    /* y esto contestó */
-
 function consultarEncabezado(){
   var dtImp = document.getElementById("dt-impreso");
   if(!dtImp) return true;
   devolverEncabezado();          /* toda impresión arranca sin marcas de la anterior */
 
-  /* Si no hay datos cargados no hay nada que confirmar, y preguntar sería justamente
-     hacer perder tiempo: no se pregunta. */
+  /* La regla es de Alejandro y es la más simple de todas: si los datos de la parcela
+     están cargados, VAN. No se pregunta nada. Solo se ofrece sacarlos en el único caso
+     donde eso cambia algo — cuando ahorran una hoja de verdad.
+
+     Antes esto preguntaba una vez por sesión y recordaba la respuesta. Se sacó: para el
+     que trabaja, un cartel que no cambia el resultado es tiempo perdido, y recordar la
+     respuesta traía su propio problema —no había forma de cambiarla sin recargar—. */
   if(dtImp.className.indexOf("tiene-datos") < 0) return true;
 
-  /* Se pregunta UNA VEZ por sesión, no en cada impresión. La observación es de Alejandro:
-     un cartel en cada impresión es tiempo perdido, y el que lo ve siempre termina
-     contestando lo mismo. La respuesta se recuerda y se vuelve a aplicar sola; para
-     cambiarla alcanza con recargar el programa. */
-  if(!ENC_DECIDIDO){
-    var texto = "¿Los datos de la parcela van en la impresión?\n\n" +
-      "Son la partida, la nomenclatura catastral y el titular: lo que identifica de qué " +
-      "inmueble son estas hojas.\n\n";
-    /* El costo en hojas se informa solo cuando existe, que es el tramo entre los dos topes
-       de A4. Decirlo fuera de ahí sería sugerir un ahorro que no ocurre. */
-    var res = document.getElementById("pl-resultados");
-    var enPlanilla = !!(res && res.style.display !== "none");
-    if(enPlanilla && PL_NVERT > TOPE_A4_CON && PL_NVERT <= TOPE_A4_SIN){
-      texto += "En este trabajo, de " + PL_NVERT + " vértices:\n" +
-               "  · con los datos, en A4 son 3 hojas\n" +
-               "  · sin ellos, 2 hojas\n" +
-               "  · en hoja oficio, 2 de las dos maneras\n\n";
-    }
-    texto += "Aceptar: van incluidos.\n" +
-             "Cancelar: se imprime sin ellos.\n\n" +
-             "No se vuelve a preguntar en esta sesión.";
-    ENC_INCLUIR  = window.confirm(texto);
-    ENC_DECIDIDO = true;
-  }
-  if(!ENC_INCLUIR) dtImp.classList.add("sin-encabezado");
+  /* El único tramo donde sacarlos ahorra una hoja: entre los dos topes de A4. Con 4
+     vértices o menos entra igual; con 6 o más no alcanza con sacarlos. Preguntar fuera de
+     ahí sería tentar a quitar la identificación del inmueble a cambio de nada. */
+  var res = document.getElementById("pl-resultados");
+  var enPlanilla = !!(res && res.style.display !== "none");
+  if(!(enPlanilla && PL_NVERT > TOPE_A4_CON && PL_NVERT <= TOPE_A4_SIN)) return true;
+
+  var incluir = window.confirm(
+    "Este trabajo, de " + PL_NVERT + " vértices, en hoja A4:\n" +
+    "  · con los datos de la parcela → 3 hojas\n" +
+    "  · sin ellos → 2 hojas\n\n" +
+    "En hoja oficio entra en 2 de las dos maneras.\n\n" +
+    "Los datos de la parcela —partida, nomenclatura catastral y titular— son lo que " +
+    "identifica de qué inmueble son estas hojas.\n\n" +
+    "Aceptar: van incluidos.\n" +
+    "Cancelar: se imprime sin ellos, en 2 hojas.");
+  if(!incluir) dtImp.classList.add("sin-encabezado");
   return true;
 }
 function devolverEncabezado(){
@@ -3613,6 +3619,7 @@ function plMostrar(){
 
   $("pl-resultados").style.display = "block";
   $("pl-res-body").innerHTML = h;
+  sellarCalculo();
   plAvisoPapel();
   anunciar(tituloDe("pl-res-body"));
 
@@ -4140,6 +4147,7 @@ $("co-calcular").addEventListener("click", function(){
   h += dibujaPlano(X, Y, L, w);
   $("co-resultados").style.display = "block";
   $("co-res-body").innerHTML = h;
+  sellarCalculo();
   anunciar(tituloDe("co-res-body"));
   sMelodia();
 });
@@ -4293,6 +4301,7 @@ $("cu-calcular").addEventListener("click", function(){
   hh += "<p style='font-size:.8rem; color:var(--ink-soft); margin-top:4px;'>Croquis: letras de los vértices desde la izquierda y en sentido horario (A, B, C, D), con el ángulo interior anotado en cada uno.</p>";
 
   out.innerHTML = hh;
+  sellarCalculo();
   anunciar(tituloDe("cu-res-body"));
   sMelodia();
 });
@@ -4529,7 +4538,8 @@ function triCampos(){
     "3": { a:1, b:1, c:0, A:0, B:1, C:0 },
     "4": { a:1, b:1, c:0, A:1, B:0, C:0 },
     "5": { a:0, b:0, c:1, A:1, B:1, C:0 },
-    "6": { a:0, b:1, c:0, A:1, B:1, C:0 }
+    "6": { a:0, b:1, c:0, A:1, B:1, C:0 },
+    "7": { a:1, b:0, c:0, A:1, B:1, C:0 }
   }[$("tri-caso").value];
   ["a","b","c"].forEach(function(k){ $("tri-f-" + k).style.display = vis[k] ? "" : "none"; });
   ["A","B","C"].forEach(function(k){ $("tri-f-" + k).style.display = vis[k] ? "flex" : "none"; });
@@ -4624,13 +4634,27 @@ $("tri-calcular").addEventListener("click", function(){
         if(sols.length === 0) err = "Con esos datos el triángulo no cierra (A + B llega a 180° o más).";
       }
     }
-  } else { /* caso 6: áng. A, áng. B y el lado b, opuesto a B */
+  } else if(caso === "6"){ /* áng. A, áng. B y el lado b, opuesto al ángulo B */
     if(!(b > 0)) err = "Cargá el lado b con un valor mayor que cero.";
     else if(A === null || B === null || A <= 0 || B <= 0) err = "Cargá los ángulos A y B (g ≤ 360, m y s menores que 60).";
     else if(A + B >= 180) err = "A + B debe ser menor que 180° para que exista el triángulo.";
     else {
       var C6 = 180 - A - B;
       sols.push({ a: b * sind(A) / sind(B), b:b, c: b * sind(C6) / sind(B), A:A, B:B, C:C6 });
+    }
+  } else { /* caso 7: áng. A, áng. B y el lado a, opuesto al ángulo A — el espejo del 6.
+              Faltaba. El comentario del botón de ejemplo decía "los siete" y la tabla que
+              traduce trabajos viejos mapea "7" a "6": hubo un caso 7 y se lo fusionó.
+              Con dos ángulos el tercero sale solo y cualquier lado define el triángulo, así
+              que hay tres variantes según qué lado se midió: el comprendido (caso 5), el
+              opuesto a B (caso 6) y el opuesto a A, que es éste. No es ambiguo: la
+              ambigüedad aparece cuando se conocen DOS lados y un ángulo, no dos ángulos. */
+    if(!(a > 0)) err = "Cargá el lado a con un valor mayor que cero.";
+    else if(A === null || B === null || A <= 0 || B <= 0) err = "Cargá los ángulos A y B (g ≤ 360, m y s menores que 60).";
+    else if(A + B >= 180) err = "A + B debe ser menor que 180° para que exista el triángulo.";
+    else {
+      var C7 = 180 - A - B;
+      sols.push({ a:a, b: a * sind(B) / sind(A), c: a * sind(C7) / sind(A), A:A, B:B, C:C7 });
     }
   }
 
@@ -4698,6 +4722,7 @@ $("tri-calcular").addEventListener("click", function(){
       });
     });
   }
+  sellarCalculo();
   anunciar(sols.length === 2
     ? "Dos triángulos posibles. " + tituloDe("tri-res-body")
     : tituloDe("tri-res-body"));
@@ -4721,7 +4746,8 @@ $("tri-ejemplo").addEventListener("click", function(){
   else if(caso === "3"){ lado("a"); lado("b"); ang("B"); }
   else if(caso === "4"){ lado("a"); lado("b"); ang("A"); }
   else if(caso === "5"){ ang("A"); ang("B"); lado("c"); }
-  else            { ang("A"); ang("B"); lado("b"); }
+  else if(caso === "6"){ ang("A"); ang("B"); lado("b"); }
+  else                 { ang("A"); ang("B"); lado("a"); }   /* caso 7 */
   triCampos();
   sConfirm();
 });
@@ -5135,6 +5161,12 @@ function dtArmarEncabezado(){
   var mat  = dtValor("dt-matricula");
   agrega("Profesional", prof + (prof && mat ? " — Mat. " + mat : (mat ? "Mat. " + mat : "")));
   agrega("Fecha", dtValor("dt-fecha"));
+  /* Cuándo se hizo el cálculo, no cuándo se imprimió ni de qué versión es el programa.
+     Es lo único que le faltaba al impreso para poder reconstruirse entero: figura, medidas
+     cargadas, método usado, tolerancia aplicada, resultado — y ahora el momento. La fecha
+     de arriba la escribe el agrimensor y puede ser la del trabajo; ésta la pone el
+     programa y no se toca. */
+  agrega("Calculado", SELLO_CALCULO);
   /* Esta función se vuelve a correr en 'beforeprint', es decir JUSTO ANTES de imprimir, y
      asigna className entero. Sin esta línea, la marca de "sacá el encabezado de esta
      impresión" se borraba en ese momento y el encabezado salía igual: elegir que no fuera
@@ -5575,33 +5607,44 @@ function correrPruebas(){
   }
   var dtImp = document.getElementById("dt-impreso");
 
-  /* cuántas veces se llamó al cartel: lo que se controla es que pregunte UNA sola vez */
+  /* cuántas veces se preguntó: la regla es que solo se pregunte donde ahorra una hoja */
   var preguntas = 0;
   function responder(r){
     window.confirm = function(){ preguntas++; return r; };
   }
 
   encabezado(true);
-  planillaDe(5, [60,60,80,120,80], [90,180,90,90,90]);
 
-  ENC_DECIDIDO = false; preguntas = 0; responder(true);      /* "sí, que vayan" */
+  /* 4 vértices: entra en A4 igual, así que los datos van y no se pregunta nada */
+  planillaDe(4, [120,80,120,80], [90,90,90,90]);
+  preguntas = 0; responder(false);
   consultarEncabezado();
-  ver(J, "con datos cargados — pregunta una vez", preguntas, 1);
+  ver(J, "4 vértices — no pregunta: los datos entran igual", preguntas, 0);
+  ver(J, "4 vértices — y los datos van al papel",
+      dtImp.classList.contains("sin-encabezado"), false);
+
+  /* 8 vértices: sacarlos no salva la hoja, así que tampoco se pregunta */
+  planillaDe(8, [60,60,40,40,60,60,40,40], [90,180,90,180,90,180,90,180]);
+  preguntas = 0;
+  consultarEncabezado();
+  ver(J, "8 vértices — no pregunta: sacarlos no salva la hoja", preguntas, 0);
+
+  /* 5 vértices: acá y solo acá cuesta una hoja */
+  planillaDe(5, [60,60,80,120,80], [90,180,90,90,90]);
+  preguntas = 0; responder(true);                            /* "sí, que vayan" */
+  consultarEncabezado();
+  ver(J, "5 vértices — pregunta una vez", preguntas, 1);
   ver(J, "si dice que sí, el encabezado se queda",
       dtImp.classList.contains("sin-encabezado"), false);
-  consultarEncabezado(); consultarEncabezado();
-  ver(J, "y NO vuelve a preguntar en las impresiones siguientes", preguntas, 1);
 
-  ENC_DECIDIDO = false; preguntas = 0; responder(false);     /* "no, que no vayan" */
+  preguntas = 0; responder(false);                           /* "no, que no vayan" */
   consultarEncabezado();
   ver(J, "si dice que no, lo saca", dtImp.classList.contains("sin-encabezado"), true);
   ver(J, "el encabezado NO se imprime cuando se lo saca",
       displayAlImprimir(dtImp), "none");
-  devolverEncabezado();
-  consultarEncabezado();
-  ver(J, "la decisión se recuerda y se vuelve a aplicar sola",
-      dtImp.classList.contains("sin-encabezado"), true);
-  ver(J, "sin volver a preguntar", preguntas, 1);
+  /* Acá había dos pruebas de que la respuesta se recordaba y no se volvía a preguntar.
+     Se van con la conducta que verificaban: ahora se pregunta cada vez que el trabajo cae
+     en el tramo donde sacar los datos ahorra una hoja, y no se recuerda nada. */
   /* El navegador dispara 'beforeprint' JUSTO ANTES de imprimir, y ahí se rehace el
      encabezado asignando className entero. Sin cuidado, eso borraba la marca y el
      encabezado salía igual: decir que no no servía de nada y nada lo avisaba. */
@@ -5613,16 +5656,44 @@ function correrPruebas(){
   devolverEncabezado();
   ver(J, "y vuelve solo después de imprimir",
       dtImp.classList.contains("sin-encabezado"), false);
-  ENC_DECIDIDO = true; ENC_INCLUIR = true;
   ver(J, "devuelto, el encabezado SÍ se imprime",
       displayAlImprimir(dtImp) !== "none", true);
 
+  /* la marca no se arrastra de una impresión a la otra: cada una arranca limpia */
+  dtImp.classList.add("sin-encabezado");
+  planillaDe(4, [120,80,120,80], [90,90,90,90]);
+  responder(true);
+  consultarEncabezado();
+  ver(J, "una impresión no hereda la marca de la anterior",
+      dtImp.classList.contains("sin-encabezado"), false);
+
   /* sin datos cargados no hay nada que confirmar: preguntar sería hacer perder tiempo */
   encabezado(false);
-  ENC_DECIDIDO = false; preguntas = 0; responder(false);
+  preguntas = 0; responder(false);
   ver(J, "sin datos cargados — sigue adelante", consultarEncabezado(), true);
   ver(J, "sin datos cargados — no pregunta nada", preguntas, 0);
   ver(J, "y no deja marcas", dtImp.classList.contains("sin-encabezado"), false);
+
+  /* ---------- K · El sello del cálculo ----------
+     Es lo único que le faltaba al impreso para poder reconstruirse: figura, medidas,
+     método, tolerancia, resultado — y CUÁNDO se calculó. La fecha de arriba la escribe el
+     agrimensor y puede ser la del trabajo; ésta la pone el programa. */
+  var K = "K · El sello del cálculo";
+  encabezado(true);
+  SELLO_CALCULO = "";
+  planillaDe(4, [120,80,120,80], [90,90,90,90]);
+  ver(K, "calcular deja el sello puesto", /\d\d\/\d\d\/\d{4} \d\d:\d\d hs/.test(SELLO_CALCULO), true);
+  ver(K, "y sale en el encabezado impreso",
+      dtImp.textContent.indexOf(SELLO_CALCULO) >= 0, true);
+  ver(K, "rotulado como Calculado, no como Fecha",
+      /Calculado:/.test(dtImp.textContent), true);
+  /* los otros módulos también lo sellan: si no, un triángulo saldría con la hora de un
+     cálculo anterior, que es peor que no tener hora */
+  var selloPlanilla = SELLO_CALCULO;
+  SELLO_CALCULO = "";
+  tri("1");
+  ver(K, "triángulos también sella", SELLO_CALCULO !== "" && SELLO_CALCULO !== "0", true);
+  SELLO_CALCULO = selloPlanilla;
   /* se devuelve el confirm de la corrida —el que contesta que sí—, NO el del navegador:
      restaurar el original acá dejaría diálogos de verdad esperando en las pruebas que siguen */
   window.confirm = function(){ return true; };
@@ -5807,7 +5878,33 @@ function correrPruebas(){
   ver(G, "caso 3 — dos lados y el ángulo opuesto al otro",   tri("3"), 2400, 0.01);
   ver(G, "caso 4 — dos lados y el ángulo opuesto a uno",     tri("4"), 2400, 0.01);
   ver(G, "caso 5 — dos ángulos y el lado adyacente",         tri("5"), 2400, 0.01);
-  ver(G, "caso 6 — dos ángulos y el lado opuesto a uno",     tri("6"), 2400, 0.01);
+  ver(G, "caso 6 — dos ángulos y el lado opuesto al ángulo B", tri("6"), 2400, 0.01);
+  /* El caso 7 faltaba: con dos ángulos hay TRES variantes según qué lado se midió —el
+     comprendido, el opuesto a B y el opuesto a A— y estaba solo hasta el 6. El comentario
+     del botón de ejemplo decía "los siete" y la tabla que traduce trabajos viejos mapea
+     "7" a "6": existió y se lo fusionó. Ahora vuelve, y el mismo triángulo por los siete
+     caminos tiene que dar los mismos 2400 m². */
+  ver(G, "caso 7 — dos ángulos y el lado opuesto al ángulo A", tri("7"), 2400, 0.01);
+
+  /* Los carteles tienen que distinguirse SOLOS. Los del 3 y el 4 decían "opuesto al otro"
+     y "opuesto a uno": la misma frase con las palabras cambiadas de lugar, y el propio
+     agrimensor no sabía cuál era cuál. Ahora cada uno nombra el lado o el ángulo concreto.
+     Esta prueba no mira estilo: mira que ningún par de carteles sea igual si se le sacan
+     el número y los espacios, que es lo que pasaba. */
+  var carteles = Array.prototype.map.call(
+    document.querySelectorAll("#tri-caso option"),
+    function(o){ return o.textContent.replace(/^\s*\d+\s*–\s*/, "").replace(/\s+/g, " ").trim(); });
+  ver(G, "hay siete casos", carteles.length, 7);
+  var repetidos = 0, ci, cj;
+  for(ci = 0; ci < carteles.length; ci++){
+    for(cj = ci + 1; cj < carteles.length; cj++){ if(carteles[ci] === carteles[cj]) repetidos++; }
+  }
+  ver(G, "ningún cartel repite a otro", repetidos, 0);
+  /* y el par que confundía nombra ahora el lado concreto, no "uno" y "el otro" */
+  ver(G, "el caso 3 nombra el lado b",  /opuesto al lado b/i.test(carteles[2]), true);
+  ver(G, "el caso 4 nombra el lado a",  /opuesto al lado a/i.test(carteles[3]), true);
+  ver(G, "el caso 6 nombra el ángulo B", /opuesto al ángulo B/i.test(carteles[5]), true);
+  ver(G, "el caso 7 nombra el ángulo A", /opuesto al ángulo A/i.test(carteles[6]), true);
   /* el caso 4 es ambiguo: con estos datos tiene que ofrecer los dos triángulos */
   tri("4");
   ver(G, "caso 4 — ofrece las dos soluciones",
