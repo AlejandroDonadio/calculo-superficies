@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "16.8";
-var APP_FECHA = "09/09/2026 19:54";
+var APP_VER   = "16.9";
+var APP_FECHA = "09/09/2026 20:22";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -554,6 +554,42 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
   #pl-res-body p{ margin-top:2px !important; margin-bottom:4px !important; }
   #pl-res-body .big-result{ padding-top:5px !important; padding-bottom:1px !important; }
   #pl-res-body .plano-box{ margin-top:3px !important; padding-top:3px !important; padding-bottom:3px !important; }
+
+  /* ---------- Triángulos y cuadriláteros: una sola hoja ----------
+     La v16.8 saco de la impresion la tarjeta "1 - Datos" y la medicion daba 0,78 paginas,
+     asi que parecia resuelto. En papel seguia saliendo en dos, con el CROQUIS SOLO en la
+     segunda. Ese sintoma es el que lo explica: .plano-box tiene break-inside:avoid -correcto
+     para un dibujo, que partido no sirve-, asi que si no entra entero en lo que queda de la
+     primera hoja salta completo.
+     O sea que no sobraba contenido: faltaba lugar para un bloque de 330 px que no se parte.
+
+     Dos errores de medicion mios, encontrados persiguiendo esto:
+       - Medi al ancho del PAPEL (794 px) y no al imprimible. Con margenes el contenido
+         reflowea mas angosto y crece a lo alto.
+       - Medi sin datos del trabajo cargados. El recuadro #dt-impreso solo aparece al
+         imprimir y agrega 103 px, que empujan el croquis de terminar en 790 a terminar
+         en 905.
+
+     Lo que se recorta acá no es contenido del documento: el rotulo "2 - Resultados" es del
+     flujo en pantalla -en la hoja terminada no significa nada- y el resto es espacio muerto
+     de margenes y padding. Medido sobre el cuadrilatero con datos de trabajo cargados:
+
+         como estaba                        el croquis terminaba en 905 px
+         sin el rotulo "2 - Resultados"                            862
+         + espaciado apretado                                      810
+         + tarjeta ajustada                                        800
+
+     No se achica el croquis ni se toca el subtitulo con el nombre del estudio: lo primero
+     volveria ilegibles los angulos -es lo que arreglo la v13.8- y lo segundo saca del papel
+     el nombre del profesional, que no es una decision de programacion. */
+  #cu-resultados > h2, #tri-resultados > h2{ display:none !important; }
+  #cu-resultados.card, #tri-resultados.card{ padding-top:6px !important; padding-bottom:6px !important; }
+  #cu-res-body td, #cu-res-body th,
+  #tri-res-body td, #tri-res-body th{ padding-top:3px !important; padding-bottom:3px !important; }
+  #cu-res-body table, #tri-res-body table{ margin-top:3px !important; margin-bottom:3px !important; }
+  #cu-res-body p, #tri-res-body p{ margin-top:2px !important; margin-bottom:2px !important; }
+  #cu-res-body .big-result, #tri-res-body .big-result{ padding-top:5px !important; padding-bottom:1px !important; }
+  #cu-res-body .plano-box, #tri-res-body .plano-box{ margin-top:3px !important; padding-top:2px !important; padding-bottom:2px !important; }
 }
 
 /* Oculta a la vista pero NO al lector de pantalla. Ni display:none ni visibility:hidden
