@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "18.6";
-var APP_FECHA = "21/09/2026 15:38";
+var APP_VER   = "18.7";
+var APP_FECHA = "21/09/2026 17:35";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -2244,6 +2244,29 @@ function haStr(w){
 }
 function validGms(g, m, s){ return isFinite(g) && isFinite(m) && isFinite(s) && g >= 0 && g <= 360 && m >= 0 && m < 60 && s >= 0 && s < 60; }
 
+/* ---------- Coordenadas repetidas ----------
+   Pares de vértices con las mismas coordenadas, al milímetro. Casi siempre es un punto
+   cargado dos veces por error: una fila copiada, un vértice dictado de nuevo. Era la única
+   de las validaciones de ingreso propuestas el 21 de septiembre que el programa no tenía:
+   las otras ocho ya estaban.
+
+   Dos casos, que se avisan distinto porque significan cosas distintas:
+     · contiguos (incluido el último con el primero): ese lado mide cero. La superficie no
+       cambia, pero sobra un vértice.
+     · no contiguos: el polígono se toca a sí mismo en ese punto — la figura de un ocho.
+       poligonoSimple() no lo ve, porque ahí los lados se TOCAN pero no se CRUZAN. */
+function coordenadasRepetidas(X, Y){
+  var n = X.length, res = [], i, j;
+  for(i = 0; i < n; i++){
+    for(j = i + 1; j < n; j++){
+      if(Math.abs(X[i] - X[j]) < 0.0005 && Math.abs(Y[i] - Y[j]) < 0.0005){
+        res.push({ a: i + 1, b: j + 1, contiguos: (j === i + 1) || (i === 0 && j === n - 1) });
+      }
+    }
+  }
+  return res;
+}
+
 /* ---------- ¿el polígono es simple? (ningún par de lados no contiguos se cruza) ----------
    Un polígono con lados cruzados no encierra una superficie única: la fórmula de Gauss
    devuelve la suma algebraica de las dos hojas, que no es la superficie de la parcela.
@@ -4265,6 +4288,17 @@ $("co-calcular").addEventListener("click", function(){
   }
   var h = "";
   if(!poligonoSimple(X, Y)) h += "<div class='msg info'><b>Atención:</b> hay lados del polígono que se cruzan. La superficie que sigue es la suma algebraica de las dos hojas y no representa una parcela. Revisá el orden de los vértices.</div>";
+  /* Coordenadas repetidas: advertencia, no error. Se calcula igual, porque puede haber un
+     motivo, pero casi siempre es un punto cargado dos veces. Ver coordenadasRepetidas(). */
+  coordenadasRepetidas(X, Y).forEach(function(r){
+    h += "<div class='msg info co-repetida'><b>Atención:</b> los vértices " + r.a + " y " + r.b +
+         " tienen las mismas coordenadas. " +
+         (r.contiguos
+           ? "El lado " + r.a + "–" + r.b + " mide cero: casi seguro es un punto cargado dos veces. " +
+             "La superficie no cambia, pero sobra un vértice."
+           : "El polígono se toca a sí mismo en ese punto. Revisá si se repitió un punto por error.") +
+         "</div>";
+  });
   h += "<table><thead><tr><th>Lado</th><th>Longitud (m)</th></tr></thead><tbody>";
   for(i = 0; i < CO.n; i++){
     h += "<tr><td class='lbl'>" + (i+1) + "–" + ((i+2) > CO.n ? 1 : i+2) + "</td><td>" + fmt(L[i], 2) + "</td></tr>";
@@ -6229,6 +6263,41 @@ function correrPruebas(){
   coords([0,10,10,0],[0,10,0,10]);
   ver(E, "avisa si los lados se cruzan",
       /se cruzan/.test(document.getElementById("co-res-body").textContent), true);
+
+  /* ---------- E2 · Coordenadas repetidas ----------
+     De las nueve validaciones de ingreso propuestas el 21 de septiembre, ocho ya estaban.
+     Ésta no: un punto cargado dos veces pasaba sin aviso. */
+  var E2 = "E2 · Coordenadas repetidas";
+  ver(E2, "cuadrado limpio — ninguna repetida",
+      coordenadasRepetidas([0,100,100,0],[0,0,100,100]).length, 0);
+  var rep1 = coordenadasRepetidas([0,100,100,100,0],[0,0,0,100,100]);
+  ver(E2, "punto cargado dos veces seguidas — lo detecta", rep1.length, 1);
+  ver(E2, "y lo reconoce como contiguos (lado de largo cero)", rep1.length ? rep1[0].contiguos : "nada", true);
+  var rep2 = coordenadasRepetidas([0,100,100,0,0],[0,0,100,100,0]);
+  ver(E2, "el último igual al primero también cuenta como contiguo",
+      rep2.length === 1 && rep2[0].a === 1 && rep2[0].b === 5 && rep2[0].contiguos, true);
+  /* figura de ocho: los vértices 3 y 6 son el mismo punto, y no son vecinos */
+  var ochoX = [0,10,5,10,0,5], ochoY = [0,0,5,10,10,5];
+  var rep3 = coordenadasRepetidas(ochoX, ochoY);
+  ver(E2, "no contiguos — lo detecta como polígono que se toca",
+      rep3.length === 1 && rep3[0].a === 3 && rep3[0].b === 6 && !rep3[0].contiguos, true);
+  /* Lo que dice el comentario de coordenadasRepetidas(): el control de lados cruzados NO
+     ve este caso, porque ahí los lados se tocan sin cruzarse. Se prueba en vez de darlo
+     por sentado: si algún día poligonoSimple() lo detectara, el aviso saldría repetido. */
+  ver(E2, "el control de lados cruzados no ve el polígono que se toca", poligonoSimple(ochoX, ochoY), true);
+  /* al milímetro: dos puntos a 2 mm son dos puntos */
+  ver(E2, "a 2 mm de distancia no son repetidos",
+      coordenadasRepetidas([0,100,100.002,0],[0,0,0,100]).length, 0);
+
+  /* y en pantalla: advierte, y la superficie sale igual */
+  var supRep = coords([0,100,100,100,0],[0,0,0,100,100]);
+  var avRep = document.querySelector("#co-res-body .co-repetida");
+  ver(E2, "en pantalla — aparece la advertencia", avRep !== null, true);
+  ver(E2, "y dice que ese lado mide cero", avRep ? /mide cero/.test(avRep.textContent) : false, true);
+  ver(E2, "la superficie no cambia", supRep, 10000, 0.01);
+  coords([0,100,100,0],[0,0,100,100]);
+  ver(E2, "con datos limpios no advierte nada",
+      document.querySelector("#co-res-body .co-repetida"), null);
 
   /* ---------- F · Cuadriláteros ---------- */
   var F = "F · Cuadriláteros";
