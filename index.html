@@ -2971,10 +2971,11 @@ function plVerificar(){
   } else {
     h += "<div class='msg " + (dentroAng ? "info" : "bad grave") + "'>Error de cierre angular: " + segStr(difSeg) +
          " &nbsp;" + (dentroAng ?
-           /* La última oración promete una pregunta que deja de existir en cuanto se toca
-              "sigo calculando": ahí la decisión queda tomada y al calcular ya no se pregunta
-              nada. Va en su propio span para poder retirarla en ese momento, en vez de
-              dejarla en pantalla afirmando algo que dejó de ser cierto. */
+           /* Dentro de tolerancia, igual hay que compensar: sin compensar, el error lo absorbe
+              el ángulo de la fila 1, que no entra en el cálculo lineal, y el resultado
+              depende del vértice de arranque (v18.4). Antes este texto ofrecía dos caminos
+              —compensar o seguir calculando— y este comentario explicaba cómo se retiraba la
+              frase del segundo; el segundo camino ya no existe. */
            "<span class='badge ok'>DENTRO de tolerancia</span><br><span style='font-size:.82rem;'>Hay que <b>compensarlo antes de calcular</b>, con alguno de los tres métodos de abajo. Sin compensar, el resultado dependería del vértice por el que empezaste la carga.</span>" :
            "<span class='badge no'>EXCEDE la tolerancia</span><br><span style='font-size:.82rem;'>Supera la tolerancia de " + gmsStr(Tang / 3600) +
            ". Conviene revisar los ángulos medidos en campo antes de compensar.</span>") +
@@ -3633,9 +3634,10 @@ function plMostrar(){
       "<div><label>Alcance de la compensación</label>" +
       "<label style='" + estRad + "'>" +
       "<input type='radio' name='pl-alc' id='pl-alc-t' checked style='accent-color:var(--marca);'> Total (todos los lados)</label>" +
-      /* dos renglones, como el botón "Está en tolerancia / no compenso y sigo": arriba la
-         instrucción, abajo el consejo en chico. El primer renglón conserva el peso de
-         "Total (todos los lados)" para que los dos rótulos de la fila se lean parejos. */
+      /* dos renglones, como el botón «Corrección manual asistida» del cierre angular: arriba
+         la instrucción, abajo el consejo en chico. El primer renglón conserva el peso de
+         "Total (todos los lados)" para que los dos rótulos de la fila se lean parejos.
+         (Tomaba como modelo el botón «no compenso y sigo», que se sacó en la v18.6.) */
       "<label style='" + estRad.replace("align-items:center", "align-items:flex-start") + "'>" +
       "<input type='radio' name='pl-alc' id='pl-alc-p' style='accent-color:var(--marca); margin-top:2px;'>" +
       "<span style='display:block; line-height:1.3;'>Parcial (elegir los lados a compensar)" +
