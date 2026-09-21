@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "18.5";
-var APP_FECHA = "21/09/2026 15:16";
+var APP_VER   = "18.6";
+var APP_FECHA = "21/09/2026 15:38";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -3642,17 +3642,12 @@ function plMostrar(){
       "<span style='display:block; font-size:.78rem; opacity:.8;'>conviene compensar entre dos o más lados</span>" +
       "</span></label></div>" +
       "<button class='primary' id='pl-compensar'>Compensar</button>" +
-      /* Cuarta opción: no compensar. Solo si el error entra en tolerancia; si la excede,
-         dejarlo así no es una decisión válida y el botón no aparece. */
-      (dentro ? "<button id='pl-no-comp' style='line-height:1.3; text-align:left;'>" +
-        "<span style='display:block; font-size:.9rem; font-weight:700;'>Está en tolerancia</span>" +
-        "<span style='display:block; font-size:.7rem; font-weight:500; opacity:.8; text-align:center;'>no compenso y sigo</span></button>" : "") +
+      /* Hasta la v18.5 había una cuarta opción, «Está en tolerancia, no compenso y sigo».
+         Se sacó a pedido de Alejandro, igual que la del cierre angular: sin compensar, el
+         polígono no cierra, y la superficie depende del vértice por el que se empezó la
+         carga. Ver el comentario de la superficie, más abajo. */
       "<button class='ghost' id='pl-modif'>Modificar lados manualmente…</button>" +
       "</div><div id='pl-lados-box'></div></div>";
-  } else if(D.noComp){
-    h += "<div class='msg good'>No se compensa, <b>por decisión</b>: el error de cierre lineal (" +
-         fmt(errR, 2) + " m) entra en la tolerancia de " + fmt(tolR, 2) + " m.</div>" +
-         "<div class='row no-print'><button id='pl-volver-comp'>Prefiero compensarlo</button></div>";
   } else if(D.comp){
     h += "<div class='msg info'>Coordenadas compensadas por " + D.metodo + ". Lados recalculados a partir de las coordenadas.</div>";
   }
@@ -3660,8 +3655,11 @@ function plMostrar(){
     if(cierraExacto){
       h += "<div class='msg good'>✔ El polígono cierra exacto: no hay error lineal para repartir.</div>";
     } else if(D.error < 0.01){
-      h += "<div class='msg good'>Error de cierre menor a 1 cm. Podés dejarlo así o compensarlo igual, " +
-           "para que las coordenadas cierren exactas.</div>";
+      /* Decía "podés dejarlo así o compensarlo igual". Desde la v18.6 no se puede dejar así:
+         aunque sea menos de 1 cm, con el polígono sin cerrar la superficie depende del
+         vértice de arranque. */
+      h += "<div class='msg good'>Error de cierre menor a 1 cm, pero hay que compensarlo igual para " +
+           "obtener la superficie: aunque sea chico, el polígono no cierra.</div>";
     }
   }
 
@@ -3677,23 +3675,60 @@ function plMostrar(){
           compensado tiene que seguir informando su método, no "cierra exacto". */
        (D.comp ? "<b>" + D.metodo + "</b>." + ((D.met === 2 || D.met === 3) ? " Se compensaron los lados y los ángulos." : "")
         : (cierraExacto ? "<b>SIN COMPENSAR</b> — el polígono cierra exacto: no hubo error lineal que repartir."
-        : (D.noComp ? "<b>SIN COMPENSAR, por decisión</b> — el error de cierre (" + fmt(errR, 2) +
-                      " m) entra en la tolerancia de " + fmt(tolR, 2) + " m."
-                    : "<b>SIN COMPENSAR</b> — la superficie incluye el error de cierre lineal."))) + "</p>";
+                        : "<b>SIN COMPENSAR</b> — la superficie se da después de compensar el error de cierre lineal.")) + "</p>";
 
-  h += "<div class='big-result'>SUPERFICIE= " + fmt(w, 2) + "m² <small>= " + haStr(w) + "</small></div>";
-  /* Los dos métodos coinciden cuando la poligonal cierra; si no cierra, difieren. Como
-     el elegido define la superficie que va al plano, conviene ver qué daría el otro sin
-     ir a buscarlo. Si ya se pidió la comparación completa, no se repite. */
-  var difMetodos = Math.abs(wPlan - wCoord);
-  if(!D.verOtro && difMetodos >= 0.005){
-    h += "<p style='font-size:.82rem; color:var(--ink-soft); margin:6px 0 0;'>Por el método de <b>" +
-         (porCoord ? "planilla de cálculo" : "coordenadas (Gauss)") + "</b> daría <b>" +
-         fmt(porCoord ? wPlan : wCoord, 2) + " m²</b>: difieren en " + fmt(difMetodos, 2) +
-         " m², porque queda un error de cierre de " + fmt(D.error, 2) +
-         " m. Compensando la poligonal, los dos métodos coinciden.</p>";
+  /* ---------- La superficie solo con el polígono cerrado (v18.6) ----------
+     Con el error lineal sin compensar el polígono no cierra, y la superficie se calcula
+     cerrando el hueco con una recta imaginaria entre el último vértice y el primero. Cuál
+     es el "último" depende de por dónde se empezó la carga: el hueco cae en otro lugar y
+     la superficie cambia.
+
+     Medido sobre un cuadrilátero irregular de 9.600 m², con 11 mm de cierre lineal: sin
+     compensar, 9.600,64 / 9.600,09 / 9.599,40 / 9.599,94 m² según el vértice de arranque
+     —1,24 m² de diferencia—. Compensado por Bowditch, 9.600,03 m² desde los cuatro. Y
+     además más cerca de la verdadera, que es 9.600,00.
+
+     Alejandro pidió que empezar por cualquier vértice dé siempre lo mismo. Para el cierre
+     angular se resolvió en la v18.4; esto es lo mismo para el lineal: sin compensar no se
+     da la superficie, ni el croquis —que la lleva escrita adentro—.
+
+     Consecuencia práctica, que conviene tener a la vista: un cierre de campo casi nunca es
+     exactamente cero, así que en un trabajo real casi siempre va a haber que compensar. El
+     umbral es el mismo CIERRA_EXACTO de arriba: no hay un mínimo que se pueda dejar pasar,
+     porque la diferencia es el hueco por el brazo de palanca, y un hueco de 1 mm en un
+     lado de 100 m ya mueve la superficie en décimas de m². */
+  /* La condición es que el polígono CIERRE, no que se haya compensado. Compensar recalcula
+     el cierre y lo deja en ~1e-14, así que un polígono compensado ya cuenta como cerrado.
+     Se había escrito "D.comp || cierraExacto", y la mutación que sacaba el D.comp no rompía
+     ninguna prueba: las dos daban lo mismo. Pero si algún día un método de compensación
+     dejara un residuo, la versión con D.comp mostraría la superficie de un polígono
+     abierto — justo lo que esto viene a evitar. Lo que sostiene la regla es que la
+     compensación cierre, y eso tiene su propia prueba. */
+  var muestraSup = cierraExacto;
+  if(muestraSup){
+    h += "<div class='big-result'>SUPERFICIE= " + fmt(w, 2) + "m² <small>= " + haStr(w) + "</small></div>";
+    /* Los dos métodos coinciden cuando la poligonal cierra; si no cierra, difieren. Como
+       el elegido define la superficie que va al plano, conviene ver qué daría el otro sin
+       ir a buscarlo. Si ya se pidió la comparación completa, no se repite. */
+    var difMetodos = Math.abs(wPlan - wCoord);
+    if(!D.verOtro && difMetodos >= 0.005){
+      h += "<p style='font-size:.82rem; color:var(--ink-soft); margin:6px 0 0;'>Por el método de <b>" +
+           (porCoord ? "planilla de cálculo" : "coordenadas (Gauss)") + "</b> daría <b>" +
+           fmt(porCoord ? wPlan : wCoord, 2) + " m²</b>: difieren en " + fmt(difMetodos, 2) +
+           " m², porque queda un error de cierre de " + fmt(D.error, 2) +
+           " m. Compensando la poligonal, los dos métodos coinciden.</p>";
+    }
+    h += dibujaPlano(X, Y, D.L, w);
+  } else {
+    h += "<div class='msg info' id='pl-sin-superficie'><b>La superficie se da después de compensar.</b> " +
+         (dentro
+           ? "El polígono no cierra por " + fmt(D.error, 2) + " m, dentro de la tolerancia: elegí un método de " +
+             "compensación arriba y tocá «Compensar»."
+           : "El polígono no cierra por " + fmt(D.error, 2) + " m, <b>más que la tolerancia</b>: así no se puede " +
+             "compensar y hay que revisar las mediciones.") +
+         "<br><span style='font-size:.85rem;'>Sin cerrar, la superficie dependería del vértice por el que " +
+         "empezaste la carga: el hueco queda en otro lugar según el arranque, y el número cambia.</span></div>";
   }
-  h += dibujaPlano(X, Y, D.L, w);
 
   /* El aviso de papel va en un recuadro propio porque se RECALCULA: ver plAvisoPapel(). */
   PL_NVERT = D.L.length;
@@ -3948,18 +3983,8 @@ function plMostrar(){
     });
   });
 
-  var bnc = $("pl-no-comp");
-  if(bnc) bnc.addEventListener("click", function(){
-    D.noComp = true;
-    sConfirm();
-    plMostrar();
-  });
-  var bvc = $("pl-volver-comp");
-  if(bvc) bvc.addEventListener("click", function(){
-    D.noComp = false;
-    sConfirm();
-    plMostrar();
-  });
+  /* Acá estaban los manejadores de «no compenso y sigo» y de «Prefiero compensarlo». Se
+     sacaron con el botón (v18.6): D.noComp ya no se prende desde ningún lado. */
 
   var bc = $("pl-compensar");
 
@@ -5796,6 +5821,17 @@ function correrPruebas(){
   ver(J, "sin datos cargados — no pregunta nada", preguntas, 0);
   ver(J, "y no deja marcas", dtImp.classList.contains("sin-encabezado"), false);
 
+  /* Se devuelve el confirm de la corrida —el que contesta que sí—, NO el del navegador:
+     restaurar el original dejaría diálogos de verdad esperando en las pruebas que siguen.
+
+     VA ACÁ, APENAS TERMINA J, y no al final. Hasta la v18.5 estaba al final de toda la
+     batería: J deja el confirm contestando "no" para probar un caso, y los grupos K, L, M
+     y N —agregados después, entre J y esta línea— corrieron contestando "no" a cualquier
+     diálogo. Pasaban de casualidad, porque ninguno se topaba con uno que importara. El N
+     fue el primero: al recalcular un polígono ya compensado el programa pregunta, recibía
+     "no", no recalculaba, y la prueba leía el resultado viejo. */
+  window.confirm = function(){ return true; };
+
   /* ---------- K · El sello del cálculo ----------
      Es lo único que le faltaba al impreso para poder reconstruirse: figura, medidas,
      método, tolerancia, resultado — y CUÁNDO se calculó. La fecha de arriba la escribe el
@@ -5885,12 +5921,16 @@ function correrPruebas(){
       document.getElementById("pl-seguir"), null);
   ver(L, "tampoco calcula arrancando por el vértice del ángulo malo", cierreLineal(), null);
 
-  /* 3 · compensando, vuelve a dar lo mismo desde los cuatro vértices. Se usa un error
-     de 32″, que se reparte parejo en 8″ por ángulo: con un resto, los segundos que sobran
-     van a algunos ángulos y no a otros, y eso sí depende del orden (ver la bitácora). */
+  /* 3 · compensando, vuelve a dar lo mismo desde los cuatro vértices. Se usa un error de
+     30″, que NO se reparte parejo entre 4 ángulos: sobran 2″. Hasta la v18.5 este comentario
+     decía que los segundos sobrantes iban a ángulos distintos según el orden de carga, "ver
+     la bitácora", y usaba 32″ para esquivarlo. Era falso, y la bitácora nunca lo explicó.
+     Medido: repartirEn() agrupa los ángulos por su valor en segundos y recorre esos grupos
+     en orden numérico, así que los sobrantes van siempre a los mismos ángulos, se empiece
+     por donde se empiece. El cierre dio idéntico desde los cuatro vértices. */
   var comp = [];
   for(var q3 = 0; q3 < 4; q3++){
-    cargarDesde(q3, 2, 32);
+    cargarDesde(q3, 2, 30);
     var rt = document.getElementById("pl-rep-todos");
     if(rt) rt.click();
     comp.push(cierreLineal());
@@ -6000,9 +6040,53 @@ function correrPruebas(){
       detectarCorrimiento(Lbien, Abien, 3 * eMin, 1.5 * eMin), null);
   ver(M, "y sí avisa si mejora de verdad",
       detectarCorrimiento(Lbien, Abien, 30 * eMin, 1.5 * eMin) !== null, true);
-  /* se devuelve el confirm de la corrida —el que contesta que sí—, NO el del navegador:
-     restaurar el original acá dejaría diálogos de verdad esperando en las pruebas que siguen */
-  window.confirm = function(){ return true; };
+
+  /* ---------- N · La superficie solo con el polígono cerrado ----------
+     Con el error lineal sin compensar, la superficie se calculaba cerrando el hueco con
+     una recta entre el último vértice y el primero, y cuál es el último depende del
+     arranque. Medido sobre el cuadrilátero irregular de 9.600 m² con 11 mm de cierre:
+     1,24 m² de diferencia según el vértice de arranque. Compensado, idéntica desde los
+     cuatro. Alejandro pidió lo mismo que para el angular: sin compensar no hay superficie. */
+  var N = "N · La superficie solo con el polígono cerrado";
+  function compensarLineal(){
+    var m2 = document.getElementById("pl-met2");
+    if(m2){ m2.checked = true; m2.dispatchEvent(new Event("change", { bubbles:true })); }
+    var bc = document.getElementById("pl-compensar");
+    if(bc) bc.click();
+  }
+
+  /* sin compensar lo lineal: no hay superficie ni croquis, y dice por qué */
+  cargarDesde(0, 2, 30);
+  var rtN = document.getElementById("pl-rep-todos"); if(rtN) rtN.click();
+  cierreLineal();
+  ver(N, "sin compensar lo lineal — no da superficie", sup("pl-res-body"), null);
+  ver(N, "ni el croquis, que la lleva escrita",
+      document.querySelector("#pl-res-body .plano-box"), null);
+  ver(N, "y explica que se da después de compensar",
+      document.getElementById("pl-sin-superficie") !== null, true);
+  ver(N, "ya no existe «no compenso y sigo»", document.getElementById("pl-no-comp"), null);
+
+  /* compensando, aparece — y es la misma desde los cuatro vértices */
+  var supN = [];
+  for(var qn = 0; qn < 4; qn++){
+    cargarDesde(qn, 2, 30);
+    var rtq = document.getElementById("pl-rep-todos"); if(rtq) rtq.click();
+    cierreLineal();
+    compensarLineal();
+    supN.push(sup("pl-res-body"));
+  }
+  /* El invariante que sostiene la regla: la superficie se da cuando el polígono cierra
+     (hasta 1e-9 m), y compensar tiene que dejarlo cerrado. Si un método dejara un residuo,
+     la superficie no aparecería y esta prueba lo diría antes que el usuario. */
+  ver(N, "compensar deja el polígono cerrado",
+      PL.datos ? PL.datos.error <= 1e-9 : false, true);
+  ver(N, "compensado — da la superficie desde los cuatro vértices",
+      supN.every(function(s){ return s !== null; }), true);
+  ver(N, "y es la misma arranque por donde arranque", dispersion(supN) < 0.005, true);
+
+  /* con el polígono cerrado exacto no hay nada que compensar: la superficie sale directa */
+  planillaDe(4, [120,80,120,80], [90,90,90,90]);
+  ver(N, "cierre exacto — da la superficie sin compensar", sup("pl-res-body"), 9600, 0.01);
 
   /* ---------- D2 · Crandall, verificación matemática ----------
      Las pruebas del grupo D comprueban que Crandall cierra. Eso lo cumple también un
