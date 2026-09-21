@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "18.3";
-var APP_FECHA = "10/09/2026 20:20";
+var APP_VER   = "18.4";
+var APP_FECHA = "21/09/2026 12:44";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -793,7 +793,17 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
          9654,42- porque la figura no cierra y la superficie de un poligono abierto depende
          de donde se arranque. Empezar por la izquierda es convencion para que las letras
          del croquis coincidan con las del dibujo, no un requisito de calculo. -->
-    <div class="msg info no-print" style="margin:8px 0 4px;">La carga debe iniciarse en el <b>vértice más a la izquierda del lado seleccionado</b> y continuar recorriendo el <b>polígono interior</b> en <b>sentido horario</b>.</div>
+    <!-- Redacción de Alejandro. La anterior decía "el vértice más a la izquierda del lado
+         seleccionado", y eso solo es cierto si el lado está ARRIBA en el croquis: en sentido
+         horario el lado de abajo se camina de derecha a izquierda, así que su vértice
+         izquierdo es donde TERMINA. Cargado así, cada ángulo queda corrido una fila; la suma
+         sigue dando 360° y el cierre angular no se entera, pero el lineal sí. Lo encontró él
+         con un lote real: 39,85 m de error arrancando por la izquierda del frente, cero por
+         la derecha. Reproducido con un lote de 20 × 40 m: 4,44 m contra 0,00 m.
+         Y en un lado vertical "el vértice más a la izquierda" ni siquiera existe.
+         "Con el interior del terreno a la derecha" vale para cualquier lado, esté donde esté
+         y tenga la inclinación que tenga. -->
+    <div class="msg info no-print" style="margin:8px 0 4px;">La carga debe iniciarse en el <b>vértice donde comienza el lado seleccionado</b>, recorriendo el polígono en <b>sentido horario</b>, <b>con el interior del terreno siempre a la derecha</b>.</div>
 <div id="pl-tabla-box"></div>
     <!-- role="alert" y no aria-live="polite": acá caen los datos mal cargados y el cierre
          angular fuera de tolerancia, que son cosas que hay que corregir antes de seguir.
@@ -2965,7 +2975,7 @@ function plVerificar(){
               "sigo calculando": ahí la decisión queda tomada y al calcular ya no se pregunta
               nada. Va en su propio span para poder retirarla en ese momento, en vez de
               dejarla en pantalla afirmando algo que dejó de ser cierto. */
-           "<span class='badge ok'>DENTRO de tolerancia</span><br><span style='font-size:.82rem;'>tenés dos caminos: <b>compensarlo</b> por alguno de los tres métodos de abajo, o —como está dentro de tolerancia— <b>seguir calculando</b> con ese error.<span id='pl-aviso-pregunta'> Al tocar «Calcular superficie» el programa te lo va a preguntar.</span></span>" :
+           "<span class='badge ok'>DENTRO de tolerancia</span><br><span style='font-size:.82rem;'>Hay que <b>compensarlo antes de calcular</b>, con alguno de los tres métodos de abajo. Sin compensar, el resultado dependería del vértice por el que empezaste la carga.</span>" :
            "<span class='badge no'>EXCEDE la tolerancia</span><br><span style='font-size:.82rem;'>Supera la tolerancia de " + gmsStr(Tang / 3600) +
            ". Conviene revisar los ángulos medidos en campo antes de compensar.</span>") +
          (dentroAng ? "" :
@@ -3006,9 +3016,9 @@ function plVerificar(){
          "<button id='pl-rep-corto' style='line-height:1.3; text-align:left;'>" +
            "<span style='display:block; font-size:.9rem; font-weight:700;'>Corrección manual asistida</span>" +
            "<span style='display:block; font-size:.7rem; font-weight:500; opacity:.8; text-align:center;'>Compensar el lado más corto</span></button>" +
-         (dentroAng ? "<button id='pl-seguir' style='line-height:1.3; text-align:left;'>" +
-           "<span style='display:block; font-size:.9rem; font-weight:700;'>Como está en tolerancia</span>" +
-           "<span style='display:block; font-size:.7rem; font-weight:500; opacity:.8; text-align:center;'>sigo calculando</span></button>" : "") +
+         /* Hasta la v18.3 había un cuarto botón, «Como está en tolerancia, sigo calculando».
+            Se sacó a pedido de Alejandro: con el error angular sin compensar, el resultado
+            depende del vértice por el que se empezó la carga. Ver el comentario del cálculo. */
          "</div><div id='pl-elegir-box'></div>";
     /* dentro de tolerancia es una situación normal: alcanza un aviso suave.
        Si la excede, hay que volver a los ángulos medidos, y eso se marca. */
@@ -3081,22 +3091,6 @@ function plVerificar(){
       repartirEn(sel);
       PL.angMetodo = "repartiendo entre los vértices elegidos";
     });
-  });
-
-  /* Cuarta opción: no compensar. Solo existe dentro de tolerancia, deja constancia
-     de la decisión y abre el paso 2 para cargar el azimut inicial. */
-  var bs = $("pl-seguir");
-  if(bs) bs.addEventListener("click", function(){
-    PL.sinCompensar = true;
-    PL.angMetodo = null;
-    /* la decisión ya está tomada: al calcular no se vuelve a preguntar, así que la frase
-       que lo prometía se retira en vez de quedar contradiciendo lo que va a pasar */
-    var avp = $("pl-aviso-pregunta");
-    if(avp && avp.parentNode) avp.parentNode.removeChild(avp);
-    $("pl-elegir-box").innerHTML = "<div class='msg info'>Se calcula con el error de " + segStr(difSeg) +
-      ", sin compensar. Cargá el azimut inicial en el paso 2 y tocá «Calcular superficie».</div>";
-    sConfirm();
-    plHabilitarPaso2();
   });
 
   var bc = $("pl-rep-corto");
@@ -3214,19 +3208,32 @@ $("pl-calcular").addEventListener("click", function(){
         "(" + segStr(difAng) + " contra " + gmsStr(TCal / 3600) + "): revisá los ángulos en el paso 1 antes de calcular.</div>";
       return;
     }
-    /* Dentro de tolerancia el trabajo es válido y la decisión es del profesional:
-       se puede compensar primero o calcular así. Se avisa qué implica y decide él. */
-    /* Si ya eligió seguir en el paso 1, no se le pregunta de nuevo */
-    if(PL.sinCompensar){ /* decidido */ }
-    else {
+    /* Dentro de tolerancia TAMPOCO se calcula sin compensar. Hasta la v18.3 se podía, como
+       decisión del profesional, y el aviso decía que el error "se arrastra a los azimuts".
+       Eso era falso en un caso, y el caso es grave.
+
+       La propagación de azimuts de abajo usa los ángulos de la fila 2 en adelante: el de la
+       fila 1 no entra en el cálculo lineal, solo en la suma del cierre angular. Con los
+       ángulos compensados da igual —suman exacto y el de la fila 1 queda determinado por
+       los otros—. Sin compensar, el error lo absorbe el ángulo que no se usa, y cuál es
+       depende del vértice por el que se empezó la carga.
+
+       Alejandro lo encontró así: el mismo cuadrilátero, cargado desde el vértice de la
+       izquierda, excedía la tolerancia lineal; cargado desde el de la derecha, cerraba
+       perfecto. Reproducido con un cuadrilátero y un pentágono irregulares y un solo ángulo
+       errado en 30″: desde el vértice del ángulo malo el cierre daba 0,0001 m, y desde los
+       demás entre 0,011 y 0,023 m. El cierre angular daba 30″ en todos. EL RESULTADO
+       PERFECTO ERA EL QUE MENTÍA: escondía el ángulo mal medido.
+
+       Es la misma clase de defecto que el de Crandall del 6 de septiembre: un cierre que
+       sale bien sin que el trabajo esté bien. Por eso no se deja pasar. */
     sError();
-    if(!confirm("El cierre angular tiene un error de " + segStr(difAng) + ", que entra en la tolerancia de " +
-                gmsStr(TCal / 3600) + ", pero todavía no se compensó.\n\n" +
-                "Si calculás así, ese error se arrastra a los azimuts y se suma al error de cierre lineal, " +
-                "de modo que el veredicto del Art. 42 va a mezclar las dos cosas.\n\n" +
-                "Cancelá para compensarlo primero en el paso 1, o seguí si preferís ver el cálculo sin compensar.\n\n" +
-                "¿Calcular igual?")) return;
-    }
+    $("pl-cierre-ang").innerHTML = "<div class='msg bad'>Hay un error de cierre angular de <b>" +
+      segStr(difAng) + "</b> sin compensar. <b>Compensalo en el paso 1 antes de calcular.</b><br>" +
+      "<span style='font-size:.85rem;'>Sin compensar, el resultado depende del vértice por el que " +
+      "empezaste la carga: el error lo absorbe el ángulo de la primera fila, que no entra en el " +
+      "cálculo lineal, y el cierre puede salir perfecto con un ángulo mal medido.</span></div>";
+    return;
   }
   var azg = num($("pl-az-g").value) || 0, azm = num($("pl-az-m").value) || 0, azs = num($("pl-az-s").value) || 0;
   if(!validGms(azg, azm, azs)){ sError(); alert("El azimut inicial no corresponde: g ≤ 360, m < 60, s < 60."); return; }
@@ -5745,6 +5752,102 @@ function correrPruebas(){
   tri("1");
   ver(K, "triángulos también sella", SELLO_CALCULO !== "" && SELLO_CALCULO !== "0", true);
   SELLO_CALCULO = selloPlanilla;
+
+  /* ---------- L · El vértice de arranque no cambia el resultado ----------
+     Lo encontró Alejandro: el mismo cuadrilátero, cargado desde el vértice de la izquierda,
+     excedía la tolerancia lineal; desde el de la derecha, cerraba perfecto. La causa: la
+     propagación de azimuts usa los ángulos de la fila 2 en adelante, así que con el error
+     angular SIN COMPENSAR el error lo absorbe el ángulo de la fila 1, y cuál es depende de
+     por dónde se empezó. Desde el vértice del ángulo malo, el cierre salía perfecto y
+     escondía la mala medición.
+     Se usa un cuadrilátero IRREGULAR a propósito: un rectángulo cierra bien aunque haya
+     errores, y esta prueba no mordería. */
+  var L = "L · El vértice de arranque no cambia el resultado";
+  var PQ = [[0,0],[0,100],[80,120],[100,10]];   /* horario; x = este, y = norte */
+  function qDist(a,b){ return Math.hypot(b[0]-a[0], b[1]-a[1]); }
+  function qAzim(a,b){ var z = Math.atan2(b[0]-a[0], b[1]-a[1])*180/Math.PI; return (z+360)%360; }
+  function qInterior(i){
+    var n = PQ.length, p = PQ[(i-1+n)%n], c = PQ[i], q = PQ[(i+1)%n];
+    var ax=p[0]-c[0], ay=p[1]-c[1], bx=q[0]-c[0], by=q[1]-c[1];
+    return Math.acos((ax*bx+ay*by)/(Math.hypot(ax,ay)*Math.hypot(bx,by)))*180/Math.PI;
+  }
+  function qGms(d){ var g=Math.floor(d), r=(d-g)*60, m=Math.floor(r), s=(r-m)*60; return [g,m,+s.toFixed(4)]; }
+  /* carga el cuadrilátero empezando por el vértice 'desde'; el vértice 'malo' recibe
+     'errSeg' segundos de más en su ángulo */
+  function cargarDesde(desde, malo, errSeg){
+    var n = PQ.length;
+    tab(/Planilla/);
+    document.getElementById("pl-n").value = String(n);
+    document.getElementById("pl-generar").click();
+    for(var j = 0; j < n; j++){
+      var v = (desde + j) % n, t = qGms(qInterior(v) + (v === malo ? errSeg/3600 : 0));
+      document.getElementById("pl-l"+(j+1)).value = qDist(PQ[v], PQ[(v+1)%n]).toFixed(4);
+      document.getElementById("pl-g"+(j+1)).value = t[0];
+      document.getElementById("pl-m"+(j+1)).value = t[1];
+      document.getElementById("pl-s"+(j+1)).value = t[2];
+    }
+    document.getElementById("pl-verificar").click();
+    var z = qGms(qAzim(PQ[desde], PQ[(desde+1)%n]));
+    document.getElementById("pl-az-g").value = z[0];
+    document.getElementById("pl-az-m").value = z[1];
+    document.getElementById("pl-az-s").value = z[2];
+  }
+  /* devuelve el error de cierre lineal, o null si el programa se negó a calcular */
+  function cierreLineal(){
+    PL.datos = null;
+    document.getElementById("pl-calcular").click();
+    return PL.datos ? PL.datos.error : null;
+  }
+  function dispersion(a){ return Math.max.apply(null, a) - Math.min.apply(null, a); }
+
+  /* 1 · sin error angular, da lo mismo por dónde se empiece */
+  var cierres = [];
+  for(var q1 = 0; q1 < 4; q1++){ cargarDesde(q1, -1, 0); cierres.push(cierreLineal()); }
+  ver(L, "sin error angular — calcula desde los cuatro vértices",
+      cierres.every(function(c){ return c !== null; }), true);
+  ver(L, "y el cierre es el mismo arranque por donde arranque", dispersion(cierres) < 1e-5, true);
+
+  /* 2 · con un ángulo errado sin compensar, no calcula — de ningún lado */
+  cargarDesde(0, 2, 30);
+  ver(L, "error angular sin compensar — no calcula", cierreLineal(), null);
+  ver(L, "y dice que hay que compensar primero",
+      /Compensalo en el paso 1/.test(document.getElementById("pl-cierre-ang").textContent), true);
+  /* el caso exacto del defecto: desde el vértice del ángulo malo antes salía perfecto */
+  cargarDesde(2, 2, 30);
+  /* El botón se mira ACÁ, recién verificado y antes de calcular: al calcular, el aviso
+     reemplaza todo el recuadro y el botón desaparece igual. Mirándolo después, esta prueba
+     pasaba aunque el botón hubiera vuelto — lo detectó la mutación que lo reponía. */
+  ver(L, "ya no existe «sigo calculando» sin compensar",
+      document.getElementById("pl-seguir"), null);
+  ver(L, "tampoco calcula arrancando por el vértice del ángulo malo", cierreLineal(), null);
+
+  /* 3 · compensando, vuelve a dar lo mismo desde los cuatro vértices. Se usa un error
+     de 32″, que se reparte parejo en 8″ por ángulo: con un resto, los segundos que sobran
+     van a algunos ángulos y no a otros, y eso sí depende del orden (ver la bitácora). */
+  var comp = [];
+  for(var q3 = 0; q3 < 4; q3++){
+    cargarDesde(q3, 2, 32);
+    var rt = document.getElementById("pl-rep-todos");
+    if(rt) rt.click();
+    comp.push(cierreLineal());
+  }
+  ver(L, "compensado — calcula desde los cuatro vértices",
+      comp.every(function(c){ return c !== null; }), true);
+  ver(L, "y el cierre es el mismo desde los cuatro", dispersion(comp) < 1e-5, true);
+
+  /* La nota de carga. Decía "el vértice más a la izquierda del lado seleccionado", que solo
+     es cierto si el lado está arriba: el de abajo, en sentido horario, se camina de derecha
+     a izquierda. Arrancando por su izquierda los ángulos quedan corridos una fila, la suma
+     sigue en 360° y el cierre angular no lo ve. Esto fija la redacción de Alejandro, que
+     vale para cualquier lado, y que la frase vieja no vuelva. */
+  var notaCarga = (document.querySelector("#panel-planilla .msg.info") || {}).textContent || "";
+  notaCarga = notaCarga.replace(/\s+/g, " ");
+  ver(L, "la nota pide el vértice donde COMIENZA el lado",
+      /vértice donde comienza el lado seleccionado/.test(notaCarga), true);
+  ver(L, "y el interior del terreno a la derecha",
+      /interior del terreno siempre a la derecha/.test(notaCarga), true);
+  ver(L, "y ya no dice «el más a la izquierda», que falla con el lado abajo",
+      /más a la izquierda/.test(notaCarga), false);
   /* se devuelve el confirm de la corrida —el que contesta que sí—, NO el del navegador:
      restaurar el original acá dejaría diálogos de verdad esperando en las pruebas que siguen */
   window.confirm = function(){ return true; };
