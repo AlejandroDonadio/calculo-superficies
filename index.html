@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "18.4";
-var APP_FECHA = "21/09/2026 12:44";
+var APP_VER   = "18.5";
+var APP_FECHA = "21/09/2026 15:16";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -3146,6 +3146,48 @@ function plPerimetro(){
   return lt;
 }
 
+/* =====================================================================
+   DETECCIÓN DE ÁNGULOS CORRIDOS UNA FILA
+
+   Alejandro cargó un lote con el frente abajo arrancando por su vértice izquierdo y le dio
+   39,85 m de error; arrancando por el derecho, cero. En sentido horario el lado de abajo
+   se camina de derecha a izquierda, así que su vértice izquierdo es donde TERMINA: cada
+   ángulo había quedado en la fila del lado que termina en él, no del que empieza. Corridos
+   una fila.
+
+   La suma de los ángulos no se entera —son los mismos valores— y el cierre angular da
+   perfecto. Solo el lineal lo delata, con un número enorme y sin decir por qué. Esta
+   función es la que dice por qué: si con el cierre fuera de tolerancia alguno de los dos
+   corrimientos posibles cierra, casi seguro fue eso.
+
+   Condiciones para avisar, las dos: que el corrimiento entre en tolerancia, y que mejore
+   el cierre por lo menos diez veces. La segunda evita falsos avisos donde correr los
+   ángulos no cambia nada —un rectángulo, con los cuatro ángulos iguales— o donde el error
+   es otro —un lado mal medido no se arregla corriendo ángulos—.
+
+   k = +1: el ángulo de cada fila baja una fila. Arregla el error típico: haber cargado el
+            ángulo del vértice donde el lado TERMINA.
+   k = −1: el ángulo de cada fila sube una fila. */
+function cierreConAngulos(L, A){
+  var n = L.length, Z = [0], ex = 0, ey = 0, i;
+  for(i = 0; i < n - 1; i++) Z.push(norm360(Z[i] + 180 - A[i + 1]));
+  for(i = 0; i < n; i++){ ex += L[i] * Math.cos(rad(Z[i])); ey += L[i] * Math.sin(rad(Z[i])); }
+  return Math.sqrt(ex*ex + ey*ey);   /* el cierre no depende del azimut inicial: se usa 0 */
+}
+function detectarCorrimiento(L, A, error, tol){
+  if(!(error >= tol)) return null;          /* si cierra en tolerancia no hay nada que buscar */
+  var n = A.length, mejor = null;
+  [1, -1].forEach(function(k){
+    var As = [], j;
+    for(j = 0; j < n; j++) As.push(A[(j - k + n) % n]);
+    var e2 = cierreConAngulos(L, As);
+    /* 'original' se guarda acá porque compensar después deja el cierre en cero, y el aviso
+       tiene que seguir mostrando cuánto daba con los datos como se cargaron */
+    if(e2 < tol && e2 * 10 < error && (!mejor || e2 < mejor.error)) mejor = { k:k, error:e2, original:error };
+  });
+  return mejor;
+}
+
 function plTolPrevia(){
   var el = $("pl-tol-previa");
   if(!el) return;
@@ -3257,6 +3299,10 @@ $("pl-calcular").addEventListener("click", function(){
   var tol = TOL[$("pl-mensura").value](lt);
   var dentro = error < tol;   /* Art. 42: E debe ser MENOR que T, sin redondear */
 
+  /* Se guarda en PL y no en PL.datos: compensar reemplaza PL.datos y deja el cierre en cero,
+     y el aviso tiene que seguir a la vista — compensar un error de carga no lo arregla, lo
+     esconde. Se recalcula en cada cálculo, así que corregir los datos lo hace desaparecer. */
+  PL.corrimiento = detectarCorrimiento(d.L, d.A, error, tol);
   PL.datos = { L:d.L, Z:Z, x:x, y:y, ex:ex, ey:ey, error:error, tol:tol, lt:lt, comp:false,
                difAng: difAng, tolAng: TCal, angMetodo: PL.angMetodo || null, mcalc: ($("pl-metcalc2") && $("pl-metcalc2").checked) ? 2 : 1 };
   plMostrar();
@@ -3652,6 +3698,24 @@ function plMostrar(){
   /* El aviso de papel va en un recuadro propio porque se RECALCULA: ver plAvisoPapel(). */
   PL_NVERT = D.L.length;
   h = "<div id='pl-aviso-papel'></div>" + h;
+
+  /* Va primero, antes que el aviso de papel: dice que los DATOS están mal cargados, y eso
+     pesa más que cuántas hojas ocupa el resultado. No se imprime: es una instrucción para
+     corregir la carga; el veredicto de que el cierre excede la tolerancia ya sale en papel. */
+  if(PL.corrimiento){
+    var cr = PL.corrimiento;
+    h = "<div class='msg bad no-print' id='pl-corrimiento'><b>Los ángulos parecen estar corridos una fila.</b> " +
+        "Con cada ángulo una fila más " + (cr.k === 1 ? "abajo" : "arriba") + ", el polígono cierra con " +
+        "un error de <b>" + fmt(cr.error, 2) + " m</b>, contra los " + fmt(cr.original, 2) + " m con que se cargó.<br>" +
+        "<span style='font-size:.85rem;'>" +
+        (cr.k === 1
+          ? "Lo más probable es que en cada fila se haya cargado el ángulo del vértice donde el lado " +
+            "<b>termina</b>. Pasa, por ejemplo, al arrancar un frente de abajo por su vértice izquierdo: " +
+            "en sentido horario ese lado se camina de derecha a izquierda, y el izquierdo es donde termina. "
+          : "En cada fila parece haberse cargado el ángulo que correspondía a la fila de abajo. ") +
+        "Revisá que el ángulo de cada fila sea el del vértice donde <b>comienza</b> ese lado, " +
+        "recorriendo con el interior del terreno a la derecha.</span></div>" + h;
+  }
 
   $("pl-resultados").style.display = "block";
   $("pl-res-body").innerHTML = h;
@@ -5848,6 +5912,94 @@ function correrPruebas(){
       /interior del terreno siempre a la derecha/.test(notaCarga), true);
   ver(L, "y ya no dice «el más a la izquierda», que falla con el lado abajo",
       /más a la izquierda/.test(notaCarga), false);
+
+  /* ---------- M · Ángulos corridos una fila ----------
+     El caso de Alejandro: frente abajo, arrancado por su vértice izquierdo, que en sentido
+     horario es donde el frente TERMINA. Cada ángulo queda en la fila del lado que termina en
+     él. La suma sigue en 360°, el cierre angular da perfecto, y el lineal da un número enorme
+     sin decir por qué. El programa ahora prueba los dos corrimientos y, si uno cierra, avisa.
+     Tan importante como detectarlo es NO inventar el diagnóstico: un lado mal medido o un
+     rectángulo no tienen que disparar el aviso. */
+  var M = "M · Ángulos corridos una fila";
+  var LV = { AI:[0,0], ArI:[2,40], ArD:[22,38], AD:[20,0] };   /* lote irregular, frente abajo */
+  var LO = ["AI","ArI","ArD","AD"];                            /* sentido horario */
+  function lSig(k){ return LO[(LO.indexOf(k)+1)%4]; }
+  function lAnt(k){ return LO[(LO.indexOf(k)+3)%4]; }
+  function lDist(a,b){ return Math.hypot(LV[b][0]-LV[a][0], LV[b][1]-LV[a][1]); }
+  function lInt(k){
+    var p=LV[lAnt(k)], c=LV[k], q=LV[lSig(k)];
+    var ax=p[0]-c[0], ay=p[1]-c[1], bx=q[0]-c[0], by=q[1]-c[1];
+    return Math.acos((ax*bx+ay*by)/(Math.hypot(ax,ay)*Math.hypot(bx,by)))*180/Math.PI;
+  }
+  /* filas: [desde, hasta, vértice cuyo ángulo va en esa fila]; 'extra' se suma al lado 1 */
+  function cargarFilas(filas, extra){
+    tab(/Planilla/);
+    document.getElementById("pl-n").value = String(filas.length);
+    document.getElementById("pl-generar").click();
+    for(var j = 0; j < filas.length; j++){
+      var f = filas[j], t = qGms(lInt(f[2]));
+      document.getElementById("pl-l"+(j+1)).value = (lDist(f[0],f[1]) + (j === 0 ? (extra || 0) : 0)).toFixed(4);
+      document.getElementById("pl-g"+(j+1)).value = t[0];
+      document.getElementById("pl-m"+(j+1)).value = t[1];
+      document.getElementById("pl-s"+(j+1)).value = t[2];
+    }
+    document.getElementById("pl-verificar").click();
+    document.getElementById("pl-az-g").value = 270;
+    document.getElementById("pl-az-m").value = 0;
+    document.getElementById("pl-az-s").value = 0;
+    PL.datos = null;
+    document.getElementById("pl-calcular").click();
+    return PL.corrimiento;
+  }
+  /* bien: cada ángulo con el lado que EMPIEZA en él, frente desde su vértice derecho */
+  var FILAS_BIEN     = [["AD","AI","AD"], ["AI","ArI","AI"], ["ArI","ArD","ArI"], ["ArD","AD","ArD"]];
+  /* el caso de Alejandro: cada ángulo con el lado que TERMINA en él */
+  var FILAS_TERMINA  = [["AD","AI","AI"], ["AI","ArI","ArI"], ["ArI","ArD","ArD"], ["ArD","AD","AD"]];
+  /* corridos al revés: cada ángulo con el lado siguiente al que le corresponde */
+  var FILAS_ANTERIOR = [["AD","AI","ArD"], ["AI","ArI","AD"], ["ArI","ArD","AI"], ["ArD","AD","ArI"]];
+
+  ver(M, "carga correcta — no avisa nada", cargarFilas(FILAS_BIEN, 0), null);
+  ver(M, "y no aparece el cartel", document.getElementById("pl-corrimiento"), null);
+
+  var cMas = cargarFilas(FILAS_TERMINA, 0);
+  ver(M, "ángulos del vértice donde el lado termina — lo detecta", cMas !== null, true);
+  ver(M, "y sabe para qué lado están corridos", cMas ? cMas.k : "nada", 1);
+  ver(M, "corriéndolos, el polígono cierra", cMas ? cMas.error < 0.01 : false, true);
+  var cartelCorr = document.getElementById("pl-corrimiento");
+  ver(M, "el cartel aparece", cartelCorr !== null, true);
+  ver(M, "y nombra la causa: el vértice donde el lado termina",
+      cartelCorr ? /termina/.test(cartelCorr.textContent) : false, true);
+  ver(M, "el cartel no se imprime", cartelCorr ? cartelCorr.classList.contains("no-print") : false, true);
+
+  var cMenos = cargarFilas(FILAS_ANTERIOR, 0);
+  ver(M, "corridos para el otro lado — también lo detecta", cMenos ? cMenos.k : "nada", -1);
+
+  /* sin falsos avisos */
+  ver(M, "un lado mal medido — no lo confunde con ángulos corridos", cargarFilas(FILAS_BIEN, 3), null);
+  planillaDe(4, [123,80,120,80], [90,90,90,90]);
+  ver(M, "rectángulo con un lado mal — no avisa (correr ángulos iguales no cambia nada)",
+      PL.corrimiento, null);
+
+  /* corregida la carga, el aviso se va solo */
+  cargarFilas(FILAS_TERMINA, 0);
+  cargarFilas(FILAS_BIEN, 0);
+  ver(M, "corregida la carga, el aviso desaparece", document.getElementById("pl-corrimiento"), null);
+
+  /* La condición de "mejorar por lo menos diez veces" es la que evita el falso aviso fino:
+     un error apenas arriba de la tolerancia y un corrimiento que apenas la baja. Con lotes
+     reales es difícil de fabricar, así que se prueba la función directo, con los números
+     armados para ese borde: el corrimiento entra en tolerancia (1,5 veces su propio cierre)
+     pero mejora solo tres veces. Sin esta prueba, sacar esa condición no rompía nada — lo
+     mostró la mutación que la borraba. */
+  var Lbien = FILAS_BIEN.map(function(f){ return lDist(f[0], f[1]); });
+  var Abien = FILAS_BIEN.map(function(f){ return lInt(f[2]); });
+  var eMin = Math.min(
+    cierreConAngulos(Lbien, [Abien[3], Abien[0], Abien[1], Abien[2]]),
+    cierreConAngulos(Lbien, [Abien[1], Abien[2], Abien[3], Abien[0]]));
+  ver(M, "no avisa si el corrimiento mejora poco, aunque entre en tolerancia",
+      detectarCorrimiento(Lbien, Abien, 3 * eMin, 1.5 * eMin), null);
+  ver(M, "y sí avisa si mejora de verdad",
+      detectarCorrimiento(Lbien, Abien, 30 * eMin, 1.5 * eMin) !== null, true);
   /* se devuelve el confirm de la corrida —el que contesta que sí—, NO el del navegador:
      restaurar el original acá dejaría diálogos de verdad esperando en las pruebas que siguen */
   window.confirm = function(){ return true; };
