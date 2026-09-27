@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "18.9";
-var APP_FECHA = "27/09/2026 14:09";
+var APP_VER   = "19.0";
+var APP_FECHA = "27/09/2026 17:45";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -3403,7 +3403,19 @@ $("pl-calcular").addEventListener("click", function(){
     return;
   }
   $("pl-aviso-carga").innerHTML = "";
+  /* El cierre OBSERVADO y su tolerancia quedan guardados aparte y no se tocan nunca más.
+     Compensar reescribe D.error con el residuo del ajuste (~0), y hasta la v18.9 el cuadro
+     de control mostraba ese residuo: un trabajo con 0,58 m de cierre y 0,21 m de tolerancia
+     pasaba a decir "0,00 m — DENTRO" después de compensar. El número no era falso, pero el
+     Art. 42 juzga el cierre OBSERVADO, no el residuo, y del papel desaparecía la prueba de
+     cómo se midió en campo.
+
+     Se guarda también ltObs, el perímetro observado: la tolerancia se calcula sobre el
+     perímetro, y compensar le cambia las longitudes a los lados. Sin ltObs, al cambiar
+     el tipo de mensura de un polígono ya compensado la tolerancia del cierre observado
+     saldría calculada sobre el perímetro ajustado. */
   PL.datos = { L:d.L, Z:Z, x:x, y:y, ex:ex, ey:ey, error:error, tol:tol, lt:lt, comp:false,
+               errObs: error, tolObs: tol, ltObs: lt,
                difAng: difAng, tolAng: TCal, angMetodo: PL.angMetodo || null, mcalc: ($("pl-metcalc2") && $("pl-metcalc2").checked) ? 2 : 1 };
   plMostrar();
   /* mismo aviso grave que cuando se excede el cierre angular: el error lineal
@@ -3436,7 +3448,11 @@ function plMostrar(){
   var w = shoelace(X, Y);
   /* Art. 42: "E debe ser menor que la tolerancia T respectiva". El veredicto se decide
      con los valores exactos; el redondeo es solo de presentación. */
-  var errR = D.error, tolR = D.tol;
+  /* El veredicto del Art. 42 se da sobre el cierre OBSERVADO, no sobre el residuo que deja
+     la compensación. Ver el comentario de errObs en el cálculo. Los trabajos guardados con
+     versiones anteriores no traen errObs: para ellos vale el que hay. */
+  var errR = (D.errObs !== undefined) ? D.errObs : D.error;
+  var tolR = (D.tolObs !== undefined) ? D.tolObs : D.tol;
   var dentro = errR < tolR;
   /* Si se cambió el tipo de mensura y el error dejó de entrar en tolerancia, la
      decisión de no compensar caduca: deja de ser una opción válida, y sostenerla
@@ -3486,7 +3502,15 @@ function plMostrar(){
        "<td class='lbl'>Error Angular</td><td>" + segStr(D.difAng || 0) + "</td>" +
        "<td class='lbl'>Tolerancia Angular</td><td>" + gmsStr((D.tolAng || 0) / 3600) + "</td>" +
        "<td class='lbl'>Cierre angular</td><td colspan='3'>" + dtCierreAngular(D) + "</td>" +
-       "</tr></tbody></table>";
+       "</tr>" +
+       /* Compensado, el residuo va aparte y con su nombre. Antes ocupaba el lugar del
+          cierre observado, y el veredicto pasaba a hablar de él. */
+       (D.comp
+         ? "<tr><td class='lbl'>Residuo tras compensar</td><td>" + fmt(D.error, 2) + " m</td>" +
+           "<td class='lbl' colspan='6'>El cierre de arriba es el <b>observado</b>, el que mide el trabajo de campo " +
+           "y sobre el que se aplica el Art. 42. Éste es lo que queda después del ajuste.</td></tr>"
+         : "") +
+       "</tbody></table>";
 
   /* Qué es cada número del cuadro de control. Va acá y no en la ayuda porque es donde se
      leen las cifras, y porque esta parte sale impresa: en el papel no hay ayuda a la que ir. */
@@ -3644,7 +3668,20 @@ function plMostrar(){
        "<select id='pl-mensura-res' style='font-family:inherit; font-size:.95rem; padding:7px; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink);'>" +
        $("pl-mensura").innerHTML + "</select></div></div>";
 
-  if(!D.comp && !cierraExacto && !D.noComp){
+  /* ---------- Fuera de tolerancia no se compensa (v19.0) ----------
+     Del lado angular el programa ya lo hacía: si el cierre excede, manda a revisar los
+     ángulos medidos y no deja calcular. Del lado lineal dejaba compensar, y el resultado
+     era el peor posible: un trabajo con 0,58 m de cierre y 0,21 m de tolerancia terminaba
+     impreso como "0,00 m — DENTRO". Compensar convertía un trabajo rechazado en un
+     documento que decía que cumplía.
+     Un cierre fuera de tolerancia se vuelve a medir; no se reparte. */
+  if(!D.comp && !cierraExacto && !dentro){
+    h += "<div class='msg bad grave no-print'><b>El cierre lineal excede la tolerancia: no corresponde compensar.</b><br>" +
+         "<span style='font-size:.9rem;'>El error observado es de " + fmt(errR, 2) + " m contra una tolerancia de " +
+         fmt(tolR, 2) + " m. Repartirlo entre los lados no lo arregla: lo esconde, y la hoja diría que el trabajo " +
+         "cumple. Hay que <b>revisar las mediciones</b> de campo. Si el tipo de mensura no es el que corresponde, " +
+         "cambialo acá arriba y la tolerancia se recalcula.</span></div>";
+  } else if(!D.comp && !cierraExacto && !D.noComp){
     var estRad = "display:inline-flex; align-items:center; gap:6px; margin:2px 18px 0 0; font-size:.92rem; color:var(--ink); cursor:pointer;";
     h += "<div class='no-print' id='pl-metodo-box'>" +
       "<div class='ayuda-comp'>" +
@@ -3703,7 +3740,7 @@ function plMostrar(){
            · En los PROPORCIONALES (2 y 3) no hace falta ninguno. Corrigen Δx y Δy por
              separado, así que la corrección es un vector libre. Con un solo lado el factor
              L/ΣL vale 1 y ese lado absorbe el error entero: el cierre da cero exacto.
-             Medido sobre el ejemplo, marcando solo el lado 1–2: 0,58 m -> 0,00.
+             Medido sobre el ejemplo, marcando solo el lado 1–2: 0,10 m -> 0,00.
 
          El costo va junto al caso donde ocurre, que es el único lugar donde sirve saberlo:
          a ese lado le cambian la longitud Y el azimut, y se queda con toda la corrección.
@@ -3927,6 +3964,11 @@ function plMostrar(){
       $("pl-mensura").value = selR.value;      /* queda sincronizado con el paso 2 */
       plTolPrevia();                           /* y la tolerancia previa, con él */
       D.tol = TOL[selR.value](D.lt);
+      /* La del cierre observado también: es la que da el veredicto del Art. 42 y la que
+         sale impresa. Si no se actualizaba, cambiar el tipo de mensura movía el número de
+         la tolerancia en pantalla pero el DENTRO/EXCEDE seguía decidido con la anterior.
+         Va sobre el perímetro observado, no sobre el compensado. */
+      D.tolObs = TOL[selR.value](D.ltObs !== undefined ? D.ltObs : D.lt);
       sTick();
       plMostrar();
     });
@@ -4064,6 +4106,10 @@ function plMostrar(){
       for(j = 0; j < n; j++){ D.ex += D.x[j]; D.ey += D.y[j]; }
       D.error = Math.sqrt(D.ex*D.ex + D.ey*D.ey);
       D.tol = TOL[$("pl-mensura").value](D.lt);
+      /* Modificar los lados a mano es una medición nueva, no un ajuste: el cierre que
+         acaba de salir ES el observado. Sin esto, el cuadro seguiría imprimiendo el
+         cierre de los lados viejos. */
+      D.errObs = D.error; D.tolObs = D.tol; D.ltObs = D.lt;
       D.comp = false; D.metodo = null; D.met = 0;
       if(D.error <= D.tol) sSuccess(); else sConfirm();
       plMostrar();
@@ -4269,8 +4315,17 @@ function plMostrar(){
 
 /* Dos ejemplos, para los dos escenarios que se dan en la práctica:
    "Ejemplo sin error de cierre" entra holgado en la tolerancia del Art. 40 y sirve para ver el
-   cálculo de punta a punta; "Ejemplo con error para compensar" trae un error de cierre grande, que
-   es el que hace falta para practicar los tres métodos de compensación. */
+   cálculo de punta a punta; "Ejemplo con error para compensar" trae un error de cierre para
+   practicar los tres métodos de compensación.
+
+   Ese segundo ejemplo traía un error de 0,58 m, y en la v19.0 hubo que corregirlo. Desde que
+   un cierre fuera de tolerancia no se puede compensar, ese ejemplo era incompensable en LAS
+   SEIS categorías de mensura: la tolerancia más alta de la tabla, para su perímetro, es
+   0,49 m. Enseñaba a repartir un error que profesionalmente había que volver a medir.
+   Ahora el desajuste entre lados opuestos es de 10 cm y 3 cm, y el cierre da 0,095 m: entra
+   en las SEIS categorías —la más exigente, para ese perímetro, es 0,14 m— y con holgura en
+   la urbana, que es 0,21 m. Sigue siendo un error de verdad, grande como para ver qué hace
+   cada método, pero de los que sí se compensan. */
 $("pl-ejemplo2").addEventListener("click", function(){
   if(!confirmarPerder("panel-planilla", "el ejemplo los va a reemplazar")) return;
   $("pl-n").value = "4"; plGenerar();
@@ -4288,7 +4343,12 @@ $("pl-ejemplo2").addEventListener("click", function(){
 $("pl-ejemplo").addEventListener("click", function(){
   if(!confirmarPerder("panel-planilla", "el ejemplo los va a reemplazar")) return;
   $("pl-n").value = "4"; plGenerar();
-  var L = ["120.45","80.20","119.98","80.55"];
+  /* 10 cm de desajuste entre los lados 1 y 3, y 3 cm entre el 2 y el 4: cierre de 0,095 m.
+     Ver el comentario de arriba. Antes eran 0,58 m, que no entran en ninguna de las seis
+     categorías; probé con 20 y 5 cm y el cierre daba 0,24 m contra 0,21 de la urbana, o sea
+     que seguía sin entrar. Un ejemplo para enseñar tiene que quedar cómodo adentro de las
+     seis, y la más exigente de las seis para este perímetro es 0,14 m. */
+  var L = ["120.45","80.20","120.35","80.17"];
   var G = [90, 89, 90, 90], M = [0, 59, 0, 0], S = [0, 40, 10, 10];
   for(var i = 1; i <= 4; i++){
     $("pl-l" + i).value = L[i-1];
@@ -5571,6 +5631,10 @@ $("btn-imprimir").addEventListener("click", function(){
 ===================================================================== */
 function correrPruebas(){
   var casos = [];
+  /* Si algo revienta en medio, la batería se corta. Lo que ya se midió queda acá para que
+     el informe lo muestre igual: el corte dice en qué prueba fue, y eso es la mitad del
+     dato. Antes se perdía todo y el informe decía "0 de 1". */
+  correrPruebas.parciales = casos;
   /* Las pruebas hacen clic en botones que ahora preguntan antes de pisar datos.
      Se responde que sí durante la corrida, así no quedan diálogos esperando. */
   var confirmOriginal = window.confirm;
@@ -5581,6 +5645,11 @@ function correrPruebas(){
      terminar; hasta entonces ninguna prueba llegaba a un alert. */
   var alertOriginal = window.alert;
   window.alert = function(){};
+  /* Los dos originales quedan a mano: si la batería se corta, las líneas que los devuelven
+     —al final de esta función— no se ejecutan, y el programa se queda sin preguntar y sin
+     avisar nada por el resto de la sesión. Silencioso y peligroso: los confirm son los que
+     cuidan de pisar un trabajo cargado. */
+  correrPruebas.originales = { confirm: confirmOriginal, alert: alertOriginal };
   function ver(grupo, nombre, obtenido, esperado, tol){
     var t = (tol === undefined) ? 0 : tol, pasa;
     if(typeof esperado === "number" && typeof obtenido === "number"){
@@ -5724,7 +5793,15 @@ function correrPruebas(){
   document.getElementById("pl-az-g").value = 45;
   document.getElementById("pl-calcular").click();
   ver(C, "el ejemplo a compensar trae error para repartir",
-      PL.datos.error > 0.1, true);
+      PL.datos.error > 0.05, true);
+  /* Desde la v19.0 un cierre fuera de tolerancia NO se compensa. El ejemplo existe para
+     practicar los tres métodos, así que su error tiene que ser compensable, y no en la
+     categoría más suelta sino en TODAS: el agrimensor puede tener elegida cualquiera.
+     El ejemplo anterior tenía 0,58 m y no entraba en ninguna de las seis. */
+  var peorTol = Infinity, cat;
+  for(cat = 1; cat <= 6; cat++){ peorTol = Math.min(peorTol, TOL[cat](PL.datos.lt)); }
+  ver(C, "y ese error es compensable en las seis categorías",
+      PL.datos.errObs < peorTol, true);
 
   /* compensación: los tres métodos deben cerrar el error */
   var D = "D · Compensación";
@@ -5736,24 +5813,122 @@ function correrPruebas(){
     document.getElementById("pl-az-s").value = 0;
     document.getElementById("pl-calcular").click();
     var antes = PL.datos.error;
-    document.getElementById(metodo).click();
-    document.getElementById("pl-compensar").click();
+    /* Desde la v19.0 la caja de compensación no se dibuja si el cierre excede la
+       tolerancia, así que estos dos elementos pueden no existir. Antes el helper
+       reventaba con un TypeError y la batería entera se cortaba en la primera prueba:
+       el informe decía "0 de 1" y no cuál era el problema. Si faltan, se devuelve un
+       resultado que hace fallar las pruebas de este grupo, que es lo que hay que leer. */
+    var rad0 = document.getElementById(metodo);
+    var bot0 = document.getElementById("pl-compensar");
+    if(!rad0 || !bot0) return { antes: antes, despues: NaN, datos: PL.datos, sinCaja: true };
+    rad0.click();
+    bot0.click();
     return { antes: antes, despues: PL.datos.error, datos: PL.datos };
   }
   var c1 = compensar("pl-met1");
-  ver(D, "Método de Crandall: había error para compensar", c1.antes > 0.1, true);
+  ver(D, "Método de Crandall: había error para compensar", c1.antes > 0.05, true);
   ver(D, "Método de Crandall: cierra el error", c1.despues, 0, 1e-6);
   var c2 = compensar("pl-met2");
   ver(D, "Regla de la brújula: cierra el error", c2.despues, 0, 1e-6);
   var c3 = compensar("pl-met3");
   ver(D, "Con pesos: cierra el error", c3.despues, 0, 1e-6);
   /* el azimut ajustado tiene que corresponder a las proyecciones compensadas */
-  var maxDesvio = 0, dd = c2.datos;
-  for(var w = 0; w < dd.L.length; w++){
+  /* sin compensar no hay azimut ajustado: Infinity hace fallar la prueba sin reventarla */
+  var dd = c2.datos, maxDesvio = dd.Zaj ? 0 : Infinity;
+  if(dd.Zaj) for(var w = 0; w < dd.L.length; w++){
     var real = norm360(Math.atan2(dd.y[w], dd.x[w]) * 180 / Math.PI);
     maxDesvio = Math.max(maxDesvio, Math.abs(dd.Zaj[w] - real) * 3600);
   }
   ver(D, "azimut ajustado coherente (segundos)", maxDesvio, 0, 0.001);
+
+  /* ---------- v19.0 · el cierre observado no se pierde al compensar ----------
+     Compensar deja D.error en cero, y hasta la 18.9 el cuadro de control leía ese cero:
+     la hoja salía con "0,00 m — DENTRO DE TOLERANCIA" sin decir en ningún lado cuánto
+     había medido el agrimensor. El error de cierre es el dato que dice si la medición
+     sirve; el cero de después solo dice que la cuenta se repartió bien. Ahora el veredicto
+     se emite sobre el observado (errObs/tolObs, que quedan congelados) y el cero aparece
+     aparte, rotulado "Residuo tras compensar". */
+  ver(D, "compensar no borra el cierre observado",
+      Math.abs(c2.datos.errObs - c2.antes) < 1e-9, true);
+  ver(D, "y el residuo posterior sí es cero", c2.datos.error, 0, 1e-6);
+  var txtComp = document.getElementById("pl-res-body").textContent;
+  ver(D, "el resumen del polígono compensado informa el residuo",
+      /Residuo tras compensar/.test(txtComp), true);
+  /* y el número que sale IMPRESO en el cuadro de control es el observado. Esta es la mitad
+     que importa: el cuadro es lo único de esto que va a la hoja. Si leyera D.error, el
+     trabajo que midió 0,10 m de cierre se archivaría diciendo 0,00. */
+  var iErr = txtComp.indexOf("Error de cierre lineal");
+  ver(D, "el cuadro de control imprime el cierre observado, no el cero",
+      txtComp.substr(iErr + 22, 14).indexOf(fmt(c3.antes, 2) + " m"), 0);
+
+  /* ---------- v19.0 · fuera de tolerancia no se compensa ----------
+     Este es el defecto grave que encontró la auditoría: con 0,58 m de cierre y 0,21 m de
+     tolerancia, compensar imprimía un trabajo rechazado como si cumpliera. Del lado
+     angular el programa ya no lo permitía; del lineal sí. La prueba usa justamente el
+     lado que tenía el ejemplo viejo (119,98 en lugar de 120,35) para volver a ese cierre:
+     0,46 m contra 0,21 m de la categoría 1. El tipo de mensura se fija a mano porque de
+     él depende la tolerancia, y las pruebas anteriores lo dejan en cualquier valor.
+     Se comprueban las dos mitades: que lo diga y que no haya con qué hacerlo. */
+  tab(/Planilla/);
+  document.getElementById("pl-ejemplo").click();
+  document.getElementById("pl-mensura").value = "1";
+  document.getElementById("pl-l3").value = "119.98";
+  document.getElementById("pl-calcular").click();
+  var dExc = PL.datos;
+  ver(D, "el lado alterado deja el cierre fuera de tolerancia",
+      dExc.errObs > dExc.tolObs, true);
+  var txtExc = document.getElementById("pl-res-body").textContent;
+  ver(D, "el resultado avisa que no corresponde compensar",
+      /no corresponde compensar/.test(txtExc), true);
+  ver(D, "y no ofrece el botón de compensar",
+      document.getElementById("pl-compensar") === null, true);
+  ver(D, "tampoco ofrece los métodos de compensación",
+      document.getElementById("pl-met1") === null, true);
+
+  /* Congelar el cierre observado abrió dos huecos, y los dos se me pasaron al escribirlo:
+     el número queda guardado aparte, así que hay que acordarse de refrescarlo cuando
+     cambia la medición o cambia la tolerancia con la que se lo juzga. Si no, el veredicto
+     se queda pegado al de antes. Las dos pruebas que siguen son por eso.
+
+     Una: cambiar el tipo de mensura tiene que mover el VEREDICTO, no solo el número de la
+     tolerancia en pantalla. Con este lado el cierre da 0,24 m: la categoría 1 (0,21) lo
+     rechaza y la 2 (0,28) lo admite. */
+  function vereLineal(){
+    var t = document.getElementById("pl-res-body").textContent;
+    var z = t.substr(t.indexOf("Tolerancia Lineal"), 60);
+    return /EXCEDE/.test(z) ? "EXCEDE" : (/DENTRO/.test(z) ? "DENTRO" : "?");
+  }
+  tab(/Planilla/);
+  document.getElementById("pl-ejemplo").click();
+  document.getElementById("pl-mensura").value = "1";
+  document.getElementById("pl-l3").value = "120.20";
+  document.getElementById("pl-calcular").click();
+  ver(D, "categoría 1: ese cierre excede", vereLineal(), "EXCEDE");
+  redibujar("2");
+  ver(D, "al pasar a la categoría 2 el veredicto cambia a DENTRO", vereLineal(), "DENTRO");
+  redibujar("1");
+  ver(D, "y al volver a la 1 vuelve a EXCEDE", vereLineal(), "EXCEDE");
+
+  /* Y dos: modificar los lados a mano es una medición nueva, no un ajuste. El cierre que
+     sale de esos lados es el observado, y es el que tiene que imprimirse. */
+  tab(/Planilla/);
+  document.getElementById("pl-ejemplo").click();
+  document.getElementById("pl-mensura").value = "1";
+  document.getElementById("pl-calcular").click();
+  var errAntesMod = PL.datos.errObs;
+  /* «Modificar lados» vive en la misma caja que la compensación, así que puede no estar:
+     si falta, estas dos pruebas fallan, pero la batería sigue. */
+  var bMod = document.getElementById("pl-modif");
+  if(bMod){
+    bMod.click();
+    document.querySelectorAll(".pl-mod-l")[2].value = "120.20";
+    document.getElementById("pl-recalc").click();
+  }
+  ver(D, "modificar los lados a mano renueva el cierre observado",
+      Math.abs(PL.datos.errObs - PL.datos.error) < 1e-9 &&
+      PL.datos.errObs > errAntesMod + 0.1, true);
+  ver(D, "y el cuadro imprime ese cierre nuevo",
+      vereLineal(), "EXCEDE");
 
   /* Los tres radios del método se rehacen con cada innerHTML de plMostrar, así que la
      elección se perdía en cada redibujado (v15.5). Nada fallaba: el control exige elegir y
@@ -5776,13 +5951,17 @@ function correrPruebas(){
   document.getElementById("pl-ejemplo").click();
   document.getElementById("pl-calcular").click();
   ver(D, "método: al arrancar no viene ninguno marcado", metMarcado(), 0);
-  document.getElementById("pl-met1").click();
+  /* clic solo si el radio existe: la caja de compensación no se dibuja cuando el cierre
+     excede la tolerancia, y sin esta guarda la batería se cortaba acá en lugar de informar */
+  var rMet1 = document.getElementById("pl-met1");
+  if(rMet1) rMet1.click();
   ver(D, "método: queda marcado el elegido (Crandall)", metMarcado(), 1);
   redibujar("3");
   ver(D, "método: sobrevive al redibujado", metMarcado(), 1);
   redibujar("1");
   ver(D, "método: sobrevive a un segundo redibujado", metMarcado(), 1);
-  document.getElementById("pl-met2").click();
+  var rMet2 = document.getElementById("pl-met2");
+  if(rMet2) rMet2.click();
   redibujar("4");
   ver(D, "método: al cambiarlo persiste el nuevo, no el viejo", metMarcado(), 2);
   redibujar("1");                                /* dejar el tipo de mensura como estaba */
@@ -6366,8 +6545,10 @@ function correrPruebas(){
       Z0 = q0.Z.slice(), ex0 = q0.ex, ey0 = q0.ey;
   var oro = oroLagrange(x0, y0, L0, ex0, ey0);
 
-  document.getElementById("pl-met1").click();
-  document.getElementById("pl-compensar").click();
+  /* la caja de compensación no existe si el cierre excede la tolerancia (v19.0): sin la
+     guarda, un ejemplo fuera de tolerancia cortaba la batería en lugar de informar */
+  var rC1 = document.getElementById("pl-met1"), bC1 = document.getElementById("pl-compensar");
+  if(rC1 && bC1){ rC1.click(); bC1.click(); }
   var q1 = PL.datos, difOro = 0, w2;
   for(w2 = 0; w2 < L0.length; w2++){
     difOro = Math.max(difOro, Math.abs((q1.L[w2] - L0[w2]) - oro[w2]));
@@ -6376,8 +6557,8 @@ function correrPruebas(){
 
   /* Firma del método: ajusta longitudes sin tocar direcciones. Si algún día un azimut
      cambiara, no sería Crandall aunque cerrara igual. */
-  var difAzC = 0;
-  for(w2 = 0; w2 < Z0.length; w2++) difAzC = Math.max(difAzC, Math.abs(q1.Zaj[w2] - Z0[w2]));
+  var difAzC = q1.Zaj ? 0 : Infinity;
+  if(q1.Zaj) for(w2 = 0; w2 < Z0.length; w2++) difAzC = Math.max(difAzC, Math.abs(q1.Zaj[w2] - Z0[w2]));
   ver(D2, "Crandall no cambia los azimuts", difAzC, 0, 1e-9);
 
   /* Las correcciones tienen que cancelar el cierre exactamente. Con el índice corrido
@@ -6825,7 +7006,13 @@ function mostrarPruebas(){
   var casos;
   try{ casos = correrPruebas(); }
   catch(e){
-    casos = [{ g:"ERROR", n:"la batería se interrumpió: " + e.message, obt:"-", esp:"-", ok:false }];
+    /* Se conserva todo lo que se alcanzó a medir y la fila del error va al final, que es
+       donde se cortó: así se ve en qué prueba fue. Y se devuelven confirm y alert, que la
+       batería reemplaza al arrancar y que al interrumpirse quedaban anulados. */
+    casos = correrPruebas.parciales || [];
+    casos.push({ g:"ERROR", n:"la batería se interrumpió: " + e.message, obt:"-", esp:"-", ok:false });
+    var or = correrPruebas.originales;
+    if(or){ window.confirm = or.confirm; window.alert = or.alert; }
   }
 
   /* devolver el trabajo que había antes de correr las pruebas */
