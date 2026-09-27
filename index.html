@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "18.8";
-var APP_FECHA = "27/09/2026 13:53";
+var APP_VER   = "18.9";
+var APP_FECHA = "27/09/2026 14:09";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -1087,6 +1087,14 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
       <button id="trab-importar">Abrir archivo…</button>
       <input type="file" id="trab-file" accept=".json,application/json" style="display:none">
     </div>
+    <!-- El respaldo de TODOS. Los trabajos viven en el navegador, y ahí nada es para
+         siempre: vaciar los datos del sitio los borra, y ningún programa puede impedirlo.
+         Lo único que sobrevive a eso es un archivo fuera del navegador. Por eso este botón
+         y la fecha del último respaldo, que no reta a nadie: solo dice cómo está. -->
+    <div class="fila">
+      <button class="primary" id="trab-exportar-todos">Respaldar TODOS los trabajos</button>
+    </div>
+    <p id="trab-respaldo" style="margin-top:6px;"></p>
     <p>El archivo se puede pasar de la computadora al celular, mandar por mail o guardar de respaldo. Al abrirlo, el trabajo también queda en esta lista.</p>
   </div>
 </aside>
@@ -5193,6 +5201,7 @@ $("btn-trab-guardar").addEventListener("click", function(){
 
 function trabRender(){
   var arr = trabLeer(), h = "", k;
+  if(typeof trabRespaldoTexto === "function") trabRespaldoTexto();
   if(!arr.length){
     h = "<div class='trab-vacio'>Todavía no guardaste ningún trabajo.<br><br>" +
         "Usá <b>Guardar trabajo</b> para conservar el cálculo actual con un nombre " +
@@ -5278,6 +5287,98 @@ $("trab-exportar").addEventListener("click", function(){
   else { sError(); alert("Este navegador no pudo generar el archivo."); }
 });
 
+/* ---------- Respaldo de TODOS los trabajos ----------
+   Los trabajos viven en el navegador, y ahí nada dura para siempre: vaciar los datos del
+   sitio los borra, una ventana de incógnito no guarda nada, y un navegador configurado
+   para limpiar al cerrar se los lleva. Ningún programa puede impedirlo. Lo único que
+   sobrevive es un archivo fuera del navegador, y hasta la v18.8 solo se podía sacar de a
+   uno: con ocho trabajos, ocho vueltas, que es lo mismo que no tener respaldo.
+   Este archivo trae la lista entera y se vuelve a cargar de una sola vez. */
+var RESPALDO_KEY = "calcsup_respaldo";
+
+/* Pedirle al navegador que NO borre estos datos por su cuenta. Sin esto, cuando el equipo
+   queda corto de espacio el navegador puede desalojar el almacenamiento de un sitio sin
+   avisar, y los trabajos se van con él. Con el permiso concedido, quedan marcados como
+   persistentes y solo los borra el usuario.
+   No resuelve el caso grave —vaciar los datos del sitio a mano se lleva todo igual—, por
+   eso el respaldo en archivo sigue siendo la única garantía. Va en silencio: si el
+   navegador no lo soporta o lo niega, no hay nada que el agrimensor pueda hacer al
+   respecto y un cartel solo sería ruido. */
+(function(){
+  try{
+    if(navigator.storage && navigator.storage.persist && navigator.storage.persisted){
+      navigator.storage.persisted().then(function(ya){
+        if(!ya) navigator.storage.persist().catch(function(){});
+      }).catch(function(){});
+    }
+  }catch(e){}
+})();
+
+function trabRespaldoTexto(){
+  var e = $("trab-respaldo");
+  if(!e) return;
+  var n = trabLeer().length, f = null;
+  try{ f = localStorage.getItem(RESPALDO_KEY); }catch(err){}
+  if(n === 0){ e.innerHTML = ""; return; }
+  e.innerHTML = f
+    ? "Último respaldo de todos: <b>" + f + "</b>."
+    : "<b>Todavía no hay respaldo.</b> Los trabajos están solo en este navegador: si se borran los datos del sitio, se pierden.";
+}
+
+$("trab-exportar-todos").addEventListener("click", function(){
+  var arr = trabLeer();
+  if(!arr.length){ sError(); alert("Todavía no hay trabajos guardados para respaldar."); return; }
+  var d = new Date(), p = function(x){ return (x < 10 ? "0" : "") + x; };
+  var sello = d.getFullYear() + "-" + p(d.getMonth()+1) + "-" + p(d.getDate());
+  var obj = { app: "calculo-superficies", v: 2, tipo: "lista", f: trabFecha(), t: arr };
+  if(trabDescargar("calculo-superficies-trabajos-" + sello + ".json", obj)){
+    try{ localStorage.setItem(RESPALDO_KEY, trabFecha()); }catch(err){}
+    trabRespaldoTexto();
+    sConfirm();
+    alert("Respaldo de " + arr.length + " trabajo" + (arr.length === 1 ? "" : "s") + ".\n\n" +
+          "Guardá ese archivo fuera del navegador —en una carpeta, en el mail o en la nube—. " +
+          "Con «Abrir archivo…» los repone todos de una vez, acá o en otro equipo.");
+  } else { sError(); alert("Este navegador no pudo generar el archivo."); }
+});
+
+/* Repone la lista entera desde un respaldo. NO pisa lo que ya hay sin permiso: agrega los
+   que faltan y pregunta UNA sola vez por los repetidos. Preguntar trabajo por trabajo, con
+   diez en el archivo, son diez ventanas seguidas, y eso termina en aceptar cualquier cosa
+   sin leer. Está aparte del manejador del archivo para poder probarla sin abrir diálogos. */
+function trabImportarLista(obj){
+  var entra = (obj.t || []).filter(function(r){ return r && r.n && r.e; });
+  if(!entra.length){ sError(); alert("Ese respaldo no trae ningún trabajo."); return false; }
+  var actual = trabLeer(), repetidos = [], k2, i2;
+  for(k2 = 0; k2 < entra.length; k2++){
+    for(i2 = 0; i2 < actual.length; i2++){
+      if(String(actual[i2].n).toLowerCase() === String(entra[k2].n).toLowerCase()){ repetidos.push(entra[k2].n); break; }
+    }
+  }
+  var pisar = true;
+  if(repetidos.length){
+    pisar = confirm("El respaldo trae " + entra.length + " trabajo" + (entra.length === 1 ? "" : "s") + ".\n\n" +
+      "Ya tenés " + repetidos.length + " con el mismo nombre: " + repetidos.slice(0, 5).join(", ") +
+      (repetidos.length > 5 ? "…" : "") + "\n\n" +
+      "Aceptar: los reemplaza con los del archivo.\n" +
+      "Cancelar: deja los tuyos y agrega solo los que faltan.");
+  } else if(!confirm("El respaldo trae " + entra.length + " trabajo" + (entra.length === 1 ? "" : "s") +
+                     ". ¿Los agrego a tu lista?")) return false;
+  var puestos = 0, agregados = 0;
+  entra.forEach(function(r){
+    var j2 = -1, q;
+    for(q = 0; q < actual.length; q++){ if(String(actual[q].n).toLowerCase() === String(r.n).toLowerCase()){ j2 = q; break; } }
+    var reg2 = { n: String(r.n), f: r.f || trabFecha(), e: r.e };
+    if(j2 >= 0){ if(pisar){ actual[j2] = reg2; puestos++; } }
+    else { actual.unshift(reg2); agregados++; }
+  });
+  if(!trabEscribir(actual)) return false;
+  trabRender();
+  sConfirm();
+  alert("Listo: " + agregados + " agregado" + (agregados === 1 ? "" : "s") +
+        (puestos ? " y " + puestos + " reemplazado" + (puestos === 1 ? "" : "s") : "") + ".");
+  return true;
+}
+
 $("trab-importar").addEventListener("click", function(){ $("trab-file").click(); });
 
 $("trab-file").addEventListener("change", function(){
@@ -5288,11 +5389,12 @@ $("trab-file").addEventListener("change", function(){
   lector.onload = function(){
     var obj = null;
     try{ obj = JSON.parse(lector.result); }catch(e){}
-    if(!obj || obj.app !== "calculo-superficies" || !obj.e){
+    if(!obj || obj.app !== "calculo-superficies" || (!obj.e && !(obj.t instanceof Array))){
       sError();
       alert("Ese archivo no es un trabajo de Cálculo de Superficies.");
       return;
     }
+    if(obj.t instanceof Array){ trabImportarLista(obj); return; }
     var nom = String(obj.n || "Trabajo importado");
     if(!confirm("Abrir «" + nom + "».\nLo que tengas cargado ahora se reemplaza. ¿Seguimos?")) return;
     aplicarEstado(obj.e);
@@ -5473,6 +5575,12 @@ function correrPruebas(){
      Se responde que sí durante la corrida, así no quedan diálogos esperando. */
   var confirmOriginal = window.confirm;
   window.confirm = function(){ return true; };
+  /* Y el alert también: no devuelve nada que decidir, pero DETIENE la corrida hasta que
+     alguien lo cierre. Con la batería corriendo sola —o sin ventana, en las mediciones—
+     eso la deja colgada. Apareció al agregar el respaldo de trabajos, que avisa al
+     terminar; hasta entonces ninguna prueba llegaba a un alert. */
+  var alertOriginal = window.alert;
+  window.alert = function(){};
   function ver(grupo, nombre, obtenido, esperado, tol){
     var t = (tol === undefined) ? 0 : tol, pasa;
     if(typeof esperado === "number" && typeof obtenido === "number"){
@@ -6360,6 +6468,67 @@ function correrPruebas(){
   ver(E, "avisa si los lados se cruzan",
       /se cruzan/.test(document.getElementById("co-res-body").textContent), true);
 
+  /* ---------- E1 · Respaldo de todos los trabajos ----------
+     Los trabajos viven en el navegador y ahí nada dura para siempre. Hasta la v18.8 solo
+     se podían sacar de a uno: con ocho trabajos, ocho vueltas, que es lo mismo que no
+     tener respaldo. Lo que se fija acá es que el archivo los lleve a todos, que al
+     reponerlo NO pise lo que ya hay sin permiso, y que la fecha del respaldo quede. */
+  var E1 = "E1 · Respaldo de todos los trabajos";
+  var trabPrevios = trabLeer();                       /* se devuelven al final */
+  var respPrevio = null;
+  try{ respPrevio = localStorage.getItem(RESPALDO_KEY); }catch(e){}
+
+  trabEscribir([{ n:"UNO", f:"01/01/2026 10:00", e:{v:3} },
+                { n:"DOS", f:"02/01/2026 10:00", e:{v:3} }]);
+  /* Se aprieta EL BOTÓN y se intercepta la bajada, en vez de armar el archivo a mano: así
+     lo que se prueba es lo que el agrimensor va a obtener, no una copia del código escrita
+     en la prueba. Sin esto, cambiar lo que el botón guarda no rompía nada. */
+  try{ localStorage.removeItem(RESPALDO_KEY); }catch(e){}
+  var capturado = null, descargarOriginal = trabDescargar;
+  trabDescargar = function(nombre, obj){ capturado = { nombre: nombre, obj: obj }; return true; };
+  document.getElementById("trab-exportar-todos").click();
+  trabDescargar = descargarOriginal;
+  ver(E1, "el botón arma el respaldo", capturado !== null, true);
+  ver(E1, "y lleva TODOS los trabajos", capturado ? capturado.obj.t.length : 0, 2);
+  ver(E1, "el archivo lleva la fecha en el nombre",
+      capturado ? /calculo-superficies-trabajos-\d{4}-\d{2}-\d{2}\.json/.test(capturado.nombre) : false, true);
+  var fechaResp = null;
+  try{ fechaResp = localStorage.getItem(RESPALDO_KEY); }catch(e){}
+  ver(E1, "y queda anotada la fecha del respaldo", fechaResp !== null, true);
+  var respaldo = capturado ? capturado.obj : { t: [] };
+
+  /* reponerlo sobre una lista distinta: agrega los que faltan y respeta los repetidos */
+  trabEscribir([{ n:"DOS", f:"09/09/2026 10:00", e:{v:9, mio:true} },
+                { n:"TRES", f:"09/09/2026 10:00", e:{v:9} }]);
+  window.confirm = function(){ return false; };       /* "no pises los míos" */
+  trabImportarLista(respaldo);
+  var tras = trabLeer();
+  ver(E1, "repone los que faltaban", tras.length, 3);
+  ver(E1, "y NO pisa el repetido cuando se dice que no",
+      (tras.filter(function(r){ return r.n === "DOS"; })[0] || {}).e.mio, true);
+
+  window.confirm = function(){ return true; };        /* "sí, reemplazá" */
+  trabImportarLista(respaldo);
+  var tras2 = trabLeer();
+  ver(E1, "diciendo que sí, el repetido se reemplaza",
+      (tras2.filter(function(r){ return r.n === "DOS"; })[0] || {}).e.mio, undefined);
+  ver(E1, "y no duplica los que ya estaban", tras2.length, 3);
+
+  /* la fecha del último respaldo, que es lo que el panel muestra */
+  try{ localStorage.removeItem(RESPALDO_KEY); }catch(e){}
+  trabRespaldoTexto();
+  ver(E1, "sin respaldo, el panel lo dice",
+      /Todavía no hay respaldo/.test(document.getElementById("trab-respaldo").textContent), true);
+  try{ localStorage.setItem(RESPALDO_KEY, "27/09/2026 14:00"); }catch(e){}
+  trabRespaldoTexto();
+  ver(E1, "con respaldo, muestra la fecha",
+      /27\/09\/2026 14:00/.test(document.getElementById("trab-respaldo").textContent), true);
+
+  /* se devuelve todo como estaba: las pruebas no pueden costarle los trabajos a nadie */
+  trabEscribir(trabPrevios);
+  try{ if(respPrevio === null) localStorage.removeItem(RESPALDO_KEY); else localStorage.setItem(RESPALDO_KEY, respPrevio); }catch(e){}
+  trabRender();
+
   /* ---------- E2 · Coordenadas repetidas ----------
      De las nueve validaciones de ingreso propuestas el 21 de septiembre, ocho ya estaban.
      Ésta no: un punto cargado dos veces pasaba sin aviso. */
@@ -6644,6 +6813,7 @@ function correrPruebas(){
   ver(G, "el ejemplo respeta el caso elegido", selTri.value, "5");
 
   window.confirm = confirmOriginal;
+  window.alert = alertOriginal;
   return casos;
 }
 
