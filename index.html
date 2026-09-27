@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "18.7";
-var APP_FECHA = "21/09/2026 17:35";
+var APP_VER   = "18.8";
+var APP_FECHA = "27/09/2026 13:53";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -803,8 +803,20 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
          Y en un lado vertical "el vértice más a la izquierda" ni siquiera existe.
          "Con el interior del terreno a la derecha" vale para cualquier lado, esté donde esté
          y tenga la inclinación que tenga. -->
-    <div class="msg info no-print" style="margin:8px 0 4px;">La carga debe iniciarse en el <b>vértice donde comienza el lado seleccionado</b>, recorriendo el polígono en <b>sentido horario</b>, <b>con el interior del terreno siempre a la derecha</b>.</div>
+    <div class="msg info no-print" style="margin:8px 0 4px;">La carga debe iniciarse en el <b>vértice donde comienza el lado seleccionado</b>, recorriendo el polígono en <b>sentido horario</b>, <b>con el interior del terreno siempre a la derecha</b>.
+    <!-- El ejemplo va DESPUÉS de la regla y no en su lugar: la regla es la que nunca falla
+         —vale para un lado vertical o inclinado, donde "izquierda" y "derecha" no alcanzan—
+         y el ejemplo la aterriza en el caso de todos los días. Se agregó porque el propio
+         Alejandro preguntó, con el programa delante, cuál era el vértice de arranque de un
+         lado horizontal: si lo pregunta quien escribió la nota, lo va a preguntar cualquiera.
+         Da los DOS casos horizontales a propósito: con uno solo habría que deducir el otro,
+         que es justamente el paso que faltaba. -->
+    <span style="display:block; font-size:.82rem; margin-top:4px; opacity:.9;">Por ejemplo: si el lado elegido está <b>abajo</b> en el croquis —el frente sobre la calle—, el terreno queda arriba y se arranca por su vértice <b>derecho</b>; si está <b>arriba</b>, por el <b>izquierdo</b>.</span></div>
 <div id="pl-tabla-box"></div>
+    <!-- Acá cae el aviso de ángulos corridos una fila: junto a la carga, que es donde hay
+         que corregir, y no abajo del todo con los resultados. no-print porque la planilla de
+         carga SÍ se imprime, y esto es una instrucción para arreglar los datos. -->
+    <div id="pl-aviso-carga" class="no-print" role="alert"></div>
     <!-- role="alert" y no aria-live="polite": acá caen los datos mal cargados y el cierre
          angular fuera de tolerancia, que son cosas que hay que corregir antes de seguir.
          "alert" interrumpe; "polite" espera a que el lector termine lo que estaba diciendo,
@@ -2904,6 +2916,9 @@ function plGenerar(){
   if(!isFinite(n) || n < 3 || n > 200){ sError(); alert("Ingresá un número de lados entre 3 y 200."); return; }
   PL.n = n;
   PL.angMetodo = null; PL.sinCompensar = false;
+  /* la planilla vieja se va con su aviso: si quedara, estaría hablando de datos que ya no están */
+  PL.corrimiento = null;
+  if($("pl-aviso-carga")) $("pl-aviso-carga").innerHTML = "";
   var h = "<table><thead><tr><th>#</th><th>Lado (m)</th><th>Ángulo g</th><th>m</th><th>s</th></tr></thead><tbody>";
   for(var i = 1; i <= n; i++){
     /* aria-label: el encabezado de la columna se ve, pero un lector de pantalla lee campo
@@ -3198,6 +3213,26 @@ function cierreConAngulos(L, A){
   for(i = 0; i < n; i++){ ex += L[i] * Math.cos(rad(Z[i])); ey += L[i] * Math.sin(rad(Z[i])); }
   return Math.sqrt(ex*ex + ey*ey);   /* el cierre no depende del azimut inicial: se usa 0 */
 }
+/* Mueve los ángulos cargados k filas, la misma cuenta que usa detectarCorrimiento() para
+   probar el corrimiento. No toca los lados, no calcula y no verifica nada: deja los valores
+   en las casillas del paso 1 para que el agrimensor los mire contra su croquis. Si el
+   corrimiento no era el problema, lo ve enseguida —los ángulos quedan en filas que no
+   coinciden con su croquis— y vuelve atrás sin haber perdido nada. */
+function plCorrerAngulos(k){
+  var n = PL.n, g = [], m = [], s = [], i, j;
+  for(i = 1; i <= n; i++){ g.push($("pl-g" + i).value); m.push($("pl-m" + i).value); s.push($("pl-s" + i).value); }
+  for(i = 0; i < n; i++){
+    j = ((i - k) % n + n) % n;
+    $("pl-g" + (i+1)).value = g[j]; $("pl-m" + (i+1)).value = m[j]; $("pl-s" + (i+1)).value = s[j];
+  }
+  PL.corrimiento = null;
+  $("pl-aviso-carga").innerHTML = "<div class='msg info'>Los ángulos se corrieron una fila. " +
+    "<b>Revisalos contra tu croquis</b> —en cada fila tiene que estar el del vértice donde " +
+    "empieza ese lado— y tocá «Calcular superficie».</div>";
+  sConfirm();
+  anunciar("Los ángulos se corrieron una fila. Revisalos y volvé a calcular.");
+}
+
 function detectarCorrimiento(L, A, error, tol){
   if(!(error >= tol)) return null;          /* si cierra en tolerancia no hay nada que buscar */
   var n = A.length, mejor = null;
@@ -3323,10 +3358,43 @@ $("pl-calcular").addEventListener("click", function(){
   var tol = TOL[$("pl-mensura").value](lt);
   var dentro = error < tol;   /* Art. 42: E debe ser MENOR que T, sin redondear */
 
-  /* Se guarda en PL y no en PL.datos: compensar reemplaza PL.datos y deja el cierre en cero,
-     y el aviso tiene que seguir a la vista — compensar un error de carga no lo arregla, lo
-     esconde. Se recalcula en cada cálculo, así que corregir los datos lo hace desaparecer. */
+  /* ---------- Ángulos corridos una fila: se frena y se manda a corregir (v18.8) ----------
+     Hasta la v18.7 el aviso salía con los resultados, abajo de todo. Alejandro pidió que
+     llame la atención y que se vuelva a ingresar. Ahora el cálculo NO se hace: el aviso va
+     arriba, junto a la planilla de carga, que es donde hay que corregir.
+
+     Y trae un botón que acomoda los ángulos, en vez de obligar a tipear de nuevo ocho
+     valores que estaban bien medidos y solo mal ubicados —cada tipeo es una oportunidad
+     nueva de equivocarse—. El botón NO calcula: solo mueve los valores en las casillas del
+     paso 1 y deja al agrimensor mirándolos contra su croquis. La confirmación es suya,
+     igual que en el caso ambiguo de los triángulos: el programa no decide cuál es el
+     terreno, ni acá cuál era la carga correcta. */
   PL.corrimiento = detectarCorrimiento(d.L, d.A, error, tol);
+  if(PL.corrimiento){
+    var cr0 = PL.corrimiento;
+    PL.datos = null;
+    $("pl-resultados").style.display = "none";
+    $("pl-aviso-carga").innerHTML =
+      "<div class='msg bad' id='pl-corrimiento'><b>Los ángulos parecen estar corridos una fila.</b> " +
+      "Con cada ángulo una fila más " + (cr0.k === 1 ? "abajo" : "arriba") + ", el polígono cierra con " +
+      "<b>" + fmt(cr0.error, 2) + " m</b> en lugar de " + fmt(cr0.original, 2) + " m.<br>" +
+      "<span style='font-size:.85rem;'>" +
+      (cr0.k === 1
+        ? "Lo más probable es que en cada fila se haya cargado el ángulo del vértice donde el lado " +
+          "<b>termina</b>. Pasa al arrancar un frente de abajo por su vértice izquierdo: en sentido " +
+          "horario ese lado se camina de derecha a izquierda, y el izquierdo es donde termina. "
+        : "En cada fila parece haberse cargado el ángulo que correspondía a la fila de abajo. ") +
+      "En cada fila el ángulo tiene que ser el del vértice donde <b>comienza</b> ese lado. " +
+      "Revisá la carga y calculá de nuevo.</span>" +
+      "<div class='row' style='margin-top:8px;'><button class='primary' id='pl-correr-ang'>" +
+      "Correr los ángulos una fila</button></div></div>";
+    $("pl-correr-ang").addEventListener("click", function(){ plCorrerAngulos(cr0.k); });
+    sAlerta();
+    anunciar("Los ángulos parecen estar corridos una fila. El cálculo no se hizo.");
+    $("pl-aviso-carga").scrollIntoView({ block: "center" });
+    return;
+  }
+  $("pl-aviso-carga").innerHTML = "";
   PL.datos = { L:d.L, Z:Z, x:x, y:y, ex:ex, ey:ey, error:error, tol:tol, lt:lt, comp:false,
                difAng: difAng, tolAng: TCal, angMetodo: PL.angMetodo || null, mcalc: ($("pl-metcalc2") && $("pl-metcalc2").checked) ? 2 : 1 };
   plMostrar();
@@ -3759,23 +3827,9 @@ function plMostrar(){
   PL_NVERT = D.L.length;
   h = "<div id='pl-aviso-papel'></div>" + h;
 
-  /* Va primero, antes que el aviso de papel: dice que los DATOS están mal cargados, y eso
-     pesa más que cuántas hojas ocupa el resultado. No se imprime: es una instrucción para
-     corregir la carga; el veredicto de que el cierre excede la tolerancia ya sale en papel. */
-  if(PL.corrimiento){
-    var cr = PL.corrimiento;
-    h = "<div class='msg bad no-print' id='pl-corrimiento'><b>Los ángulos parecen estar corridos una fila.</b> " +
-        "Con cada ángulo una fila más " + (cr.k === 1 ? "abajo" : "arriba") + ", el polígono cierra con " +
-        "un error de <b>" + fmt(cr.error, 2) + " m</b>, contra los " + fmt(cr.original, 2) + " m con que se cargó.<br>" +
-        "<span style='font-size:.85rem;'>" +
-        (cr.k === 1
-          ? "Lo más probable es que en cada fila se haya cargado el ángulo del vértice donde el lado " +
-            "<b>termina</b>. Pasa, por ejemplo, al arrancar un frente de abajo por su vértice izquierdo: " +
-            "en sentido horario ese lado se camina de derecha a izquierda, y el izquierdo es donde termina. "
-          : "En cada fila parece haberse cargado el ángulo que correspondía a la fila de abajo. ") +
-        "Revisá que el ángulo de cada fila sea el del vértice donde <b>comienza</b> ese lado, " +
-        "recorriendo con el interior del terreno a la derecha.</span></div>" + h;
-  }
+  /* Hasta la v18.7 el aviso de ángulos corridos se armaba acá, con los resultados. Desde la
+     v18.8 el cálculo ni siquiera llega a este punto cuando se detecta: se frena antes y el
+     aviso sale junto a la planilla de carga, que es donde hay que corregir. */
 
   $("pl-resultados").style.display = "block";
   $("pl-res-body").innerHTML = h;
@@ -5988,6 +6042,14 @@ function correrPruebas(){
       /interior del terreno siempre a la derecha/.test(notaCarga), true);
   ver(L, "y ya no dice «el más a la izquierda», que falla con el lado abajo",
       /más a la izquierda/.test(notaCarga), false);
+  /* El ejemplo que aterriza la regla. Se agregó porque el propio Alejandro preguntó, con el
+     programa delante, cuál era el vértice de arranque de un lado horizontal. Da los dos
+     casos: con uno solo hay que deducir el otro, que es el paso que faltaba. */
+  ver(L, "la nota trae el ejemplo del frente sobre la calle",
+      /frente sobre la calle/.test(notaCarga), true);
+  ver(L, "y dice por cuál vértice se arranca en cada caso",
+      /vértice <?b?>?derecho/.test(notaCarga.replace(/<[^>]*>/g, "")) &&
+      /por el izquierdo/.test(notaCarga), true);
 
   /* ---------- M · Ángulos corridos una fila ----------
      El caso de Alejandro: frente abajo, arrancado por su vértice izquierdo, que en sentido
@@ -6036,16 +6098,50 @@ function correrPruebas(){
 
   ver(M, "carga correcta — no avisa nada", cargarFilas(FILAS_BIEN, 0), null);
   ver(M, "y no aparece el cartel", document.getElementById("pl-corrimiento"), null);
+  ver(M, "carga correcta — sí calcula", PL.datos !== null, true);
 
   var cMas = cargarFilas(FILAS_TERMINA, 0);
   ver(M, "ángulos del vértice donde el lado termina — lo detecta", cMas !== null, true);
   ver(M, "y sabe para qué lado están corridos", cMas ? cMas.k : "nada", 1);
   ver(M, "corriéndolos, el polígono cierra", cMas ? cMas.error < 0.01 : false, true);
+  /* v18.8: el cálculo se frena y el aviso va junto a la carga, no con los resultados */
+  ver(M, "detectado — NO calcula", PL.datos, null);
+  ver(M, "ni muestra resultados",
+      document.getElementById("pl-resultados").style.display, "none");
   var cartelCorr = document.getElementById("pl-corrimiento");
   ver(M, "el cartel aparece", cartelCorr !== null, true);
+  ver(M, "y aparece junto a la carga, no con los resultados",
+      cartelCorr ? cartelCorr.closest("#pl-aviso-carga") !== null : false, true);
   ver(M, "y nombra la causa: el vértice donde el lado termina",
       cartelCorr ? /termina/.test(cartelCorr.textContent) : false, true);
-  ver(M, "el cartel no se imprime", cartelCorr ? cartelCorr.classList.contains("no-print") : false, true);
+  /* la planilla de carga SÍ se imprime, así que el aviso tiene que quedar fuera del papel */
+  ver(M, "el cartel no se imprime",
+      cartelCorr ? cartelCorr.closest(".no-print") !== null : false, true);
+
+  /* el botón que acomoda los ángulos: mueve, no calcula */
+  var botonCorrer = document.getElementById("pl-correr-ang");
+  ver(M, "ofrece correr los ángulos", botonCorrer !== null, true);
+  var antesG = [], qb;
+  for(qb = 1; qb <= 4; qb++) antesG.push(document.getElementById("pl-g" + qb).value);
+  /* con guarda: si el botón no estuviera, un click sobre null tira abajo la batería entera
+     y se pierden las 240 pruebas que siguen. Lo mostró la mutación que quitaba el freno. */
+  if(botonCorrer) botonCorrer.click();
+  var despuesG = [];
+  for(qb = 1; qb <= 4; qb++) despuesG.push(document.getElementById("pl-g" + qb).value);
+  ver(M, "al tocarlo, los ángulos se mueven una fila",
+      despuesG.join("|") === [antesG[3], antesG[0], antesG[1], antesG[2]].join("|"), true);
+  ver(M, "pero NO calcula: la confirmación es del agrimensor", PL.datos, null);
+  ver(M, "y el cartel de error se reemplaza por el de revisión",
+      document.getElementById("pl-corrimiento"), null);
+  /* y ahora, calculando, cierra: el corrimiento era el problema */
+  document.getElementById("pl-verificar").click();
+  document.getElementById("pl-az-g").value = 270;
+  document.getElementById("pl-az-m").value = 0;
+  document.getElementById("pl-az-s").value = 0;
+  PL.datos = null;
+  document.getElementById("pl-calcular").click();
+  ver(M, "corregidos los ángulos, ahora sí calcula", PL.datos !== null, true);
+  ver(M, "y el polígono cierra", PL.datos ? PL.datos.error < 0.01 : false, true);
 
   var cMenos = cargarFilas(FILAS_ANTERIOR, 0);
   ver(M, "corridos para el otro lado — también lo detecta", cMenos ? cMenos.k : "nada", -1);
