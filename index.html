@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "19.0";
-var APP_FECHA = "27/09/2026 17:45";
+var APP_VER   = "19.1";
+var APP_FECHA = "27/09/2026 18:10";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -5208,7 +5208,16 @@ function restaurarEstado(){
    TRABAJOS GUARDADOS — lista con nombre, para conservar varios cálculos
    (el guardado automático sigue igual: esto es aparte y no lo pisa)
 ===================================================================== */
-var TRAB_KEY = "calcsup_trabajos";
+/* La clave no es una constante a propósito: la batería de pruebas la DESVÍA a una clave
+   aparte mientras corre. Hasta la v19.1 las pruebas escribían ésta, la de verdad —guardaban
+   una copia de la lista al empezar y la devolvían al final—, y el final no siempre llega:
+   si la corrida se interrumpía, o si se cerraba la pestaña en medio, los trabajos del
+   agrimensor quedaban reemplazados por los de prueba («UNO», «DOS», «TRES»). Es el tercer
+   defecto de la misma forma en una semana: algo se reemplaza al empezar y se devuelve al
+   final, y una interrupción se come la devolución. Ahora la de verdad no se toca nunca. */
+var TRAB_KEY_REAL   = "calcsup_trabajos";
+var TRAB_KEY_PRUEBA = "calcsup_trabajos_de_prueba";
+var TRAB_KEY = TRAB_KEY_REAL;
 
 function trabLeer(){
   try{ var a = JSON.parse(localStorage.getItem(TRAB_KEY) || "[]"); return (a instanceof Array) ? a : []; }
@@ -5354,7 +5363,11 @@ $("trab-exportar").addEventListener("click", function(){
    sobrevive es un archivo fuera del navegador, y hasta la v18.8 solo se podía sacar de a
    uno: con ocho trabajos, ocho vueltas, que es lo mismo que no tener respaldo.
    Este archivo trae la lista entera y se vuelve a cargar de una sola vez. */
-var RESPALDO_KEY = "calcsup_respaldo";
+/* Misma historia que TRAB_KEY: la batería la desvía mientras corre. Acá solo se pierde una
+   fecha, pero el panel la muestra y quedaría diciendo cualquier cosa. */
+var RESPALDO_KEY_REAL   = "calcsup_respaldo";
+var RESPALDO_KEY_PRUEBA = "calcsup_respaldo_de_prueba";
+var RESPALDO_KEY = RESPALDO_KEY_REAL;
 
 /* Pedirle al navegador que NO borre estos datos por su cuenta. Sin esto, cuando el equipo
    queda corto de espacio el navegador puede desalojar el almacenamiento de un sitio sin
@@ -5645,11 +5658,31 @@ function correrPruebas(){
      terminar; hasta entonces ninguna prueba llegaba a un alert. */
   var alertOriginal = window.alert;
   window.alert = function(){};
-  /* Los dos originales quedan a mano: si la batería se corta, las líneas que los devuelven
-     —al final de esta función— no se ejecutan, y el programa se queda sin preguntar y sin
-     avisar nada por el resto de la sesión. Silencioso y peligroso: los confirm son los que
-     cuidan de pisar un trabajo cargado. */
-  correrPruebas.originales = { confirm: confirmOriginal, alert: alertOriginal };
+  /* Y los trabajos guardados: las pruebas guardan, borran e importan trabajos, así que se
+     las manda a escribir una clave APARTE. Ni una interrupción ni cerrar la pestaña en
+     medio de la corrida pueden tocar la lista de verdad, porque durante la corrida nadie
+     la nombra. Antes se copiaba y se devolvía al final, y ahí estaba el agujero.
+
+     Todo lo que la batería reemplaza se devuelve en un solo lugar, y ese lugar se llama
+     también desde el manejador del error: si la corrida se corta, las líneas del final no
+     se ejecutan y el programa quedaba sin preguntar, sin avisar y escribiendo la clave de
+     prueba por el resto de la sesión. */
+  /* Se anota tal cual está la lista de verdad —el texto crudo, sin interpretarlo— para
+     comprobar al final que la corrida no la tocó. Se lee ANTES del desvío. */
+  var crudoReal = null;
+  try{ crudoReal = localStorage.getItem(TRAB_KEY_REAL); }catch(err){}
+  TRAB_KEY     = TRAB_KEY_PRUEBA;
+  RESPALDO_KEY = RESPALDO_KEY_PRUEBA;
+  correrPruebas.devolver = function(){
+    window.confirm = confirmOriginal;
+    window.alert   = alertOriginal;
+    TRAB_KEY     = TRAB_KEY_REAL;
+    RESPALDO_KEY = RESPALDO_KEY_REAL;
+    /* la clave de prueba no queda dando vueltas en el navegador de nadie */
+    try{ localStorage.removeItem(TRAB_KEY_PRUEBA); }catch(err){}
+    try{ localStorage.removeItem(RESPALDO_KEY_PRUEBA); }catch(err){}
+    try{ trabRender(); }catch(err){}   /* el panel vuelve a mostrar los trabajos de verdad */
+  };
   function ver(grupo, nombre, obtenido, esperado, tol){
     var t = (tol === undefined) ? 0 : tol, pasa;
     if(typeof esperado === "number" && typeof obtenido === "number"){
@@ -6655,7 +6688,14 @@ function correrPruebas(){
      tener respaldo. Lo que se fija acá es que el archivo los lleve a todos, que al
      reponerlo NO pise lo que ya hay sin permiso, y que la fecha del respaldo quede. */
   var E1 = "E1 · Respaldo de todos los trabajos";
-  var trabPrevios = trabLeer();                       /* se devuelven al final */
+  /* Lo primero: que esto se esté escribiendo en la clave de prueba y no en la de verdad.
+     Es la prueba que faltaba, y la que le costó los trabajos guardados a Alejandro: hasta
+     la v19.0 estas líneas escribían la lista real, y la devolvían recién al final. */
+  ver(E1, "las pruebas escriben una clave aparte, no la de los trabajos",
+      TRAB_KEY !== TRAB_KEY_REAL && TRAB_KEY === TRAB_KEY_PRUEBA, true);
+  ver(E1, "y lo mismo la fecha del respaldo",
+      RESPALDO_KEY !== RESPALDO_KEY_REAL && RESPALDO_KEY === RESPALDO_KEY_PRUEBA, true);
+  var trabPrevios = trabLeer();      /* de la clave de prueba: aísla E1 de los grupos que siguen */
   var respPrevio = null;
   try{ respPrevio = localStorage.getItem(RESPALDO_KEY); }catch(e){}
 
@@ -6993,8 +7033,35 @@ function correrPruebas(){
   document.getElementById("tri-ejemplo").click();
   ver(G, "el ejemplo respeta el caso elegido", selTri.value, "5");
 
-  window.confirm = confirmOriginal;
-  window.alert = alertOriginal;
+  /* ---------- Z · Los trabajos guardados no se tocan ----------
+     La prueba más importante de la batería, porque lo que cuida no es un número sino el
+     trabajo del agrimensor. Compara el texto crudo de la clave real con el que había antes
+     de empezar: si cualquier grupo escribió ahí, esto falla. Va última a propósito, para que
+     mida la corrida entera.
+     Motivo: la v19.0 y anteriores escribían la clave real desde el grupo E1 y la devolvían
+     al final. Con la corrida completa no se notaba nada; con la corrida interrumpida —o
+     cerrando la pestaña en medio— los trabajos quedaban reemplazados por «UNO» y «DOS». */
+  var Z = "Z · Los trabajos guardados no se tocan";
+  var crudoAhora = null;
+  try{ crudoAhora = localStorage.getItem(TRAB_KEY_REAL); }catch(err){}
+  ver(Z, "la lista de trabajos de verdad quedó igual que antes de empezar",
+      crudoAhora === crudoReal, true);
+  ver(Z, "y el desvío sigue puesto hasta el final de la corrida",
+      TRAB_KEY === TRAB_KEY_PRUEBA, true);
+
+  /* Y que la devolución devuelva de verdad. Se la llama acá —es lo último de la corrida— y
+     se comprueba el resultado: si alguna vez se cae una de estas líneas, el programa se
+     queda escribiendo la clave de prueba, o sin preguntar antes de pisar un trabajo, por
+     todo el resto de la sesión. Sin esto, sacar una de las devoluciones no rompía nada. */
+  var confirmDeLaCorrida = window.confirm;
+  correrPruebas.devolver();
+  ver(Z, "al devolver, vuelve la clave de los trabajos de verdad", TRAB_KEY, TRAB_KEY_REAL);
+  ver(Z, "y la de la fecha del respaldo", RESPALDO_KEY, RESPALDO_KEY_REAL);
+  var quedoPrueba = "no se pudo leer";
+  try{ quedoPrueba = localStorage.getItem(TRAB_KEY_PRUEBA); }catch(err){}
+  ver(Z, "la clave de prueba no queda en el navegador de nadie", quedoPrueba, null);
+  ver(Z, "y vuelven las preguntas del programa", window.confirm !== confirmDeLaCorrida, true);
+
   return casos;
 }
 
@@ -7007,12 +7074,12 @@ function mostrarPruebas(){
   try{ casos = correrPruebas(); }
   catch(e){
     /* Se conserva todo lo que se alcanzó a medir y la fila del error va al final, que es
-       donde se cortó: así se ve en qué prueba fue. Y se devuelven confirm y alert, que la
-       batería reemplaza al arrancar y que al interrumpirse quedaban anulados. */
+       donde se cortó: así se ve en qué prueba fue. Y se devuelve lo que la batería reemplaza
+       al arrancar —confirm, alert y las claves de los trabajos—, que al interrumpirse
+       quedaba como lo dejó la corrida. */
     casos = correrPruebas.parciales || [];
     casos.push({ g:"ERROR", n:"la batería se interrumpió: " + e.message, obt:"-", esp:"-", ok:false });
-    var or = correrPruebas.originales;
-    if(or){ window.confirm = or.confirm; window.alert = or.alert; }
+    try{ if(correrPruebas.devolver) correrPruebas.devolver(); }catch(e2){}
   }
 
   /* devolver el trabajo que había antes de correr las pruebas */
