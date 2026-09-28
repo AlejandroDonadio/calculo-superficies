@@ -20,8 +20,8 @@
    clavada en "07/09/2026 08:38" mientras el programa avanzaba, que es exactamente el
    problema que tenía el número. Sacarla fue una sobrecorrección de la v15.0; lo que
    correspondía era generarla, no eliminarla. */
-var APP_VER   = "19.2";
-var APP_FECHA = "27/09/2026 19:56";
+var APP_VER   = "19.3";
+var APP_FECHA = "28/09/2026 11:16";
 
 if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
   addEventListener('load', function(){
@@ -715,6 +715,7 @@ footer{max-width:960px; margin:14px auto; font-size:.78rem; color:var(--ink-soft
 <div class="hint-bar">
   <span><kbd>Enter</kbd> (también el del teclado numérico) pasa al campo siguiente</span>
   <span><kbd>+</kbd> del teclado numérico ejecuta el cálculo del módulo activo</span>\n  <span><kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> / <kbd>4</kbd> eligen el método de compensación (fuera de un campo)</span>
+  <span><kbd>0</kbd> calcula sin compensar, si el cierre entra en tolerancia (y vuelve atrás)</span>
   <span>Se aceptan coma o punto como decimal</span>
 </div>
 
@@ -2903,6 +2904,26 @@ document.addEventListener("keydown", function(e){
       return;
     }
   }
+  /* El 0 para calcular sin compensar (v19.3). Va en el 0 y no en el 4 por dos razones: el 4
+     ya significa «Triángulos» en la pantalla de inicio, y un cuarto número al lado de los
+     tres métodos se leería como un cuarto método de compensación, que es lo contrario de lo
+     que hace. El 0 está pegado al + del teclado numérico, que es con el que ya se calcula.
+     No decide nada por su cuenta: aprieta el botón que esté en pantalla, así que solo puede
+     hacer lo que el programa ya estaba ofreciendo. Si el cierre excede la tolerancia no hay
+     botón y la tecla no hace nada. Y sirve para los dos lados —poner y sacar la decisión—
+     porque siempre está el botón del sentido contrario. */
+  if(e.key === "0" && (!t || t.tagName !== "INPUT" || t.type === "radio" || t.type === "checkbox")){
+    /* Sin control de visibilidad: a diferencia de los radios del método, estos dos botones
+       se dibujan solo en el estado en el que corresponden, así que estar en el documento y
+       estar a la vista es lo mismo. La mutación que sacaba el control no rompía ninguna
+       prueba, y una guarda que nada puede hacer fallar no se deja. */
+    var bSinComp = $("pl-no-comp") || $("pl-si-comp");
+    if(bSinComp){
+      e.preventDefault();
+      bSinComp.click();
+      return;
+    }
+  }
   if(e.code === "NumpadAdd"){
     e.preventDefault();
     var panel2 = document.querySelector(".panel.active");
@@ -3722,7 +3743,7 @@ function plMostrar(){
             cargada sin antes volver atrás. Lo encontró una prueba que no podía pasar: pedía
             modificar los lados con la decisión tomada, y el botón no existía. */
          "<div class='row' style='margin-top:8px;'><button class='primary' id='pl-si-comp'>" +
-         "Prefiero compensarlo</button>" +
+         "Prefiero compensarlo — tecla <b>0</b></button>" +
          "<button class='ghost' id='pl-modif'>Modificar lados manualmente…</button></div>" +
          "<div id='pl-lados-box'></div></div>";
   } else if(!D.comp && !cierraExacto){
@@ -3835,7 +3856,7 @@ function plMostrar(){
          un (dentro ? …) sería una guarda que ninguna prueba puede hacer fallar, y el
          programa ya tuvo una de ésas. */
       "<button class='ghost' id='pl-no-comp' title='Calcula la superficie con el error de cierre sin repartir'>" +
-      "Está en tolerancia: calcular sin compensar</button>" +
+      "Está en tolerancia: calcular sin compensar — tecla <b>0</b></button>" +
       "<button class='ghost' id='pl-modif'>Modificar lados manualmente…</button>" +
       "</div><div id='pl-lados-box'></div></div>";
   } else if(D.comp){
@@ -6709,6 +6730,52 @@ function correrPruebas(){
   }
   ver(N, "al modificar los lados a mano, la decisión se apaga", PL.datos.noComp, false);
   ver(N, "y la superficie vuelve a pedir compensar", sup("pl-res-body"), null);
+
+  /* ---------- La tecla 0 (v19.3) ----------
+     «Que pueda calcular sin compensar como estaba antes, con una tecla.» La tecla aprieta el
+     botón que esté en pantalla, así que lo que hay que probar es justamente eso: que haga lo
+     mismo que el botón, que sirva para los dos lados, y —lo que importa— que NO pueda hacer
+     nada cuando el cierre excede la tolerancia, donde no hay botón que apretar. */
+  function tecla0(){
+    document.dispatchEvent(new KeyboardEvent("keydown", { key:"0", bubbles:true }));
+  }
+  /* la misma tecla, pero escrita DENTRO de un campo: ahí es un número, no una orden */
+  function tecla0EnCampo(){
+    var campo = document.getElementById("pl-l1");
+    if(campo) campo.dispatchEvent(new KeyboardEvent("keydown", { key:"0", bubbles:true }));
+    return campo !== null;
+  }
+  cargarDesde(0, 2, 30);
+  var rtT = document.getElementById("pl-rep-todos"); if(rtT) rtT.click();
+  cierreLineal();
+  ver(N, "antes de la tecla, no hay superficie", sup("pl-res-body"), null);
+  /* Primero lo que NO tiene que pasar: escribir un 0 en una longitud es escribir un número.
+     Sin esta prueba, sacar el control de «fuera de un campo» no rompía nada, y al agrimensor
+     se le dispararía el cálculo sin compensar mientras carga un lado de 120,20. */
+  ver(N, "el campo de longitud está a la vista", tecla0EnCampo(), true);
+  ver(N, "un 0 escrito en un campo no toma la decisión", PL.datos.noComp ? true : false, false);
+  ver(N, "ni saca la superficie de la nada", sup("pl-res-body"), null);
+  tecla0();
+  ver(N, "la tecla 0 calcula sin compensar", sup("pl-res-body") !== null, true);
+  ver(N, "y deja la decisión tomada", PL.datos.noComp, true);
+  tecla0();
+  ver(N, "la tecla 0 también vuelve atrás", PL.datos.noComp, false);
+  ver(N, "y la superficie se retira", sup("pl-res-body"), null);
+
+  /* fuera de tolerancia la tecla no puede hacer nada: no hay botón. Se llega al caso con el
+     mismo lado alterado que usa el grupo D —119,98 en lugar de 120,35— y con el tipo de
+     mensura fijado a mano, porque de él depende la tolerancia. */
+  tab(/Planilla/);
+  document.getElementById("pl-ejemplo").click();
+  document.getElementById("pl-mensura").value = "1";
+  document.getElementById("pl-l3").value = "119.98";
+  document.getElementById("pl-calcular").click();
+  var dExT = PL.datos;
+  ver(N, "el caso de control excede la tolerancia",
+      dExT ? dExT.errObs > dExT.tolObs : false, true);
+  tecla0();
+  ver(N, "fuera de tolerancia, la tecla 0 no da superficie", sup("pl-res-body"), null);
+  ver(N, "ni prende la decisión", PL.datos.noComp ? true : false, false);
 
   /* compensando, aparece — y es la misma desde los cuatro vértices */
   var supN = [];
